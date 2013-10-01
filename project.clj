@@ -1,0 +1,55 @@
+(defproject visibe "0.1.0-SNAPSHOT"
+  :description "FIXME: write description"
+
+  :url "http://example.com/FIXME"
+
+  :dependencies [
+                 ;; XXX, Fri Aug 30 2013, Francis Wolke: 
+                 ;;'friend' and compojure have to be ordered in this fashion to prevent
+                 ;; an error documented here:
+                 ;; https://github.com/cemerick/friend/issues/57
+                 [com.cemerick/friend "0.1.5"]
+                 [compojure "1.1.5"]
+                 
+                 [cheshire "5.2.0"]
+                 [clj-http-lite "0.2.0"]
+                 [clj-time "0.6.0"]
+                 [cljs-painkiller "0.1.0"]
+                 [criterium "0.4.2"]
+                 [domina "1.0.2-SNAPSHOT"]
+                 [garden "0.1.0-beta6"]
+                 [hiccup "1.0.3"]
+                 [http-kit "2.1.4"]
+                 [rhizome "0.1.8"]
+                 [ring-refresh "0.1.1"]
+                 [com.cemerick/piggieback "0.1.0"]
+                 [com.cemerick/pomegranate "0.2.0"]
+                 [com.draines/postal "1.11.0"]
+                 [com.keminglabs/c2 "0.2.2"]
+                 [com.novemberain/monger "1.6.0"]
+                 [org.clojars.runa/clj-schema "0.9.4"]
+                 [org.clojure/clojure "1.5.1"]
+                 [org.clojure/clojurescript "0.0-1889"]
+                 [org.clojure/core.async "0.1.222.0-83d0c2-alpha"]
+                 [org.clojure/core.logic "0.8.3"]
+                 [org.clojure/core.typed "0.2.1"]
+                 [org.clojure/tools.namespace "0.2.3"]
+                 [org.clojure/tools.nrepl "0.2.3"]
+                 [org.clojure/tools.reader "0.7.7"]
+                 [org.clojure/tools.trace "0.7.5"]
+                 [org.toomuchcode/clara-rules "0.1.0"]
+                 [prismatic/dommy "0.1.1"]
+                 [prismatic/hiphip "0.1.0"]
+                 [prismatic/plumbing "0.1.0"]
+                 [ring/ring-jetty-adapter "1.2.0"]
+                 [ring/ring-json "0.2.0"]
+                 [shoreleave/shoreleave-remote "0.3.0"]
+                 [shoreleave/shoreleave-remote-ring "0.3.0"]]
+
+  :main tranquil.core/visibe-
+
+  :plugins [;; [lein-cljsbuild "0.3.0"]
+            [lein-ring      "0.8.3"]]
+
+  ;; :ring {:handler visibe.core/wrapped-app}
+  )

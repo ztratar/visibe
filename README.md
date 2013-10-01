@@ -1,4 +1,9 @@
-visibe
-======
+# visibe
 
-Watch situations and reactions unfold as they happen
+Get started here
+
+http://leiningen.org/ 
+
+## License
+
+Copyright © 2013 VISIBE
