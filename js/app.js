@@ -39,10 +39,31 @@ $(function() {
 
 			render: function() {
 				this.$pageContainer = this.$('.page-container');
+
+				$(document).on('click', 'a', function(ev) {
+					var currentTarget = $(ev.currentTarget),
+						href = currentTarget.attr('href');
+
+					ev.preventDefault();
+
+					if (href.indexOf('/') === 0) {
+						window.VISIBE.Runtime.router.navigate(href, true);
+						return false;	
+					}
+				});
 			},
 
 			show: function(view) {
 				this.$pageContainer.html(view.$el);
+			},
+
+			expandHeader: function() {
+				this.$el.removeClass('contract-header');
+				$('.topic-cards-view').removeClass('card-opened');
+			},
+
+			contractHeader: function() {
+				this.$el.addClass('contract-header');
 			}
 		});
 
@@ -65,6 +86,10 @@ $(function() {
 			tagName: 'ul',
 			className: 'topic-cards-view clearfix',
 
+			events: {
+				'click .topic-card-view a': 'cardOpened'
+			},
+
 			initialize: function() {
 				this.collection.on('reset', this.addAll, this);	
 				this.collection.on('add', this.addOne, this);
@@ -80,6 +105,27 @@ $(function() {
 				});
 				this.$el.append(topicCardView.$el);
 				topicCardView.render();
+			},
+
+			cardOpened: function(ev) {
+				window.VISIBE.Runtime.router.navigate('/topic');
+				$(ev.currentTarget).parent().addClass('active');
+				this.$el.addClass('card-opened');	
+				window.VISIBE.Runtime.router.appView.contractHeader();
+			}
+		});
+
+		VISIBE.Views.TopicView = VISIBE.Views.MainView.extend({
+			className: 'topic-view',
+
+			template: $('#TopicView-template').html(),
+
+			render: function() {
+				var html = _.template(this.template)({
+					model: this.model	
+				});
+				this.$el.html(html);	
+				return this;
 			}
 		});
 
@@ -98,11 +144,12 @@ $(function() {
 			index: function() {
 				this.topics = this.topics || new window.VISIBE.Collections.Topics();
 
-				this.topicsView = new window.VISIBE.Views.TopicCardsView({
+				this.topicsView = this.topicsView || new window.VISIBE.Views.TopicCardsView({
 					collection: this.topics	
 				});
 
 				this.appView.show(this.topicsView);
+				this.appView.expandHeader();
 
 				if (!this.topics.length && false) {
 					this.topics.fetch({ url: '/topics/hot' });
@@ -119,18 +166,18 @@ $(function() {
 			topic: function(id) {
 				this.topic = this.topic || new window.VISIBE.Models.Topic();
 
-				this.topicView = new TopicView({
+				this.topicView = this.topicView || new window.VISIBE.Views.TopicView({
 					model: this.topic	
 				});
 
 				this.appView.show(this.topicView);
+				this.appView.contractHeader();
 
 				if (id !== this.topic.get('id')) {
 					this.topic.fetch({ data: { id: id } });
 				} else {
 					this.topic.trigger('change');
 				}
-
 			}
 		});
 	})(window);

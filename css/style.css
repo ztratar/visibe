@@ -16,33 +16,92 @@ h1, h2, h3, h4, h5 {
 	margin: 0 auto;
 }
 
+.contract-header #logo {
+	top: 40px;
+}
+
+.contract-header a.home {
+	opacity: 1;
+	pointer-events: visible;
+}
+
+a.home {
+	position: fixed;
+	top: 46px;
+	left: 46px;
+	background: #183243;
+	padding: 16px 20px 14px;
+	color: #6c99b7;
+	font-size: 24px;
+	text-transform: uppercase;
+	font-family: 'Gotham-Bold';
+	border-radius: 10px;
+	text-decoration: none;
+	opacity: 0;
+	pointer-events: none;
+
+	transition: all 0.2s ease-out;
+	-webkit-transition: all 0.2s ease-out;
+}
+
+a.home:hover {
+	background: #122735;
+	color: #7aa6c3;
+}
+
 #logo {
+	color: white;
+	position: absolute;
+	width: 400px;
+	top: 75px;
+	left: 50%;
+	margin-left: -200px;
 	display: block;
 	font-size: 48px;
 	font-weight: 600;
-	margin: 94px 0 22px;
 	font-family: 'Gotham-Black';
 	text-transform: uppercase;
 	letter-spacing: -1px;
+
+	transition: top 0.2s ease-out;
+	-webkit-transition: top 0.2s ease-out;
+}
+
+.contract-header #main-byline {
+	top: 135px;
+	opacity: 0;
 }
 
 #main-byline {
+	position: absolute;
+	top: 170px;
+	left: 50%;
+	margin-left: -200px;
 	font-size: 28px;
 	display: block;
 	width: 400px;
-	margin: 0 auto;
 	font-weight: 400;
 	font-family: 'Skolar';
 	line-height: 1.2;
+	opacity: 1;
+
+	transition: top 0.2s ease-out, opacity 0.1s ease-out;
+	-webkit-transition: top 0.2s ease-out, opacity 0.1s ease-out;
 }
 
 .page-container {
-	margin: 28px 0 60px;
+	margin: 265px 0 60px;
 }
 
 .topic-cards-view {
 	margin: 0 -20px 0 0;
 	padding: 0;
+}
+
+.topic-cards-view.card-opened .topic-card-view a {
+	opacity: 0;
+	margin-top: 30px;
+	margin-bottom: -10px;
 }
 
 .topic-card-view {
@@ -55,14 +114,20 @@ h1, h2, h3, h4, h5 {
 	height: 200px;
 	margin: 20px 20px 0 0;
 	background: #376d92;
+	opacity: 1;
 
 	box-shadow: 0px 4px 80px rgba(0,0,0,.20);
 
-	transition: background 0.1s ease-in-out;
-	-webkit-transition: background 0.1s ease-in-out;
+	transition: background 0.1s ease-in-out, opacity 0.2s ease-out, margin 0.2s ease-out;
+	-webkit-transition: background 0.1s ease-in-out, opacity 0.2s ease-out, margin 0.2s ease-out;
 
 	color: white;
 	cursor: pointer;
+}
+
+.topic-card-view.active a {
+	opacity: 1 !important;
+	margin: 20px 20px 0 0 !important;
 }
 
 .topic-card-view a:hover {
