@@ -1,0 +1,89 @@
+body {
+	background: #397096;
+	color: white;
+	font-size: 14px;
+	text-align: center;
+	-webkit-font-smoothing: antialiased;
+	font-family: 'Gotham-Book';
+}
+
+h1, h2, h3, h4, h5 {
+	font-family: 'Gotham-Bold';
+}
+
+.page-wrapper {
+	width: 880px;
+	margin: 0 auto;
+}
+
+#logo {
+	display: block;
+	font-size: 48px;
+	font-weight: 600;
+	margin: 94px 0 22px;
+	font-family: 'Gotham-Black';
+	text-transform: uppercase;
+	letter-spacing: -1px;
+}
+
+#main-byline {
+	font-size: 28px;
+	display: block;
+	width: 400px;
+	margin: 0 auto;
+	font-weight: 400;
+	font-family: 'Skolar';
+	line-height: 1.2;
+}
+
+.page-container {
+	margin: 28px 0 60px;
+}
+
+.topic-cards-view {
+	margin: 0 -20px 0 0;
+	padding: 0;
+}
+
+.topic-card-view {
+	float: left;
+}
+
+.topic-card-view a {
+	float: left;
+	width: 280px;
+	height: 200px;
+	margin: 20px 20px 0 0;
+	background: #376d92;
+
+	box-shadow: 0px 4px 80px rgba(0,0,0,.20);
+
+	transition: background 0.1s ease-in-out;
+	-webkit-transition: background 0.1s ease-in-out;
+
+	color: white;
+	cursor: pointer;
+}
+
+.topic-card-view a:hover {
+	background: #427aa2;
+	text-decoration: none;
+}
+
+.topic-card-view a:hover h2 {
+	opacity: 1;
+}
+
+.topic-card-view a:hover span {
+	opacity: .56;
+}
+
+.topic-card-view a h2 {
+	margin-top: 72px;
+	opacity: .92;
+}
+
+.topic-card-view a span {
+	text-transform: uppercase;
+	opacity: .4;
+}
