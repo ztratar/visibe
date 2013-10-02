@@ -77,16 +77,16 @@
 (defn persist-trends [m]
     (c/insert "google-trends" (keys->countries m)))
 
-; Server
-;*******************************************************************************
+;; ; Server
+;; ;*******************************************************************************
 
 (defn ws-handler
   [request]
-  (letfn [(close-chan [status] (swap! state update-in [:channels] remove channel))]
+  (letfn [(close-chan [channel status] (swap! state update-in [:channels] remove channel))]
     (hk/with-channel request channel
       (swap! state update-in [:chan] conj channel)
       (swap! state assoc :req request)
-      (hk/on-close channel close-chan)
+      (hk/on-close channel (partial close-chan channel))
       (hk/on-receive channel
                      (fn [data] (hk/send! channel (str "ECHO:" data) false))))))
 
@@ -100,8 +100,7 @@
 development."
   ([port]
      (mg/connect-via-uri! mongo-uri)
-     (swap! state assoc-in [:server]
-            (hk/run-server #'app {:port (Integer. port)})))
+     (swap! state assoc :server (hk/run-server #'app {:port (Integer. port)})))
   ([port nrepl-port]
      (mg/connect-via-uri! mongo-uri)
      ;; XXX, Mon Sep 30 2013, Francis Wolke
@@ -113,12 +112,10 @@ development."
          (recur (let [data (google-trends)]
                   (when-not (= trends data)
                     (persist-trends data)
-                    data))))))
-  (swap! state assoc-in [:nrepl-server]
-         (start-server :port (Integer. nrepl-port)))
-  (swap! state assoc-in [:server]
-         (hk/run-server #'app {:port (Integer. port)}))))
+                    data)))))
+     (swap! state assoc :nrepl-server (start-server :port (Integer. nrepl-port)))
+     (swap! state assoc :server (hk/run-server #'app {:port (Integer. port)}))))
 
 (defn main- [& [port nrepl-port]]
-  (if (and port nrepl-port) (run-server port nrepl-port)
-      (println "lein run <port> <nrepl-port>")))
+        (if (and port nrepl-port) (run-server port nrepl-port)
+            (println "lein run <port> <nrepl-port>")))
