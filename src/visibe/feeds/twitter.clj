@@ -5,23 +5,31 @@
         [twitter.callbacks.handlers]
         [twitter.api.streaming])
   (:require [clojure.data.json :as json]
-            [http.async.client :as ac])
+            [http.async.client :as ac]
+            [clj-http.lite.client :as client]
+            [clojure.data.codec.base64 :as b64]
+            [visibe.core :refer [state]])
   (:import twitter.callbacks.protocols.AsyncStreamingCallback))
 
-;; (def my-creds (make-oauth-creds (:consumer-key @state)
-;;                                 (:consumer-secret @state)
-;;                                 (:access-token @state)
-;;                                 (:access-token-secret @state)))
+(defn string-to-base64-string [original]
+  (String. (b64/encode (.getBytes original)) "UTF-8"))
 
-; retrieves the user stream, waits 1 minute and then cancels the async call
-;; (def ^:dynamic *response* (user-stream :oauth-creds my-creds))
+(defn new-bearer-token []
+  "Calls the twitter API and returns a new bearer token."
+  (-> (client/post "https://api.twitter.com/oauth2/headers" 
+                   {:token {"Authorization" (str "Basic " (string-to-base64-string (str (:consumer-key @state) ":" (:consumer-secret @state))))
+                              "Content-Type"
+                              "application/x-www-form-urlencoded;charset=UTF-8"}
 
-;; (Thread/sleep 6000)
-;; ((:cancel (meta *response*)))
+                    :body "grant_type=client_credentials"})
+      (:body)
+      (json/read-json)
+      (:access_token)))
 
-;; ; supply a callback that only prints the text of the status
-;; (def ^:dynamic 
-;;      *custom-streaming-callback* 
-;;      (AsyncStreamingCallback. (comp println #(:text %) json/read-json #(str %2)) 
-;;                       (comp println response-return-everything)
-;;                   exception-print))
+(defn rate-limit [bearer-token]
+  (client/get "https://api.twitter.com/1.1/application/rate_limit_status.json"
+              {:headers {"Authorization" (str "Bearer" " " bearer-token)}}))
+
+(defn black-triangle  [bearer-token]
+  (:body (client/get "https://api.twitter.com/1.1/search/tweets.json?q=%23clojure&result_type=mixed&count=100"
+                     {:headers {"Authorization" (str "Bearer" " " bt)}})))

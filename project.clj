@@ -14,6 +14,8 @@
                  [com.draines/postal "1.11.0"]
                  [com.keminglabs/c2 "0.2.2"]
                  [com.novemberain/monger "1.6.0"]
+                 [twitter-api "0.7.4"]
+                 [org.clojure/data.codec "0.1.0"]
                  [compojure "1.1.5" :exclusions [ring/ring-core]]
                  [criterium "0.4.2"]
                  [domina "1.0.2-SNAPSHOT"]
