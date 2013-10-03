@@ -7,3 +7,14 @@ pom.xml
 .nrepl-port
 target/repl-port
 target/stale/extract-native.dependencies
+/repl
+.repl
+.#*
+*#
+*~
+*.jar
+*.class
+.lein-failures
+.lein-plugins
+.lein-repl-history
+config.cljd
