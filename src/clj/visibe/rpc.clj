@@ -8,7 +8,7 @@
 (defn current-trends
   "([] [region])
 Call with no arguments to retrive a list of avalible regions.
-Call with a retion to retrive trend data for that region.
+Call with a region to retrive trend data for that region.
 EG: (current-trends :canada)"
   ([] (apply str (cons "please use specify one of more of\n"
                        (interpose "\n" (vals google-mapping)))))
@@ -65,8 +65,11 @@ given its name"}})
         r (rest fm)
         fn-info (get rpc-fns f)]
     ;; FIXME, Fri Oct 04 2013, Francis Wolke
-    ;; Documentation will grab the first thing off the list.
+    ;; Documentation will grab the first thing off the list and ignore the
+    ;; rest of the elements. We should throw an exception.
     (try (cond (= f 'doc) (generate-docs (first r) (:doc (rpc-fns (first r))))
                f (apply (:var fn-info) r)
-               :else "What you have attempted is not supported. Try `(help)`")
+               ;; XXX, Fri Oct 04 2013, Francis Wolke
+               ;; This does not work all the time.
+               :else "What you have attempted is not supported. Try calling `(help)`")
          (catch Exception e (.getMessage e)))))
