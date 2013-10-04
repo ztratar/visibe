@@ -5,7 +5,9 @@
         ring.middleware.refresh)
   (:require [compojure.route :as route]
             [compojure.core :refer :all]
+            [compojure.handler :as handler]
             [visibe.storage :refer [conn-uri]]
+            ;; [visibe.rpc :refer [rpc-call]]
             [visibe.feeds.google-trends :refer [srape-google-trends]]
             [cheshire.core :refer [decode]]
             [monger.core :as mg]
@@ -18,17 +20,16 @@
   (html5 [:head
           [:title "Visibe - Watch situations and reactions unfold as they happen"]
           [:meta {:charset "UTF-8"}]
-
-          (include-css "css/fonts.css" "css/bootstrap.css" "css/style.css")
-          
-          (include-js "js/libs/jquery.js" "js/libs/underscore.js" "js/libs/backbone.js"
-                      "js/libs/bootstrap.js" "js/app.js")]
+          (include-css "css/fonts.css" "css/bootstrap.css" "css/style.css")]
 
          [:body [:div {:class "page-wrapper"}
                  [:a {:href "/" :class "home"} "Home"]
                  [:a {:href "/" } [:h1 {:id "logo"} "Visible"]]
                  [:p {:id "main-byline"} "Watch situations and reactions unfold as they happen"]
                  [:div {:class "page-container"}]]
+
+          (include-js "js/libs/jquery.js" "js/libs/underscore.js" "js/libs/backbone.js"
+                      "js/libs/bootstrap.js" "js/app.js" "js/visibe_dbg.js")
           
           [:script {:type "text/template" :id "TopicCardView-template"}
            [:a {:href "/topic/4"}
@@ -38,19 +39,19 @@
           [:script {:type "text/template" :id "TopicView-template"}
            [:img {:class "topic-img" :src ""}]
            [:h2 "Topic Name"]
-           [:span "timeline-container"]]]))
+           [:span "timeline-container"]]
+          
+          ]))
 
 (defn ws-handler
   [request]
   (letfn [(close-chan [channel status]
             (swap! state update-in [:app :channels] remove channel))]
-    
     (hk/with-channel request channel
       (swap! state update-in [:chan] conj channel)
       (swap! state assoc :req request)
       (hk/on-close channel (partial close-chan channel))
-      (hk/on-receive channel
-                     (fn [data] (hk/send! channel (str "ECHO:" data) false))))))
+      (hk/on-receive channel (fn [data] (hk/send! channel (str "ECHO: " data) false))))))
 
 (defroutes app-routes
   (GET "/" [] (index))
@@ -58,8 +59,7 @@
   ;; Defaults to PROJECT_ROOT/resouces/public 
   (route/resources "/"))
 
-(def app (-> #'app-routes
-             (wrap-refresh ["resources"])))
+(def app (handler/site app-routes))
 
 (defn rally-the-troops
   "Run the main loop when passed two args. A single arg is used for development."

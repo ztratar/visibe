@@ -19,7 +19,11 @@
                    (clojure.string/replace password "%" "%25") password)]
     (str "mongodb://" username ":" password "@" host ":" port "/" database)))
 
-;;; Persitence
+;;; Persistence
 
 (defn persist-trends [m]
   (c/insert "trends" m))
+
+;;; Query
+
+;; (def trends-q (partial (c/find-maps "trends")))

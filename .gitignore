@@ -18,3 +18,10 @@ target/stale/extract-native.dependencies
 .lein-plugins
 .lein-repl-history
 config.cljd
+
+
+out/
+resources/public/js/visibe_dbg.js
+resources/public/js/visibe_pre.js
+resources/public/js/visibe.js
+target/

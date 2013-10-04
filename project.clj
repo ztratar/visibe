@@ -1,7 +1,10 @@
 (defproject visibe "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
 
-  :url "http://example.com/FIXME"
+  :description "..."
+
+  :url "http://visibe.com"
+
+  :source-paths ["src/clj"]
 
   :dependencies [
                  [cheshire "5.2.0"]
@@ -46,4 +49,27 @@
 
   :main visibe.core/main-
 
-  :plugins [[lein-cljsbuild "0.3.0"]])
+  :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+
+  :injections [(require '[cljs.repl.browser :as brepl]
+                        '[cemerick.piggieback :as pb])
+               (defn browser-repl []
+                 (pb/cljs-repl :repl-env (brepl/repl-env :port 8002)))]
+
+  :plugins [[lein-cljsbuild "0.3.0"]]
+
+  :cljsbuild {:repl-listen-port 8002
+              
+              :builds {:prod {:source-paths ["src/cljs"]
+                              :compiler {:output-to "resources/public/js/visibe.js"}
+                              :optimizations :advanced}
+
+                       :pre-prod {:source-paths ["src/cljs"]
+                                  :compiler {:output-to "resources/public/js/visibe_pre.js"}
+                                  :optimizations :simple}
+
+                       :dev {:pretty-print true
+                             :source-paths ["src/cljs"] ;; "src/brepl/tranquil"
+                             :externs ["lib/d3.v3.js"]
+                             :compiler {:output-to "resources/public/js/visibe_dbg.js"}
+                             :optimizations :whitespace}}})
