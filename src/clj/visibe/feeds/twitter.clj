@@ -20,10 +20,13 @@
   (String. (b64/encode (.getBytes original)) "UTF-8"))
 
 (defn new-bearer-token []
-  "Calls the twitter API and returns a new bearer token."
-  (let [auth-str (string-to-base64-string (str (:consumer-key @state) ":" (:consumer-secret @state)))]
-    (-> (client/post "https://api.twitter.com/oauth2/headers" 
-                     {:token {"Authorization" (str "Basic " auth-str)
+  "calls the twitter api and returns a new bearer token."
+  ;; fixme, fri oct 04 2013, francis wolke
+  ;; relies on implementation details of `state'. make functional.
+  (let [auth-str (string-to-base64-string (str (:consumer-key (:twitter @state)) ":"
+                                               (:consumer-secret (:twitter @state))))]
+    (-> (client/post "https://api.twitter.com/oauth2/token" 
+                     {:headers {"Authorization" (str "Basic " auth-str)
                               "Content-Type" "application/x-www-form-urlencoded;charset=UTF-8"}
                       :body "grant_type=client_credentials"})
         (:body)
@@ -34,6 +37,6 @@
   (client/get "https://api.twitter.com/1.1/application/rate_limit_status.json"
               {:headers {"Authorization" (str "Bearer" " " bearer-token)}}))
 
-(defn black-triangle  [bearer-token]
+(defn black-triangle [bearer-token]
   (:body (client/get "https://api.twitter.com/1.1/search/tweets.json?q=%23clojure&result_type=mixed&count=100"
                      {:headers {"Authorization" (str "Bearer" " " bearer-token)}})))
