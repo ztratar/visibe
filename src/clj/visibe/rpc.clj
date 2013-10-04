@@ -1,35 +1,47 @@
 (ns ^{:doc "RPC logic for websocket connections."}
   visibe.rpc
-  (:use user )
+  (:use user)
   (:require [visibe.feeds.google-trends :refer [google-mapping]]))
-
-(defn current-trends
-  "Retuns current trend data by region. Call with no
-  arguments to retrive a list of avalible regions."
-  ([] (apply str (cons "please use specify one of more of\n"
-                       (interpose "\n" (vals google-mapping)))))
-  ([& ks] (str "You supplied these keys\n" ks )))
 
 (declare rpc-mapping)
 
+(defn current-trends
+  "([] [region])
+Call with no arguments to retrive a list of avalible regions.
+Call with a retion to retrive trend data for that region.
+EG: (current-trends :canada)"
+  ([] (apply str (cons "please use specify one of more of\n"
+                       (interpose "\n" (vals google-mapping)))))
+  ([region] (str "Retrive data for " region)))
+
 (defn help
-  "Returns instructions for use of the websockets api."
+  "([])
+Returns instructions for use of the websockets api."
   []
-  (apply str (into ["You can use (doc FUNCTION) to get the documentation strings for any function.\n
-The functions currently avalible to you are:\n"] (interleave (repeat "\n") (keys rpc-mapping)))))
+  (apply str (into ["-------------------------\n" "You can use (doc FUNCTION) to get the documentation strings for any function.\n
+The functions currently avalible to you are:\n"] (interleave (repeat "\n") (keys
+                                                                            rpc-mapping)))))
+
+(defmacro doc-str
+  [sym]
+  `(:doc (meta (var ~sym))))
+
+(defn generate-docs [f doc-string]
+  ;; TODO, Fri Oct 04 2013, Francis Wolke
+  ;; Docs are not currently created dynamically.
+  (str "-------------------------\n" f "\n" doc-string))
 
 (def ^{:doc "Functions avalible ap"}
-  rpc-fns {'trends #'current-trends
-           'help #'help
-           'doc #'rpc-doc})
-
-(defmacro rpc-doc
-  "Returns a doc-string formatted for a websocket connection."
-  ;; FIXME, Fri Oct 04 2013, Francis Wolke
-  ;; Dosn't work. Issue with quoting.
-  [sym]
-  (when-let [f (get rpc-fns sym)]
-    `(:doc (meta ~f))))
+  rpc-fns {'trends {:var #'current-trends
+                    :doc (doc-str current-trends)}
+           
+           'help {:var #'help
+                  :doc (doc-str help)}
+           ;; NOTE, Fri Oct 04 2013, Francis Wolke
+           ;; Doc is a special case. Ew.
+           'doc  {:var #'rpc-doc
+                  :doc "([name])\nPrints documentation for a var or special form
+given its name"}})
 
 (defn rpc-call
   ;; TODO, Thu Oct 03 2013, Francis Wolke
@@ -50,8 +62,11 @@ The functions currently avalible to you are:\n"] (interleave (repeat "\n") (keys
   [s]
   (let [fm (read-string s)
         f (first fm)
-        r (rest fm)]
-    (try (if (= f 'doc) 
-           "doc does not currently work."
-           (apply (get rpc-fns f) r))
+        r (rest fm)
+        fn-info (get rpc-fns f)]
+    ;; FIXME, Fri Oct 04 2013, Francis Wolke
+    ;; Documentation will grab the first thing off the list.
+    (try (cond (= f 'doc) (generate-docs (first r) (:doc (rpc-fns (first r))))
+               f (apply (:var fn-info) r)
+               :else "What you have attempted is not supported. Try `(help)`")
          (catch Exception e (.getMessage e)))))
