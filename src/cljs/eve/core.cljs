@@ -10,10 +10,9 @@
   (.log js/console (apply str m)))
 
 (defn process-socket-data [data]
-  (printc "!")
-  (printc "msg: " (.-data data)))
+  (printc (.-data data)))
 
-(defn ws-t []
+(defn ws-connection []
   (let [ws (js/WebSocket. "ws://localhost:3000/ws")
         _ (set! (.-onerror ws) #(printc "Websocket Error: " %))
         _ (set! (.-onmessage ws) process-socket-data)]

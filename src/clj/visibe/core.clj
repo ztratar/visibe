@@ -29,8 +29,10 @@
                  [:div {:class "page-container"}]]
 
           (include-js "js/libs/jquery.js" "js/libs/underscore.js"
-                      "js/libs/backbone.js" "d3.v3.min.js"
-                      "js/libs/bootstrap.js" "js/app.js" "js/visibe_dbg.js")
+                      "js/libs/backbone.js" "js/libs/bootstrap.js"
+                      "js/app.js" "js/visibe_dbg.js"
+                      ;; "js/d3.v3.min.js"
+                      )
           
           [:script {:type "text/template" :id "TopicCardView-template"}
            [:a {:href "/topic/4"}
@@ -70,12 +72,19 @@
   "Run the main loop when passed two args. A single arg is used for development."
   ([port]
      (mg/connect-via-uri! (conn-uri (:mongo @state)))
-     (swap! state assoc-in [:app :server] (hk/run-server #'app {:port (Integer. port)})))
+     (swap! state assoc-in
+            [:app :server]
+            (hk/run-server #'app {:port (Integer. port)})))
   ([port nrepl-port]
      (mg/connect-via-uri! (conn-uri (:mongo @state)))
      (srape-google-trends)
-     (swap! state assoc [:app :nrepl-server] (start-server :port (Integer. nrepl-port)))
-     (swap! state assoc [:app :server] (hk/run-server #'app {:port (Integer. port)}))))
+     (swap! state assoc
+            [:app :nrepl-server]
+            (start-server :port (Integer. nrepl-port)))
+     
+     (swap! state assoc
+            [:app :server]
+            (hk/run-server #'app {:port (Integer. port)}))))
 
 (defn read-config [config-path]
   ;; TODO, Wed Oct 02 2013, Francis Wolke
