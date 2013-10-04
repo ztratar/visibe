@@ -7,7 +7,7 @@
             [compojure.core :refer :all]
             [compojure.handler :as handler]
             [visibe.storage :refer [conn-uri]]
-            ;; [visibe.rpc :refer [rpc-call]]
+            [visibe.rpc :refer [rpc-call]]
             [visibe.feeds.google-trends :refer [srape-google-trends]]
             [cheshire.core :refer [decode]]
             [monger.core :as mg]
@@ -28,7 +28,8 @@
                  [:p {:id "main-byline"} "Watch situations and reactions unfold as they happen"]
                  [:div {:class "page-container"}]]
 
-          (include-js "js/libs/jquery.js" "js/libs/underscore.js" "js/libs/backbone.js"
+          (include-js "js/libs/jquery.js" "js/libs/underscore.js"
+                      "js/libs/backbone.js" "d3.v3.min.js"
                       "js/libs/bootstrap.js" "js/app.js" "js/visibe_dbg.js")
           
           [:script {:type "text/template" :id "TopicCardView-template"}
@@ -39,9 +40,7 @@
           [:script {:type "text/template" :id "TopicView-template"}
            [:img {:class "topic-img" :src ""}]
            [:h2 "Topic Name"]
-           [:span "timeline-container"]]
-          
-          ]))
+           [:span "timeline-container"]]]))
 
 (defn ws-handler
   [request]
@@ -51,7 +50,13 @@
       (swap! state update-in [:chan] conj channel)
       (swap! state assoc :req request)
       (hk/on-close channel (partial close-chan channel))
-      (hk/on-receive channel (fn [data] (hk/send! channel (str "ECHO: " data) false))))))
+      ;; NOTE, Thu Oct 03 2013, Francis Wolke
+      ;; If we run this in a future we won't be tied so a single thread of
+      ;; execution, but the messages won't come back in order.
+      (hk/on-receive channel
+                     (fn [data] (hk/send! channel
+                                          (rpc-call data)
+                                          false))))))
 
 (defroutes app-routes
   (GET "/" [] (index))
