@@ -2,6 +2,7 @@
   visibe.rpc
   (:use user)
   (:require [cheshire.core :refer [encode]]
+            [visibe.schemas :refer [random-str]]
             #_[visibe.core :refer [state]]))
 
 ;;; TODO, Sat Oct 05 2013, Francis Wolke
@@ -68,8 +69,7 @@ XXX: Currenty returns trends for the united states no matter which region is
  passed in"
   ([] (apply str (cons "please use specify one of more of\n"
                        (interpose "\n" (vals google-mapping)))))
-  ([region] (encode #_(get-in @state [:app :trends])
-                    ["foo" "bar" "baz"])))
+  ([region] (encode (take 10 (iterate (fn [_] (random-str 20)) (random-str 20))))))
 
 (defn help
   "([])

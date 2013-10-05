@@ -3,22 +3,22 @@
 
 (repl/connect "http://localhost:8002/repl")
 
-(def conn)
+(def ^:export conn)
 
-(defn printc [& m]
+(defn ^:export printc [& m]
   (.log js/console (apply str m)))
 
-(defn process-socket-data [data]
+(defn ^:export process-socket-data [data]
   ;; Add some predicates to this where we check what data comes across.
   (printc (.-data data)))
 
-(defn ws-connect []
-  (let [ws (js/WebSocket. "ws://localhost:3000/ws")
+(defn ^:export ws-connect []
+  (let [ws (js/WebSocket. "ws://localhost:4000/ws")
         _ (set! (.-onerror ws) #(printc "Websocket Error: " %))
         _ (set! (.-onmessage ws) process-socket-data)]
     (def conn ws)))
 
-(defn rpc-call [s]
+(defn ^:export rpc-call [s]
   (.send conn s))
 
 ;;; Call these at the REPL.
