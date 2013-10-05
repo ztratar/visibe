@@ -1,8 +1,8 @@
 (ns ^{:doc "RPC logic for websocket connections."}
   visibe.rpc
   (:use user)
-  (:require [visibe.feeds.google-trends :refer [google-mapping]]
-            [visibe.core :refer [state]]))
+  (:require [cheshire.core :refer [encode]]
+            #_[visibe.core :refer [state]]))
 
 ;;; TODO, Sat Oct 05 2013, Francis Wolke
 ;;; Clojure core supplies arglists in metadata. Move it from the comments to
@@ -14,6 +14,23 @@
 ;;; The next three functions are all actually implemented in 'visibe.homeless',
 ;;; and the fourth has not been implemented at all. The layout is due to some
 ;;; circular dependency issues I'll fix at a later date.
+
+(def google-mapping
+  ;; NOTE, Mon Sep 30 2013, Francis Wolke
+  ;; I have no idea why they're ranked like this (and have missing keys). The
+  ;; second version of the should be able to figure out countries itself.
+  {"1" :united-states
+   "3" :india
+   "4" :japan
+   "5" :singapore
+   "6" :israel
+   "8" :australia
+   "9" :united-kingdom
+   "10" :hong-kong
+   "12" :taiwan
+   "13" :canada
+   "14" :russia
+   "15" :germany})
 
 (defn toggle-stream-encoding!
   "([])
@@ -33,11 +50,11 @@ Stop streaming datums related to the given trend"
   [trend]
   "See 'visibe.homeless'")
 
-(defn datums-from
-  "([time])
-Returns the 50 previous datums from the specified time."
-  [id]
-  "No implementation yet.")
+(defn previous-datums
+  "([datum])
+Accepts a JSON representation of a datum and returns the previous chunk."
+  [datum]
+  "Has not yet been implemented.")
 
 ;;; Everything from here on is as it seems, even if it's in the wrong place.
 
@@ -51,7 +68,8 @@ XXX: Currenty returns trends for the united states no matter which region is
  passed in"
   ([] (apply str (cons "please use specify one of more of\n"
                        (interpose "\n" (vals google-mapping)))))
-  ([region] (str (get-in @state [:app :trends]))))
+  ([region] (encode #_(get-in @state [:app :trends])
+                    ["foo" "bar" "baz"])))
 
 (defn help
   "([])
@@ -83,21 +101,21 @@ The functions currently avalible to you are:\n"] (interleave (repeat "\n") (keys
                   :doc (doc-str help)}
            ;; NOTE, Fri Oct 04 2013, Francis Wolke
            ;; Doc is a special case. Eww.
-           'doc  {:var #'rpc-doc
+           'doc  {:var #'generate-docs
                   :doc "([name])\nPrints documentation for a var or special form
 given its name"}
            
            'close-stream {:var #'close-stream
-                         :doc (doc-str stop-stream)}
+                          :doc (doc-str close-stream)}
 
            'open-stream  {:var #'open-stream
-                           :doc (doc-str start-stream)}
+                          :doc (doc-str open-stream)}
 
            'toggle-stream-encoding! {:var #'toggle-stream-encoding!
-                                           :doc (doc-str toggle-stream-encoding!)}
+                                     :doc (doc-str toggle-stream-encoding!)}
            
-           'datums-from  {:var #'datums-from
-                          :doc (doc-str datums-from)}})
+           'previous-datums  {:var #'previous-datums
+                              :doc (doc-str previous-datums)}})
 
 (defn rpc-call
   

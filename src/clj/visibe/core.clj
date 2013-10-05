@@ -7,9 +7,7 @@
             [compojure.core :refer :all]
             [compojure.handler :as handler]
             [visibe.storage :refer [conn-uri]]
-            [visibe.rpc :refer [rpc-call]]
             [visibe.homeless :refer [test-handle]]
-            [visibe.feeds.google-trends :refer [srape-google-trends]]
             [cheshire.core :refer [decode]]
             [monger.core :as mg]
             [org.httpkit.server :as hk]
@@ -78,7 +76,7 @@
   
   ([port nrepl-port]
      (mg/connect-via-uri! (conn-uri (:mongo @state)))
-     (srape-google-trends)
+     ;; (srape-google-trends)
      (map (fn [[p f]] (update-state! p f))
           [[[:app :nrepl-server] (start-server :port (Integer. nrepl-port))]
            [[:app :server] (hk/run-server #'app {:port (Integer. port)})]])))
@@ -96,10 +94,16 @@
                  [:nrepl-server nil]]]
     (swap! state assoc-in [:app k] v)))
 
+(defn dev-mode! []
+  (read-config "./config.cljd")
+  (rally-the-troops 4000 4001))
+
 (defn main- 
+  ;; ([]
+  ;;    (read-config "./config.cljd")
+  ;;    (rally-the-troops (:port (:app @state)) (:nrepl-port (:app @state))))
   ([]
-     (read-config "./config.cljd")
-     (rally-the-troops (:port (:app @state)) (:nrepl-port (:app @state))))
+     (dev-mode!))
   ([config-path]
      (read-config config-path)
      (rally-the-troops (:port (:app @state)) (:nrepl-port (:app @state)))))

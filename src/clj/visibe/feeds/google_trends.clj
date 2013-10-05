@@ -70,7 +70,7 @@ human readable format."
             (recur (let [data (:united-states (keys->countries (google-trends)))]
                      (when-not (= trends data)
                        ;; Anything new trends that appear, track them.
-                       (do (doseq [new-trend (clojure.set/difference (set data) (set trends))]
-                             (track-trend new-trend))
-                           (update-state! [:app :trends] data)))
+                       (do ;; (doseq [new-trend (clojure.set/difference (set data) (set trends))]
+                         ;;   (track-trend new-trend))
+                         (update-state! [:app :trends] data)))
                      data)))))

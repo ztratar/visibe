@@ -1,5 +1,5 @@
 (ns ^{:doc "Data generation and validation"}
-  visibe.schema
+  visibe.schemas
   (:require [clj-time.core :refer [date-time]]
             [clj-schema.example :refer :all]
             [clj-schema.schema :refer :all]
@@ -28,8 +28,6 @@
   ;; I'm ignoring time-zones for the time being
   [[:text] String
    [:user] String
-   ;; TODO, Fri Oct 04 2013, Francis Wolke
-
    [:created_at] String
    [:name] String
    [:screen_name] String
@@ -43,4 +41,4 @@
    :created_at (str (random-date-time))
    :name  (random-str 10)
    :screen_name  (random-str 10)
-   :profile_image_url_https (random-str 100)})
+   :profile_image_url_https "https://si0.twimg.com/profile_images/2622165696/o20xkpll5fr57alshtnd_normal.jpeg"})
