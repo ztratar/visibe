@@ -10,9 +10,9 @@
 
 (declare rpc-fns)
 
-(defn toggle-stream-representation!
+(defn toggle-stream-encoding!
   "([])
-Toggles between sending JSON or EDN over stream"
+Toggles between sending JSON or EDN over the stream"
   [trend]
   "No implementation yet.")
 
@@ -86,8 +86,8 @@ given its name"}
            'open-stream  {:var #'open-stream
                            :doc (doc-str start-stream)}
 
-           'toggle-stream-representation! {:var #'toggle-stream-representation!
-                                           :doc (doc-str toggle-stream-representation!)}
+           'toggle-stream-encoding! {:var #'toggle-stream-encoding!
+                                           :doc (doc-str toggle-stream-encoding!)}
            
            'datums-from  {:var #'datums-from
                           :doc (doc-str datums-from)}})
