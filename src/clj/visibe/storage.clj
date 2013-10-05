@@ -9,6 +9,8 @@
             [monger.collection :as c])
   (:import org.bson.types.ObjectId))
 
+;;; Development stuff.
+;;; (c/remove "foo")
 
 ;;; Connection
 
