@@ -4,6 +4,10 @@
   (:require [visibe.feeds.google-trends :refer [google-mapping]]
             [visibe.core :refer [state]]))
 
+;;; TODO, Sat Oct 05 2013, Francis Wolke
+;;; Clojure core supplies arglists in metadata. Move it from the comments to
+;;; there. Perhaps a macro could do this?
+
 (declare rpc-fns)
 
 (defn toggle-stream-representation!
@@ -57,6 +61,11 @@ The functions currently avalible to you are:\n"] (interleave (repeat "\n") (keys
 (defn generate-docs [f doc-string]
   ;; TODO, Fri Oct 04 2013, Francis Wolke
   ;; Docs are not currently created dynamically.
+  
+  ;; This should fix the problem
+  ;; (defmacro foo [fm]
+  ;; `(str ~(second fm)))
+  
   (str "-------------------------\n" f "\n" doc-string))
 
 (def ^{:doc "Functions avalible to client"}

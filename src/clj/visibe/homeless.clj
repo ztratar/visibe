@@ -4,17 +4,11 @@
             [visibe.rpc :refer [rpc-call]]
             [org.httpkit.server :as hk]))
 
-;;; Could the issue lie in some inherrent properties of the atom I'm not aware of?
-
 (def channels (atom {}))
 
 (defn open-stream [channel s]
-  ;; The channel must already be in the atom for this to work.
   (swap! channels (fn [atom-val]
-                    (let [v (assoc-in atom-val [channel :stream-open?] true)
-                          _ (println "v" v)]
-                      v)))
-  ;; (assoc-in atom-val [channel :stream-open?] true)
+                    (assoc-in atom-val [channel :stream-open?] true)))
   (future (loop []
             (if (:stream-open? (@channels channel))
               (do (Thread/sleep (/ 30000 30)) ; 1 sec
