@@ -44,6 +44,8 @@
            [:h2 "Topic Name"]
            [:span "timeline-container"]]]))
 
+;;; NOTE, Fri Oct 04 2013, Francis Wolke
+;;; Broken connections are to be buildind up in `state'.
 (defn ws-handler
   [request]
   (letfn [(close-chan [channel status]
