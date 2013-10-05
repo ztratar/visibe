@@ -10,29 +10,36 @@
 
 (declare rpc-fns)
 
+;;; FIXME, XXX Sat Oct 05 2013, Francis Wolke
+;;; The next three functions are all actually implemented in 'visibe.homeless',
+;;; and the fourth has not been implemented at all. The layout is due to some
+;;; circular dependency issues I'll fix at a later date.
+
 (defn toggle-stream-encoding!
   "([])
 Toggles between sending JSON or EDN over the stream"
   [trend]
-  "No implementation yet.")
+  "See 'visibe.homeless'")
 
 (defn open-stream
   "([trend])
 Starts streaming datums related to the given trend"
   [trend]
-  "No implementation yet.")
+  "See 'visibe.homeless'")
 
 (defn close-stream
   "([trend])
 Stop streaming datums related to the given trend"
   [trend]
-  "No implementation yet.")
+  "See 'visibe.homeless'")
 
 (defn datums-from
   "([time])
 Returns the 50 previous datums from the specified time."
   [id]
   "No implementation yet.")
+
+;;; Everything from here on is as it seems, even if it's in the wrong place.
 
 (defn current-trends
   "([] [region])
