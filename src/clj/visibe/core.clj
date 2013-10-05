@@ -8,6 +8,7 @@
             [compojure.handler :as handler]
             [visibe.storage :refer [conn-uri]]
             [visibe.rpc :refer [rpc-call]]
+            [visibe.homeless :refer [rpc-handler]]
             [visibe.feeds.google-trends :refer [srape-google-trends]]
             [cheshire.core :refer [decode]]
             [monger.core :as mg]
@@ -51,16 +52,18 @@
   (letfn [(close-chan [channel status]
             (swap! state update-in [:app :channels] remove channel))]
     (hk/with-channel request channel
-      (swap! state update-in [:chan] conj channel)
-      (swap! state assoc :req request)
+      (swap! state update-in [:app :channels] conj channel)
+      ;; (swap! state assoc :req request) I don't think we need anything from
+      ;; the request.
       (hk/on-close channel (partial close-chan channel))
       ;; NOTE, Thu Oct 03 2013, Francis Wolke
       ;; If we run this in a future we won't be tied so a single thread of
       ;; execution, but the messages won't come back in order.
       (hk/on-receive channel
-                     (fn [data] (hk/send! channel
-                                          (rpc-call data)
-                                          false))))))
+                     ;; (partial rpc-handler channel)
+                     (fn [data] (hk/send! channel (rpc-call data) false))
+                     ;; (fn [data] ())
+                     ))))
 
 (defroutes app-routes
   (GET "/" [] (index))
@@ -85,8 +88,6 @@
           [
            [[:app :nrepl-server] (start-server :port (Integer. nrepl-port))]
            [[:app :server] (hk/run-server #'app {:port (Integer. port)})]
-           ;; [[:app :trends]              ;
-           ;;  ]
            ])))
 
 (defn read-config [config-path]

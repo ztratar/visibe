@@ -14,11 +14,11 @@
 (defn process-socket-data [data]
   (printc (.-data data)))
 
-(defn ws-connection []
+(defn ws-connect []
   (let [ws (js/WebSocket. "ws://localhost:3000/ws")
         _ (set! (.-onerror ws) #(printc "Websocket Error: " %))
         _ (set! (.-onmessage ws) process-socket-data)]
-    ws))
+    (def conn ws)))
 
 (defn rpc-call [s]
   (.send conn s)) 

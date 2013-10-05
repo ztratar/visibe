@@ -6,6 +6,12 @@
 
 (declare rpc-fns)
 
+(defn toggle-stream-representation!
+  "([])
+Toggles between sending JSON or EDN over stream"
+  [trend]
+  "No implementation yet.")
+
 (defn start-stream
   "([trend])
 Starts streaming datums related to the given trend"
@@ -19,8 +25,8 @@ Stop streaming datums related to the given trend"
   "No implementation yet.")
 
 (defn datums-from
-  "([id])
-Returns the 50 previous datums from the specified id."
+  "([time])
+Returns the 50 previous datums from the specified time."
   [id]
   "No implementation yet.")
 
@@ -70,6 +76,9 @@ given its name"}
 
            'start-stream  {:var #'start-stream
                            :doc (doc-str start-stream)}
+
+           'toggle-stream-representation! {:var #'toggle-stream-representation!
+                                           :doc (doc-str toggle-stream-representation!)}
            
            'datums-from  {:var #'datums-from
                           :doc (doc-str datums-from)}})
