@@ -24,6 +24,10 @@
 (defn persist-trends [m]
   (c/insert "trends" m))
 
+(defn persist-datum
+  [m]
+  (c/insert "datums" m))
+
 ;;; Query
 
 ;; (def trends-q (partial (c/find-maps "trends")))

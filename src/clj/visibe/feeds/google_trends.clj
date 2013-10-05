@@ -2,6 +2,9 @@
   visibe.feeds.google-trends  
   (:require [clj-http.lite.client :as client]
             [visibe.storage :refer [persist-trends]]
+            [visibe.core :refer [update-state!]]
+            ;; TODO, Fri Oct 04 2013, Francis Wolke
+            ;; replace `decode' with `read-json'
             [cheshire.core :refer [decode]]))
 
 (defn google-trends []
@@ -44,10 +47,14 @@ human readable format."
   "Every five minutes, scrapes google trend data."
   []
   (future
-    (loop [trends (google-trends)]
+    ;; FIXME, Fri Oct 04 2013, Francis Wolke
+    ;; I'm being lazy right now, and not dealing with data from other countries
+    ;; until it we've got the system working from end to end.
+    (loop [trends (:united-states (keys->countries (google-trends)))]
       ;; 5 min
       (Thread/sleep 300000)
       (recur (let [data (google-trends)]
                (when-not (= trends data)
-                 (persist-trends (keys->countries data))
+                 (update-state! [:app :trends] data)
+                 (persist-trends data)
                  data))))))

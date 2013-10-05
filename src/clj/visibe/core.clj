@@ -65,28 +65,29 @@
 (defroutes app-routes
   (GET "/" [] (index))
   (GET "/ws" [] ws-handler)
-  ;; Defaults to PROJECT_ROOT/resouces/public 
-  (route/resources "/"))
+  (route/resources "/"))             ; Defaults to PROJECT_ROOT/resouces/public 
 
 (def app (handler/site app-routes))
+
+(defn update-state! [path form]
+  (swap! state assoc-in path form))
 
 (defn rally-the-troops
   "Run the main loop when passed two args. A single arg is used for development."
   ([port]
      (mg/connect-via-uri! (conn-uri (:mongo @state)))
-     (swap! state assoc-in
-            [:app :server]
-            (hk/run-server #'app {:port (Integer. port)})))
+     (update-state! [:app :server] (hk/run-server #'app {:port (Integer. port)})))
+  
   ([port nrepl-port]
      (mg/connect-via-uri! (conn-uri (:mongo @state)))
      (srape-google-trends)
-     (swap! state assoc
-            [:app :nrepl-server]
-            (start-server :port (Integer. nrepl-port)))
-     
-     (swap! state assoc
-            [:app :server]
-            (hk/run-server #'app {:port (Integer. port)}))))
+     (map (fn [[p f]] (update-state! p f))
+          [
+           [[:app :nrepl-server] (start-server :port (Integer. nrepl-port))]
+           [[:app :server] (hk/run-server #'app {:port (Integer. port)})]
+           ;; [[:app :trends]              ;
+           ;;  ]
+           ])))
 
 (defn read-config [config-path]
   ;; TODO, Wed Oct 02 2013, Francis Wolke

@@ -6,6 +6,8 @@
 
 (repl/connect "http://localhost:8002/repl")
 
+(def conn)
+
 (defn printc [& m]
   (.log js/console (apply str m)))
 
@@ -17,3 +19,6 @@
         _ (set! (.-onerror ws) #(printc "Websocket Error: " %))
         _ (set! (.-onmessage ws) process-socket-data)]
     ws))
+
+(defn rpc-call [s]
+  (.send conn s)) 
