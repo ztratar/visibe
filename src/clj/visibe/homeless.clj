@@ -4,12 +4,27 @@
             [visibe.rpc :refer [rpc-call]]
             [org.httpkit.server :as hk]))
 
-(defn rpc-handler [channel data]
-  (hk/send! channel "foo" false)
-  #_(let [f (first (read-string data))]
-    (if (= 'start-stream f)
-      (loop []
-        (do (Thread/sleep 30000)        ; 30 sec
-            (hk/send! channel (str (tweet)) false)
-            (recur)))
-      (rpc-call data))))
+(defn logic [s]
+  (str (let [f (first (read-string s))]
+         (cond (= 'open-stream f)
+               "open-stream"
+               #_(loop []
+                   (do (Thread/sleep 30000) ; 30 sec
+                       (tweet)
+                       (recur)))
+               (= 'close-stream f) "close stream"
+               :else "other" #_(rpc-call s)))))
+
+(defn test-handle [channel data]
+  (let [f (first (read-string data))]
+    (cond (= 'open-stream f)
+          ;; This might have to run a future because it appears to be blocking
+          ;; the thread.
+          (loop []
+            (do (Thread/sleep (/ 30000 30)) ; 1 sec
+                (hk/send! channel "tweet" false)
+                (recur)))
+          (= 'close-stream f) (hk/send! channel "close stream" false)
+          :else (hk/send! channel "else" false))))
+
+

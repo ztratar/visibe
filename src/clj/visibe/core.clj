@@ -8,7 +8,7 @@
             [compojure.handler :as handler]
             [visibe.storage :refer [conn-uri]]
             [visibe.rpc :refer [rpc-call]]
-            [visibe.homeless :refer [rpc-handler]]
+            [visibe.homeless :refer [test-handle]]
             [visibe.feeds.google-trends :refer [srape-google-trends]]
             [cheshire.core :refer [decode]]
             [monger.core :as mg]
@@ -61,8 +61,9 @@
       ;; execution, but the messages won't come back in order.
       (hk/on-receive channel
                      ;; (partial rpc-handler channel)
-                     (fn [data] (hk/send! channel (rpc-call data) false))
-                     ;; (fn [data] ())
+                     ;; (fn [data] (hk/send! channel (rpc-call data)
+                     ;;                      false))
+                     (fn [data] (test-handle channel data))
                      ))))
 
 (defroutes app-routes

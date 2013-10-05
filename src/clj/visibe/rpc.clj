@@ -12,13 +12,13 @@ Toggles between sending JSON or EDN over stream"
   [trend]
   "No implementation yet.")
 
-(defn start-stream
+(defn open-stream
   "([trend])
 Starts streaming datums related to the given trend"
   [trend]
   "No implementation yet.")
 
-(defn stop-stream
+(defn close-stream
   "([trend])
 Stop streaming datums related to the given trend"
   [trend]
@@ -71,10 +71,10 @@ The functions currently avalible to you are:\n"] (interleave (repeat "\n") (keys
                   :doc "([name])\nPrints documentation for a var or special form
 given its name"}
            
-           'stop-stream {:var #'stop-stream
+           'close-stream {:var #'close-stream
                          :doc (doc-str stop-stream)}
 
-           'start-stream  {:var #'start-stream
+           'open-stream  {:var #'open-stream
                            :doc (doc-str start-stream)}
 
            'toggle-stream-representation! {:var #'toggle-stream-representation!
