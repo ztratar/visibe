@@ -45,14 +45,13 @@ Returns the 50 previous datums from the specified time."
   "([] [region])
 Call with no arguments to retrive a list of avalible regions.
 Call with a region to retrive trend data for that region.
-EG: (current-trends :canada)"
+EG: (current-trends :canada)
+
+XXX: Currenty returns trends for the united states no matter which region is
+ passed in"
   ([] (apply str (cons "please use specify one of more of\n"
                        (interpose "\n" (vals google-mapping)))))
-  ([region] 
-     #_(apply str (into ["Please note that I'm not dealing with regions right now. The top trends for the united states are:\n"]
-                      (interleave (repeat "\n")
-                                  (get-in @state [:app :trends]))))
-     (str (get-in @state [:app :trends]))))
+  ([region] (str (get-in @state [:app :trends]))))
 
 (defn help
   "([])

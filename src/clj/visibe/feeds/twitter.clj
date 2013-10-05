@@ -4,7 +4,7 @@
             [clj-http.lite.client :as client]
             [clojure.string :as s]
             [clojure.data.codec.base64 :as b64]            
-            [visibe.storage :refer [persist-datum]]
+            [visibe.storage :refer [persist-tweets]]
             [visibe.core :refer [state update-state!]]))
 
 ;;; NOTE, Thu Oct 03 2013, Francis Wolke
@@ -63,27 +63,22 @@
                                                               bearer-token)}}))
 
   ([_ & {:keys [query]}] (client/get (str "https://api.twitter.com/1.1/search/tweets.json"
-                                        query)
-                                   {:headers {"Authorization" (str "Bearer " bearer-token)}})))
+                                          query)
+                                     {:headers {"Authorization" (str "Bearer " bearer-token)}})))
 
 (defn current-trends
   "Convenience function"
   []
   (:current-trends (:app @state)))
 
-(defn tweet->essential-data
+(defn tweet->essentials
   ;; FIXME, NOTE Fri Oct 04 2013, Francis Wolke
   ;; `:text` path may not always have full urls.
 
   ;; Should we fetch profile pictures on the server side?
   [tweet]
-  (merge (select-keys tweet :text :profile_image_url_https)
-         (select-keys (:user tweet) :name :screen_name)))
-
-(defn persist-tweets [tweets]
-  ;; FIXME, Fri Oct 04 2013, Francis Wolke
-  ;; Use batch insert.
-  (map #(persist-datum (essential-data %)) tweets))
+  (merge (select-keys tweet [:text :profile_image_url_https :created_at])
+         (select-keys (:user tweet) [:name :screen_name])))
 
 (defn track-trend
   "Tracks a trend while it's still an active trend. Runs in future, which 
@@ -99,5 +94,5 @@ returns `nil` when trend is no longer in `(current-trends)'"
       (Thread/sleep 180000)             ; 3 min
       (let [new-query (:refresh_url (:search_metadata tweet-data))]
         (if-not ((current-trends) trend) nil
-                (do (persist-tweets (map tweet->essential-data (:statuses tweet-data)))
+                (do (persist-tweets trend (map tweet->essentials (:statuses tweet-data)))
                     (recur (search-tweets :query new-query))))))))

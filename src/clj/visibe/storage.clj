@@ -24,12 +24,14 @@
 ;;; Persistence
 
 (defn persist-trends [m]
-  (c/insert "trends" m))
+  (c/insert "test-trends" m))
 
-(defn persist-datum
-  [m]
-  (c/insert "datums" m))
-
-;;; Query
-
-;; (def trends-q (partial (c/find-maps "trends")))
+(defn persist-tweets
+  ;; XXX, Sat Oct 05 2013, Francis Wolke
+  
+  ;; All inserts are currently happening here, and the google trend data is
+  ;; being held in memory.
+  [trend tweets]
+  (if (empty? (c/find-maps "test-trends" {:trend trend}))
+    (c/insert "test-trends" {:trend trend :datums tweets})
+    (c/update "test-trends" {:trend trend} {:datums tweets} :upsert true)))

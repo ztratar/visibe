@@ -3,6 +3,7 @@
   (:require [clj-http.lite.client :as client]
             [visibe.storage :refer [persist-trends]]
             [visibe.core :refer [update-state!]]
+            [visibe.feeds.twitter.dev :refer [track-trend]]
             ;; TODO, Fri Oct 04 2013, Francis Wolke
             ;; replace `decode' with `read-json'
             [cheshire.core :refer [decode]]))
@@ -68,5 +69,8 @@ human readable format."
             (Thread/sleep (/ 300000 5))
             (recur (let [data (:united-states (keys->countries (google-trends)))]
                      (when-not (= trends data)
-                       (update-state! [:app :trends] data))
+                       ;; Anything new trends that appear, track them.
+                       (do (doseq [new-trend (clojure.set/difference (set data) (set trends))]
+                             (track-trend new-trend))
+                           (update-state! [:app :trends] data)))
                      data)))))
