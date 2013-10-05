@@ -52,19 +52,13 @@
   (letfn [(close-chan [channel status]
             (swap! state update-in [:app :channels] remove channel))]
     (hk/with-channel request channel
+      ;; Remove me.
       (swap! state update-in [:app :channels] conj channel)
-      ;; (swap! state assoc :req request) I don't think we need anything from
-      ;; the request.
+      ;; I don't think any information from the request is currently needed.
+      ;; (swap! state assoc :req request) 
       (hk/on-close channel (partial close-chan channel))
-      ;; NOTE, Thu Oct 03 2013, Francis Wolke
-      ;; If we run this in a future we won't be tied so a single thread of
-      ;; execution, but the messages won't come back in order.
       (hk/on-receive channel
-                     ;; (partial rpc-handler channel)
-                     ;; (fn [data] (hk/send! channel (rpc-call data)
-                     ;;                      false))
-                     (fn [data] (test-handle channel data))
-                     ))))
+                     (fn [data] (test-handle channel data))))))
 
 (defroutes app-routes
   (GET "/" [] (index))
@@ -86,10 +80,8 @@
      (mg/connect-via-uri! (conn-uri (:mongo @state)))
      (srape-google-trends)
      (map (fn [[p f]] (update-state! p f))
-          [
-           [[:app :nrepl-server] (start-server :port (Integer. nrepl-port))]
-           [[:app :server] (hk/run-server #'app {:port (Integer. port)})]
-           ])))
+          [[[:app :nrepl-server] (start-server :port (Integer. nrepl-port))]
+           [[:app :server] (hk/run-server #'app {:port (Integer. port)})]])))
 
 (defn read-config [config-path]
   ;; TODO, Wed Oct 02 2013, Francis Wolke
