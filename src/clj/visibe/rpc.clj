@@ -48,10 +48,11 @@ Call with a region to retrive trend data for that region.
 EG: (current-trends :canada)"
   ([] (apply str (cons "please use specify one of more of\n"
                        (interpose "\n" (vals google-mapping)))))
-  ([region] (str "Please note that I'm not dealing with regions right now. The
-  top trends for the united states are:\n"
-                 (interleave (repeat "\n")
-                             (get-in @state [:app :trends])))))
+  ([region] 
+     #_(apply str (into ["Please note that I'm not dealing with regions right now. The top trends for the united states are:\n"]
+                      (interleave (repeat "\n")
+                                  (get-in @state [:app :trends]))))
+     (str (get-in @state [:app :trends]))))
 
 (defn help
   "([])
@@ -127,8 +128,13 @@ given its name"}
     ;; FIXME, Fri Oct 04 2013, Francis Wolke
     ;; Documentation will grab the first thing off the list and ignore the
     ;; rest of the elements. We should throw an exception.
+
+    ;; `(doc fn-that-does-not-exist)` will return a partial docstring instead of
+    ;; an error.
     
-    (try (cond (= f 'doc) (generate-docs (first r) (:doc (rpc-fns (first r))))
+    (try (cond (= f 'doc) (if fn-info
+                            (generate-docs (first r) (:doc (rpc-fns (first r))))
+                            "That function does not exist.")
                f (apply (:var fn-info) r)
                ;; XXX, Fri Oct 04 2013, Francis Wolke
                ;; This does not always work.

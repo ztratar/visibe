@@ -43,7 +43,7 @@ human readable format."
           (recur (rest ks)
                  (assoc acc (google-mapping k) (m k))))))))
 
-(defn srape-google-trends
+(defn scrape-google-trends
   "Every five minutes, scrapes google trend data."
   []
   (future
@@ -56,5 +56,17 @@ human readable format."
       (recur (let [data (google-trends)]
                (when-not (= trends data)
                  (update-state! [:app :trends] data)
-                 (persist-trends data)
-                 data))))))
+                 ;; (persist-trends data)
+                 (:united-states (keys->countries (google-trends)))))))))
+
+(defn dev-scrape-trends []
+  ;; NOTE, Sat Oct 05 2013, Francis Wolke
+  ;; I'll add in a 'dev mode' so this sort of stuff does not show up in the
+  ;; codebase.
+  (future (loop [trends (:united-states (keys->countries (google-trends)))]
+            ;; 1 min
+            (Thread/sleep (/ 300000 5))
+            (recur (let [data (:united-states (keys->countries (google-trends)))]
+                     (when-not (= trends data)
+                       (update-state! [:app :trends] data))
+                     data)))))

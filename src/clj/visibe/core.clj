@@ -86,7 +86,9 @@
 (defn read-config [config-path]
   ;; TODO, Wed Oct 02 2013, Francis Wolke
   ;; Use clj-schema to verify config file is correct.
-  (defonce state (atom (read-string (slurp config-path))))
+  ;; For interactive development, ensure that we only `def' a new atom if one does
+  ;; not already exist. Add bang!
+  (def state (atom (read-string (slurp config-path))))
   (doseq [[k v] [[:channels #{}]
                  [:last-req nil]
                  [:server nil]
