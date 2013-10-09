@@ -1,13 +1,13 @@
 (ns visibe.feeds.storage-test
+  (:use clojure.test)
   (:require [visibe.feeds.storage :refer :all]
             [visibe.schemas :refer :all]
             [monger.collection :as c]
             [monger.core :as mg]))
 
 (deftest trend-and-datum-storage
-
-  ;; Connect to local DB
-  ;; Clear any tables/whatever mongo calls them
+  
+  ;; localhost, default port
   (mg/connect!)
   (c/remove "trends")
 
