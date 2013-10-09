@@ -6,11 +6,12 @@
   (:require [compojure.route :as route]
             [compojure.core :refer :all]
             [compojure.handler :as handler]
-            [visibe.storage :refer [conn-uri]]
+            [visibe.feeds.storage :as storage]
             [visibe.feeds :as feeds]
+            [visibe.api :as api]
             [visibe.homeless :refer [test-handle]]
             [cheshire.core :refer [decode]]
-            [visibe.state :refer [state]]
+            [visibe.state :refer [state read-config!]]
             [monger.core :as mg]
             [org.httpkit.server :as hk]
             [clojure.tools.nrepl.server :refer [start-server stop-server]]))
@@ -42,23 +43,11 @@
            [:h2 "Topic Name"]
            [:span "timeline-container"]]]))
 
-;;; TODO, Tue Oct 08 2013, Francis Wolke
-;;; Move into API and refactor
-
-(defn ws-handler
-  [request]
-  (letfn [(close-chan [channel status] (swap! state update-in [:app :channels] remove channel))]
-    (hk/with-channel request channel
-      ;; Remove me, and replace with something more appropriate.
-      ;; (swap! state update-in [:app :channels] conj channel)
-      (hk/on-close channel (partial close-chan channel))
-      (hk/on-receive channel
-                     (fn [data] (test-handle channel data))))))
-
 (defroutes app-routes
   (GET "/" [] (index))
-  (GET "/ws" [] ws-handler)
+  (GET "/ws" [] api/websocket-handler)
   
+  ;; (api/routes)
   ;; (POST "/ping" {body :body} (let [req-data (read-string (slurp body))] req-data))
   ;; (POST "/api/previous-datums" {body :body}  (let [] (api/previous-datums id)))
   ;; (POST "/api/current-trends" {body :body} (str (api/current-trends)))
@@ -70,7 +59,7 @@
 
 (defn rally-the-troops!
   [mode]
-  (mg/connect-via-uri! (conn-uri (:mongo @state)))
+  (mg/connect-via-uri! (storage/conn-uri (:mongo @state)))
   (map (fn [[p f]] (update-state! p f))
        [[[:app :nrepl-server] (start-server :port (Integer. (get-in @state [:app :nrepl-port])))]
         [[:app :server] (hk/run-server #'app {:port (Integer. (get-in @state [:app :port]))})]])

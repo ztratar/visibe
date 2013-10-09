@@ -1,7 +1,7 @@
 (ns ^{:doc "For collection of google trends data."}
   visibe.feeds.google-trends  
   (:require [clj-http.lite.client :as client]
-            [visibe.storage :refer [persist-trends]]
+            [visibe.feeds.storage :refer [persist-trends]]
             [visibe.core :refer [update-state!]]
             [visibe.feeds.twitter :refer [track-trend]]
             [clojure.data.json :refer [read-json]]

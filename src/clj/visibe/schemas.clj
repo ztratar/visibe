@@ -5,7 +5,8 @@
             [clj-schema.schema :refer :all]
             [clj-schema.validation :refer :all]))
 
-;;; String generation.
+; String generation.
+;*******************************************************************************
 
 (def valid-chars
   (map char (concat (range 66 91)    
@@ -19,6 +20,9 @@
 
 (defn random-date-time []
   (date-time 2013 10 (rand-int 30) (rand-int 24) (rand-int 60)))
+
+; Schemas
+;*******************************************************************************
 
 (def-map-schema tweet-schema
   ;; TODO, Fri Oct 04 2013, Francis Wolke
@@ -42,3 +46,7 @@
    :name  (random-str 10)
    :screen_name  (random-str 10)
    :profile_image_url_https "https://si0.twimg.com/profile_images/2622165696/o20xkpll5fr57alshtnd_normal.jpeg"})
+
+
+(defn n-tweets [n]
+  (take n (iterate (fn [_] (tweet)) (tweet))))

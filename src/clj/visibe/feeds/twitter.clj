@@ -4,7 +4,7 @@
             [clj-http.lite.client :as client]
             [clojure.string :as s]
             [clojure.data.codec.base64 :as b64]            
-            [visibe.storage :refer [persist-tweets]]
+            [visibe.feeds.storage :refer [persist-tweets]]
             [visibe.core :refer [state update-state!]]))
 
 ;;; NOTE, Thu Oct 03 2013, Francis Wolke

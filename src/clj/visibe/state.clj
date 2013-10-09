@@ -36,7 +36,9 @@
 
 (defn read-config!
   "Associates information from a specified file with `state'"
-  [] 
+  []
+  ;; XXX, Tue Oct 08 2013, Francis Wolke
+  ;; Dependent on the current structure of the config file
   (let [data (read-string (slurp "config.cljd"))
         vs (vals data)
         kvs (map keys vs)
