@@ -1,11 +1,11 @@
 (ns ^{:doc "For collection of twitter data."}
-  visibe.feeds.twitter
+  visibe.feeds.twitter.dev
   (:require [clojure.data.json :as json]
             [clj-http.lite.client :as client]
             [clojure.string :as s]
             [clojure.data.codec.base64 :as b64]            
-            [visibe.feeds.storage :refer [persist-tweets]]
-            [visibe.core :refer [state update-state!]]))
+            ;; [visibe.feeds.storage :refer [persist-tweets]]
+            [visibe.state :refer [state update-state!]]))
 
 ;;; NOTE, Thu Oct 03 2013, Francis Wolke
 ;;; If you want to understand what this code is doing, read these:
@@ -20,7 +20,8 @@
 
 ;;; Laziness could clean this up.
 
-;;; foo_bar -> foo-bar
+;;; XXX, Tue Oct 08 2013, Francis Wolke
+;;; As the twitter API makes no guarantees about what will be returned 
 
 (def bearer-token)
 ;;; TODO, Tue Oct 08 2013, Francis Wolke
@@ -87,19 +88,19 @@
   (underscore->hyphen (merge (select-keys tweet [:text :profile_image_url_https :created_at])
                              (select-keys (:user tweet) [:name :screen_name]))))
 
-(defn track-trend
-  "Tracks a trend while it's still an active trend. Runs in future, which 
-returns `nil` when trend is no longer in `(current-trends)'"
-  [trend]
-  ;; NOTE, Fri Oct 04 2013, Francis Wolke
-  ;; For the time being, I don't want to deal with the full stream.
+;; (defn track-trend
+;;   "Tracks a trend while it's still an active trend. Runs in future, which 
+;; returns `nil` when trend is no longer in `(current-trends)'"
+;;   [trend]
+;;   ;; NOTE, Fri Oct 04 2013, Francis Wolke
+;;   ;; For the time being, I don't want to deal with the full stream.
   
-  ;; Twitter's rate limit window is 15 minutes. We are allowed 450 requests over
-  ;; this peiod of time. (/ (* 15 60) 450) => 2 sec
-  (future
-    (loop [tweet-data (search-tweets trend)]
-      (Thread/sleep 180000)             ; 3 min
-      (let [new-query (:refresh_url (:search_metadata tweet-data))]
-        (if-not ((current-trends) trend) nil
-                (do (persist-tweets trend (map tweet->essentials (:statuses tweet-data)))
-                    (recur (search-tweets :query new-query))))))))
+;;   ;; Twitter's rate limit window is 15 minutes. We are allowed 450 requests over
+;;   ;; this peiod of time. (/ (* 15 60) 450) => 2 sec
+;;   (future
+;;     (loop [tweet-data (search-tweets trend)]
+;;       (Thread/sleep 180000)             ; 3 min
+;;       (let [new-query (:refresh_url (:search_metadata tweet-data))]
+;;         (if-not ((current-trends) trend) nil
+;;                 (do (persist-tweets trend (map tweet->essentials (:statuses tweet-data)))
+;;                     (recur (search-tweets :query new-query))))))))

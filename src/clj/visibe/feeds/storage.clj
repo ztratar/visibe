@@ -2,9 +2,10 @@
   visibe.feeds.storage
   (:require [monger.core :as mg]
             [monger.query :as q]
+            [clj-time.local :refer [local-now format-local-time]]
             [clj-time.core :refer [date-time]]
             [clj-time.coerce :refer [to-long from-long]]
-            [clj-time.format :refer [show-formatters]]
+            [clj-time.format :as f]
             [monger.operators :refer :all]
             [monger.collection :as c])
   (:import org.bson.types.ObjectId))
@@ -21,22 +22,43 @@
 ;;; Persistence
 
 (defn create-trend [trend]
-  (c/insert "test" {:trend trend
-                    ;; :created-at (now)
-                    :datums []}))
+  (c/insert "trends"
+            {:trend trend
+             :datums []
+
+             ;; XXX, Tue Oct 08 2013, Francis Wolke
+                    
+             ;; I don't want to do this, but mongodb dosn't have a way of
+             ;; timestamping transactions. Look at other datastores?
+             ;; Also, I do belive that this is the wrong time
+             ;; format. Though, for the next day or two it won't matter.
+             :created-at (str (format-local-time (local-now) :date-time))}))
 
 (defn append-datums
   "Adds new datums to the tail of the trend's datum seq. Datums must be sorted
-by timestamp prior to appending"
+by timestamp prior to appending.
+
+XXX, Tue Oct 08 2013, Francis Wolke
+
+This function ASSUMES that you will ONLY be appending datums that are
+newer than those already in ':datums'"
   [trend new-datums]
   ;; TODO, Tue Oct 08 2013, Francis Wolke
   ;; This is horrible, I find it really hard to belive that there isn't an
   ;; append function. Revisit.
-  (let [{datums :datums :as m} (c/find-one-as-map "test" {:trend trend})]
-    (c/update "test" m (assoc m :datums (into datums new-datums)))))
+  (let [{datums :datums :as m} (c/find-one-as-map "trends" {:trend trend})]
+    (c/update "trends" m (assoc m :datums (into datums new-datums)))))
 
 (defn previous-50-datums
   "Retuns 50 chronologically previous to the supplied datum"
   [trend datum]
-  (let [{datums :datums} (c/find-one-as-map "test" {:trend trend})]
-    (take 50 (drop-while #(not= datum) datums))))
+  (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]
+    (take 50 (reverse (take-while #(not= datum) datums)))))
+
+(defn after-datum
+  ;; TODO, Tue Oct 08 2013, Francis Wolke
+  ;; What about when we don't have the initial tweet?
+  "Returns any tweets that come chronologically after the supplied datom"
+  [trend datum]
+  (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]
+    (drop-while (partial not= datum) datums)))

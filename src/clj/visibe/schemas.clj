@@ -2,6 +2,7 @@
   visibe.schemas
   (:require [clj-schema.example :refer :all]
             [clj-time.core :refer [date-time]]
+            [visibe.homeless :refer [sort-datums-by-timestamp]]
             [clj-time.coerce :refer [to-long from-long]]
             [clj-time.format :as f]
             [clj-schema.schema :refer :all]
@@ -41,27 +42,20 @@
    ;; should be URI. Also, is this optional?
    [:profile-image-url-https] String])
 
-(def-example-factory tweet tweet-schema []
+(def-example-factory tweet tweet-schema
+  [{:keys [month day year]}]
   {:text  (random-str 140)
    :user  (random-str 10)
    :created-at (str (random-date-time))
    :name  (random-str 10)
    :screen-name  (random-str 10)
    :profile-image-url-https
-  "https://si0.twimg.com/profile_images/2622165696/o20xkpll5fr57alshtnd_normal.jpeg"})
+   "https://si0.twimg.com/profile_images/2622165696/o20xkpll5fr57alshtnd_normal.jpeg"})
 
 ; Utils
 ;*******************************************************************************
 
-(defn date-time-str->long [s]
-  (to-long (f/parse (f/formatters :date-time) s)))
-
 (defn n-sorted-tweets
   "n tweets, sorted by timestamp, oldest first"
   [n]
-  (sort-by #(date-time-str->long (:created-at %))
-           (take n (iterate (fn [_] (tweet)) (tweet)))))
-
-
-
-
+  (sort-datums-by-timestamp (take n (iterate (fn [_] (tweet)) (tweet)))))

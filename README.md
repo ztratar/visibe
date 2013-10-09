@@ -2,6 +2,8 @@
 
 ```
 lein run help
+
+lein test # assums you have a mongo instance running at XXX YYY
 ```
 
 ## License
