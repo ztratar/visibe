@@ -14,7 +14,6 @@ must be stubbed out."
                 _ (update-state! [:google :trends] trends)]
             (loop [trends trends]
               ;; 5 min
-
               (Thread/sleep 300000)
               (recur (let [new-trends (:united-states (goog/google-trends))]
                        (when-not (= trends new-trends)
@@ -29,19 +28,24 @@ are tracked on twitter, and relevent tweets are persisted."
     ;; FIXME, Fri Oct 04 2013, Francis Wolke
     ;; I'm being lazy right now, and not dealing with data from other countries
     ;; until it we've got the system working from end to end.
-    (loop [trends (:united-states (goog/google-trends))]
-      ;; 5 min
-      (Thread/sleep 300000)
-      (recur (let [new-trends (:united-states (goog/google-trends))]
-               (when (not= trends new-trends)
-                 ;; TODO, Wed Oct 09 2013, Francis Wolke
-                 ;; Rename.
-                 (let [new-diff-trends (set/difference (set new-trends) (set trends))]
-                   (doseq [t new-diff-trends]
-                     (create-trend t) 
-                     (twitter/track-trend t)))
-                 (update-state! [:google :trends] new-trends)
-                 new-trends))))))
+    (let [trends (:united-states (goog/google-trends))
+          _ (update-state! [:google :trends] trends)
+          _ (doseq [t trends]
+              (create-trend t) 
+              (twitter/track-trend t))]
+      (loop [trends trends]
+        ;; 5 min
+        (Thread/sleep 300000)
+        (recur (let [new-trends (:united-states (goog/google-trends))]
+                 (when (not= trends new-trends)
+                   ;; TODO, Wed Oct 09 2013, Francis Wolke
+                   ;; Rename.
+                   (let [new-diff-trends (set/difference (set new-trends) (set trends))]
+                     (doseq [t new-diff-trends]
+                       (create-trend t) 
+                       (twitter/track-trend t)))
+                   (update-state! [:google :trends] new-trends)
+                   new-trends)))))))
 
 (defn dev! []
   (scrape-trends!))

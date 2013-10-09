@@ -26,7 +26,7 @@
                   :app {:port nil
                         :nrepl-port nil
                         :server nil
-                        :nrepl-server nil
+                        ;; :nrepl-server nil
                         :channels {}}
 
                   :google {:trends []}}))

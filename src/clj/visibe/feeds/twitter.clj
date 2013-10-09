@@ -3,6 +3,9 @@
   (:require [clojure.data.json :as json]
             [clj-http.lite.client :as client]
             [clojure.string :as s]
+            [clj-time.coerce :refer [to-long from-long]]
+            [clj-time.format :as f]
+            [clj-time.core :refer [date-time]]
             [visibe.homeless :refer [sort-datums-by-timestamp]]
             [visibe.feeds.storage :refer [append-datums]]
             [clojure.data.codec.base64 :as b64]            
@@ -19,11 +22,14 @@
 ;;; As the twitter API makes no guarantees about what will be returned from the
 ;;; time perspective. This code needs to be well tested.
 
+(defn twitter->rfc822
+  "Accepts a twitter time string and returns a string in rfc822 format"
+  [s]
+  (let [[weekday month day time ? year] (clojure.string/split s #" ")]
+    (clojure.string/join " " [(str weekday ",") day month year time ?])))
+
 (defn bearer-token []
   (get-in @state [:twitter :bearer-token]))
-
-;;; TODO, Tue Oct 08 2013, Francis Wolke
-;;; Move the bearer token into visibe.state
 
 (defn string-to-base64-string [original]
   (String. (b64/encode (.getBytes original)) "UTF-8"))
@@ -59,16 +65,20 @@
 
 (defn search-tweets
   "Searches the twitter api for tweets matching the specified query"
-  ([query-string] (client/get (str "https://api.twitter.com/1.1/search/tweets.json?q="
-                                   ;; http://en.wikipedia.org/wiki/URL_encoding
-                                   (s/replace query-string " " "%23")
-                                   "&count=100") ; current max is 100 tweets.
-                              {:headers {"Authorization" (str "Bearer "
-                                                              (bearer-token))}}))
+  [query-string]
+  (-> (client/get (str "https://api.twitter.com/1.1/search/tweets.json?q="
+                       ;; http://en.wikipedia.org/wiki/URL_encoding
+                       (s/replace query-string " " "%23")
+                       "&count=100")    ; current max is 100 tweets.
+                  {:headers {"Authorization" (str "Bearer " (bearer-token))}})
+      (:body)
+      (json/read-json)))
 
-  ([_ & {:keys [query]}] (client/get (str "https://api.twitter.com/1.1/search/tweets.json"
-                                          query)
-                                     {:headers {"Authorization" (str "Bearer " (bearer-token))}})))
+(defn twitter-q [query]
+  (-> (client/get (str "https://api.twitter.com/1.1/search/tweets.json" query)
+                  {:headers {"Authorization" (str "Bearer " (bearer-token))}})
+      (:body)
+      (json/read-json)))
 
 (defn current-trends
   "Convenience function"
@@ -76,18 +86,25 @@
   (:trends (:google @state)))
 
 (defn underscore->hyphen [m]
-  (zipmap (map #((keyword (clojure.string/replace (str (name %)) "_" "-"))) (keys m)) (vals m)))
+  (letfn [(individual-kwd [kwd] (keyword (clojure.string/replace  (str (name kwd)) "_" "-")))]
+    (zipmap (map individual-kwd (keys m)) (vals m))))
 
 (defn tweet->essentials
   ;; FIXME, NOTE Fri Oct 04 2013, Francis Wolke
   ;; `:text` path may not always have full urls.
 
-  ;; Also, should we even be throwing away any data?
+  ;; Should we even be throwing away any data?
 
   ;; Should we fetch profile pictures on the server side?
   [tweet]
-  (underscore->hyphen (merge (select-keys tweet [:text :profile_image_url_https :created_at])
-                             (select-keys (:user tweet) [:name :screen_name]))))
+  (-> (merge (select-keys tweet [:text :profile_image_url_https :created_at])
+             (select-keys (:user tweet) [:name :screen_name]))
+      (underscore->hyphen)
+      (update-in [:created-at] twitter->rfc822)))
+
+(defn- store-tweets
+  [trend tweets]
+  (append-datums trend (sort-datums-by-timestamp (map tweet->essentials tweets))))
 
 (defn track-trend
   "Tracks a trend while it's still an active trend. Runs in future, which 
@@ -99,11 +116,12 @@ returns `nil` when trend is no longer in `(current-trends)'"
   ;; Twitter's rate limit window is 15 minutes. We are allowed 450 requests over
   ;; this peiod of time. (/ (* 15 60) 450) => 2 sec
   (future
-    (loop [tweet-data (search-tweets trend)]
-      ;; 3 min
-      (Thread/sleep 180000)
-      (let [new-query (:refresh_url (:search_metadata tweet-data))]
-        (if-not ((current-trends) trend) nil
-                (do (append-datums trend
-                                   (sort-datums-by-timestamp (map tweet->essentials (:statuses tweet-data))))
-                    (recur (search-tweets :query new-query))))))))
+    (let [tweet-data (search-tweets trend)
+          _ (store-tweets trend (:statuses tweet-data))]
+      (loop [tweet-data tweet-data]
+        ;; 3 min
+        (Thread/sleep 180000)
+        (let [new-query (:refresh_url (:search_metadata tweet-data))]
+          (when ((set (current-trends)) trend)
+            (do (store-tweets trend tweet-data)
+                (recur (twitter-q :query new-query)))))))))

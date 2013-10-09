@@ -7,6 +7,7 @@
             [compojure.core :refer :all]
             [compojure.handler :as handler]
             [visibe.feeds.storage :as storage]
+            [visibe.feeds.twitter :refer [new-bearer-token!]]
             [visibe.feeds :as feeds]
             [visibe.api :as api]
             [cheshire.core :refer [decode]]
@@ -48,7 +49,6 @@
   (GET "/" [] (index))
   (GET "/ws" [] api/websocket-handler)
   
-  ;; (api/routes)
   ;; (POST "/ping" {body :body} (let [req-data (read-string (slurp body))] req-data))
   ;; (POST "/api/previous-datums" {body :body}  (let [] (api/previous-datums id)))
   ;; (POST "/api/current-trends" {body :body} (str (api/current-trends)))
@@ -60,10 +60,11 @@
 
 (defn rally-the-troops!
   [mode]
+  (read-config!)
   (mg/connect-via-uri! (storage/conn-uri (:mongo @state)))
-  (map (fn [[p f]] (update-state! p f))
-       [[[:app :nrepl-server] (start-server :port (Integer. (get-in @state [:app :nrepl-port])))]
-        [[:app :server] (hk/run-server #'app {:port (Integer. (get-in @state [:app :port]))})]])
+  (new-bearer-token!)
+  (start-server :port (Integer. (get-in @state [:app :nrepl-port])))
+  (update-state! [:app :server] (hk/run-server #'app {:port (Integer. (get-in @state [:app :port]))}))
   (case mode
     :dev (feeds/dev!)
     :production (feeds/production!)))
@@ -71,7 +72,7 @@
 (defn main-
   ([] (println "Please specify one of #{help dev production}"))
   ([mode] (case mode
-            "production" (do (read-config!) (rally-the-troops! :production))
-            "dev" (do (read-config!) (rally-the-troops! :dev))
+            "production" (rally-the-troops! :production)
+            "dev" (rally-the-troops! :dev)
             "help" (println "`lein run dev` will start the server without storing data in the database. `lein run production` will. In either case, HTTP/WebSocket and nREPL servers will start with the ports specified in PROJECT_ROOT/config.cljd")
             (println "Please specify one of #{help dev production}"))))
