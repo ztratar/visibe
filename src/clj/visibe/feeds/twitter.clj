@@ -20,6 +20,8 @@
 
 ;;; Laziness could clean this up.
 
+;;; foo_bar -> foo-bar
+
 (def bearer-token)
 ;;; TODO, Tue Oct 08 2013, Francis Wolke
 ;;; Move the bearer token into visibe.state
@@ -73,14 +75,17 @@
   []
   (:current-trends (:app @state)))
 
+(defn underscore->hyphen [m]
+  (zipmap (map #((keyword (clojure.string/replace (str (name %)) "_" "-"))) (keys m)) (vals m)))
+
 (defn tweet->essentials
   ;; FIXME, NOTE Fri Oct 04 2013, Francis Wolke
   ;; `:text` path may not always have full urls.
 
   ;; Should we fetch profile pictures on the server side?
   [tweet]
-  (merge (select-keys tweet [:text :profile_image_url_https :created_at])
-         (select-keys (:user tweet) [:name :screen_name])))
+  (underscore->hyphen (merge (select-keys tweet [:text :profile_image_url_https :created_at])
+                             (select-keys (:user tweet) [:name :screen_name]))))
 
 (defn track-trend
   "Tracks a trend while it's still an active trend. Runs in future, which 

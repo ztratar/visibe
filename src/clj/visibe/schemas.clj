@@ -1,7 +1,9 @@
 (ns ^{:doc "Data generation and validation"}
   visibe.schemas
-  (:require [clj-time.core :refer [date-time]]
-            [clj-schema.example :refer :all]
+  (:require [clj-schema.example :refer :all]
+            [clj-time.core :refer [date-time]]
+            [clj-time.coerce :refer [to-long from-long]]
+            [clj-time.format :as f]
             [clj-schema.schema :refer :all]
             [clj-schema.validation :refer :all]))
 
@@ -19,7 +21,7 @@
   (apply str (take length (repeatedly random-char))))
 
 (defn random-date-time []
-  (date-time 2013 10 (rand-int 30) (rand-int 24) (rand-int 60)))
+  (date-time 2013 10 (inc (rand-int 30))  (rand-int 24) (rand-int 60)))
 
 ; Schemas
 ;*******************************************************************************
@@ -32,21 +34,34 @@
   ;; I'm ignoring time-zones for the time being
   [[:text] String
    [:user] String
-   [:created_at] String
+   [:created-at] String
    [:name] String
-   [:screen_name] String
+   [:screen-name] String
    ;; TODO, Fri Oct 04 2013, Francis Wolke
    ;; should be URI. Also, is this optional?
-   [:profile_image_url_https] String])
+   [:profile-image-url-https] String])
 
 (def-example-factory tweet tweet-schema []
   {:text  (random-str 140)
    :user  (random-str 10)
-   :created_at (str (random-date-time))
+   :created-at (str (random-date-time))
    :name  (random-str 10)
-   :screen_name  (random-str 10)
-   :profile_image_url_https "https://si0.twimg.com/profile_images/2622165696/o20xkpll5fr57alshtnd_normal.jpeg"})
+   :screen-name  (random-str 10)
+   :profile-image-url-https
+  "https://si0.twimg.com/profile_images/2622165696/o20xkpll5fr57alshtnd_normal.jpeg"})
+
+; Utils
+;*******************************************************************************
+
+(defn date-time-str->long [s]
+  (to-long (f/parse (f/formatters :date-time) s)))
+
+(defn n-sorted-tweets
+  "n tweets, sorted by timestamp, oldest first"
+  [n]
+  (sort-by #(date-time-str->long (:created-at %))
+           (take n (iterate (fn [_] (tweet)) (tweet)))))
 
 
-(defn n-tweets [n]
-  (take n (iterate (fn [_] (tweet)) (tweet))))
+
+
