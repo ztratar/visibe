@@ -3,8 +3,9 @@
   (:require [clojure.data.json :as json]
             [clj-http.lite.client :as client]
             [clojure.string :as s]
+            [visibe.homeless :refer [sort-datums-by-timestamp]]
+            [visibe.feeds.storage :refer [append-datums]]
             [clojure.data.codec.base64 :as b64]            
-            ;; [visibe.feeds.storage :refer [persist-tweets]]
             [visibe.state :refer [state update-state!]]))
 
 ;;; NOTE, Thu Oct 03 2013, Francis Wolke
@@ -103,5 +104,6 @@ returns `nil` when trend is no longer in `(current-trends)'"
       (Thread/sleep 180000)
       (let [new-query (:refresh_url (:search_metadata tweet-data))]
         (if-not ((current-trends) trend) nil
-                (do (persist-tweets trend (map tweet->essentials (:statuses tweet-data)))
+                (do (append-datums trend
+                                   (sort-datums-by-timestamp (map tweet->essentials (:statuses tweet-data))))
                     (recur (search-tweets :query new-query))))))))

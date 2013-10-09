@@ -26,7 +26,9 @@
          [:body [:div {:class "page-wrapper"}
                  [:a {:href "/" :class "home"} "Home"]
                  [:a {:href "/" } [:h1 {:id "logo"} "Visible"]]
-                 [:p {:id "main-byline"} "Watch situations and reactions unfold as they happen"]
+                 [:p {:id "main-byline"}
+                  "Watch situations and reactions unfold as they happen"]
+
                  [:div {:class "page-container"}]]
 
           (include-js "js/libs/jquery.js" "js/libs/underscore.js"
@@ -48,9 +50,9 @@
   (GET "/ws" [] api/websocket-handler)
   
   ;; (api/routes)
-  ;; (POST "/ping" {body :body} (let [req-data (read-string (slurp body))] req-data))
-  ;; (POST "/api/previous-datums" {body :body}  (let [] (api/previous-datums id)))
-  ;; (POST "/api/current-trends" {body :body} (str (api/current-trends)))
+  (POST "/ping" {body :body} (let [req-data (read-string (slurp body))] req-data))
+  (POST "/api/previous-datums" {body :body}  (let [] (api/previous-datums id)))
+  (POST "/api/current-trends" {body :body} (str (api/current-trends)))
   
   ;; Defaults to PROJECT_ROOT/resouces/public 
   (route/resources "/"))             
