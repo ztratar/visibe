@@ -17,6 +17,6 @@
     (create-trend "test-trend")
     (append-datums "test-trend" old)
     (append-datums "test-trend" new)
-
-    (is (= (butlast old) (previous-50-datums "test-trend" (last old))))
-    (is (= new (after-datum "test-trend" (last old))))))
+    
+    (is (= (butlast old) (previous-50-datums "test-trend" (last old)))) 
+    (is (= (rest new) (after-datum "test-trend" (first new))))))

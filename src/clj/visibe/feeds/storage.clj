@@ -10,16 +10,12 @@
             [monger.collection :as c])
   (:import org.bson.types.ObjectId))
 
-;;; Connection
-
 (defn conn-uri
   "'%' is an escape character."
   [{username :username password :password host :host port :port database :database}]
   (let [password (if (some #{\%} password)
                    (clojure.string/replace password "%" "%25") password)]
     (str "mongodb://" username ":" password "@" host ":" port "/" database)))
-
-;;; Persistence
 
 (defn create-trend [trend]
   (c/insert "trends"
@@ -49,16 +45,16 @@ newer than those already in ':datums'"
   (let [{datums :datums :as m} (c/find-one-as-map "trends" {:trend trend})]
     (c/update "trends" m (assoc m :datums (into datums new-datums)))))
 
-(defn previous-50-datums
+(defn previous-50-datums 
   "Retuns 50 chronologically previous to the supplied datum"
   [trend datum]
   (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]
-    (take 50 (reverse (take-while #(not= datum) datums)))))
+    (take 50 (take-while (partial not= datum) datums))))
 
 (defn after-datum
   ;; TODO, Tue Oct 08 2013, Francis Wolke
   ;; What about when we don't have the initial tweet?
   "Returns any tweets that come chronologically after the supplied datom"
-  [trend datum]
+  [trend supplied-datum]
   (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]
-    (drop-while (partial not= datum) datums)))
+    (rest (drop-while (partial not= supplied-datum) datums))))
