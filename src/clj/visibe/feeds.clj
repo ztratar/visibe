@@ -10,13 +10,16 @@
   "Scrapes trends, updates `state' but does not persist the data. Any datum feed
 must be stubbed out."
   []
-  (future (loop [trends (:united-states (goog/google-trends))]
-            ;; 5 min
-            (Thread/sleep 300000)
-            (recur (let [new-trends (:united-states (goog/google-trends))]
-                     (when-not (= trends new-trends)
-                       (update-state! [:app :trends] new-trends))
-                     new-trends)))))
+  (future (let [trends (:united-states (goog/google-trends))
+                _ (update-state! [:google :trends] trends)]
+            (loop [trends trends]
+              ;; 5 min
+
+              (Thread/sleep 300000)
+              (recur (let [new-trends (:united-states (goog/google-trends))]
+                       (when-not (= trends new-trends)
+                         (update-state! [:google :trends] new-trends))
+                       new-trends))))))
 
 (defn scrape-and-persist-trends!
   "Scrapes trends, updates `state' and perists the data when it changes. Trends
@@ -37,7 +40,7 @@ are tracked on twitter, and relevent tweets are persisted."
                    (doseq [t new-diff-trends]
                      (create-trend t) 
                      (twitter/track-trend t)))
-                 (update-state! [:app :trends] new-trends)
+                 (update-state! [:google :trends] new-trends)
                  new-trends))))))
 
 (defn dev! []

@@ -9,9 +9,8 @@
             [visibe.feeds.storage :as storage]
             [visibe.feeds :as feeds]
             [visibe.api :as api]
-            [visibe.homeless :refer [test-handle]]
             [cheshire.core :refer [decode]]
-            [visibe.state :refer [state read-config!]]
+            [visibe.state :refer [state update-state! read-config!]]
             [monger.core :as mg]
             [org.httpkit.server :as hk]
             [clojure.tools.nrepl.server :refer [start-server stop-server]]))
@@ -50,9 +49,9 @@
   (GET "/ws" [] api/websocket-handler)
   
   ;; (api/routes)
-  (POST "/ping" {body :body} (let [req-data (read-string (slurp body))] req-data))
-  (POST "/api/previous-datums" {body :body}  (let [] (api/previous-datums id)))
-  (POST "/api/current-trends" {body :body} (str (api/current-trends)))
+  ;; (POST "/ping" {body :body} (let [req-data (read-string (slurp body))] req-data))
+  ;; (POST "/api/previous-datums" {body :body}  (let [] (api/previous-datums id)))
+  ;; (POST "/api/current-trends" {body :body} (str (api/current-trends)))
   
   ;; Defaults to PROJECT_ROOT/resouces/public 
   (route/resources "/"))             

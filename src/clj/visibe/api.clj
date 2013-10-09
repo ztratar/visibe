@@ -25,9 +25,9 @@
 ;;   ;;                                                         :encoding :json}))))
 ;;   )
 
-;; (defn destroy-channel!
-;;   "Destroys a channel"
-;;   [channel])
+(defn destroy-channel!
+  "Destroys a channel"
+  [channel])
 
 ;; (defn test-handle [channel data]
 ;;   (when-not (@channels channel)
@@ -103,7 +103,7 @@
 ;; (defn current-trends
 ;;   "Returns current google trends for specified region"
 ;;   []
-;;   (get-in @state [:app :trends]))
+;;   (get-in @state [:google :trends]))
 
 ;; (defn regions
 ;;   "Returns trending regions"

@@ -1,5 +1,5 @@
 (ns ^{:doc "For collection of twitter data."}
-  visibe.feeds.twitter.dev
+  visibe.feeds.twitter
   (:require [clojure.data.json :as json]
             [clj-http.lite.client :as client]
             [clojure.string :as s]
@@ -73,7 +73,7 @@
 (defn current-trends
   "Convenience function"
   []
-  (:trends (:app @state)))
+  (:trends (:google @state)))
 
 (defn underscore->hyphen [m]
   (zipmap (map #((keyword (clojure.string/replace (str (name %)) "_" "-"))) (keys m)) (vals m)))
