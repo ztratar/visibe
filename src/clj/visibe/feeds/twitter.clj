@@ -1,5 +1,5 @@
 (ns ^{:doc "For collection of twitter data."}
-  visibe.feeds.twitter.dev
+  visibe.feeds.twitter
   (:require [clojure.data.json :as json]
             [clj-http.lite.client :as client]
             [clojure.string :as s]
@@ -21,6 +21,8 @@
 ;;; Laziness could clean this up.
 
 (def bearer-token)
+;;; TODO, Tue Oct 08 2013, Francis Wolke
+;;; Move the bearer token into visibe.state
 
 (defn string-to-base64-string [original]
   (String. (b64/encode (.getBytes original)) "UTF-8"))

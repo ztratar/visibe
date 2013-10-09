@@ -1,8 +1,8 @@
 # visibe
 
-Get started here
-
-http://leiningen.org/ 
+```
+lein run help
+```
 
 ## License
 
