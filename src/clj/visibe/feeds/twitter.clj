@@ -82,7 +82,8 @@
   (:trends (:google @state)))
 
 (defn underscore->hyphen [m]
-  (letfn [(individual-kwd [kwd] (keyword (clojure.string/replace  (str (name kwd)) "_" "-")))]
+  (letfn [(individual-kwd [kwd]
+            (keyword (clojure.string/replace  (str (name kwd)) "_" "-")))]
     (zipmap (map individual-kwd (keys m)) (vals m))))
 
 (defn tweet->essentials
@@ -118,6 +119,6 @@ returns `nil` when trend is no longer in `(current-trends)'"
         ;; 3 min
         (Thread/sleep 180000)
         (let [new-query (:refresh_url (:search_metadata tweet-data))]
-          (when ((set (current-trends)) trend)
+          (when (some #{trend} tweet-data)
             (do (store-tweets trend tweet-data)
-                (recur (twitter-q :query new-query)))))))))
+                (recur (twitter-q new-query)))))))))

@@ -5,7 +5,7 @@
             [clj-time.core :refer [date-time]]))
 
 (defn date-time-str->long [s]
-  (to-long (f/parse (f/formatters :date-time) s)))
+  (to-long (f/parse (f/formatters :rfc822) s)))
 
 (defn sort-datums-by-timestamp
   "Sorts datums by timstamp, oldest first"

@@ -32,6 +32,8 @@
                   :google {:trends []}}))
 
 (defn update-state! [path form]
+  ;; TODO, Wed Oct 09 2013, Francis Wolke
+  ;; Confusing name. Rename.
   (swap! state assoc-in path form))
 
 (defn read-config!

@@ -21,8 +21,8 @@ must be stubbed out."
                        new-trends))))))
 
 (defn scrape-and-persist-trends!
-  "Scrapes trends, updates `state' and perists the data when it changes. Trends
-are tracked on twitter, and relevent tweets are persisted."
+  "Scrapes trends, updates `state' and perists the the data when it changes. Trends
+are tracked via twitter, and relevent tweets are persisted via `twitter/track-trend'."
   []
   (future
     ;; FIXME, Fri Oct 04 2013, Francis Wolke
@@ -40,11 +40,11 @@ are tracked on twitter, and relevent tweets are persisted."
                  (when (not= trends new-trends)
                    ;; TODO, Wed Oct 09 2013, Francis Wolke
                    ;; Rename.
+                   (update-state! [:google :trends] new-trends)
                    (let [new-diff-trends (set/difference (set new-trends) (set trends))]
                      (doseq [t new-diff-trends]
                        (create-trend t) 
                        (twitter/track-trend t)))
-                   (update-state! [:google :trends] new-trends)
                    new-trends)))))))
 
 (defn dev! []
