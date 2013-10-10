@@ -11,16 +11,15 @@
                  [clj-http-lite "0.2.0"]
                  [clj-time "0.6.0"]
                  [cljs-painkiller "0.1.0"]
-                 [com.cemerick/friend "0.1.5"]
-                 [com.cemerick/piggieback "0.1.0"]
+                 [com.cemerick/piggieback "0.1.0" :exclusions [org.clojure/data.json]]
                  [com.cemerick/pomegranate "0.2.0"]
                  [com.draines/postal "1.11.0"]
                  [com.keminglabs/c2 "0.2.2"]
                  [com.novemberain/monger "1.6.0"]
-                 [twitter-api "0.7.4"]
+                 [twitter-api "0.7.4" :exclusions [org.clojure/data.json]]
                  [org.clojure/data.codec "0.1.0"]
                  [compojure "1.1.5" :exclusions [ring/ring-core]]
-                 [instagram-api "0.1.6"]
+                 [instagram-api "0.1.6" :exclusions [org.clojure/data.json]]
                  [criterium "0.4.2"]
                  [domina "1.0.2-SNAPSHOT"]
                  [garden "0.1.0-beta6"]
@@ -31,8 +30,7 @@
                  [org.clojure/clojurescript "0.0-1889"]
                  [org.clojure/core.async "0.1.222.0-83d0c2-alpha"]
                  [org.clojure/core.logic "0.8.3"]
-                 [org.clojure/core.typed "0.2.1"]
-                 [org.clojure/tools.namespace "0.2.3"]
+                 [org.clojure/tools.namespace "0.2.4"]
                  [org.clojure/tools.nrepl "0.2.3"]
                  [org.clojure/tools.reader "0.7.7"]
                  [org.clojure/tools.trace "0.7.5"]
@@ -70,7 +68,7 @@
                                   :optimizations :simple}
 
                        :dev {:pretty-print true
-                             :source-paths ["src/cljs"] ;; "src/brepl/tranquil"
+                             :source-paths ["src/cljs"]
                              :externs ["lib/d3.v3.js"]
                              :compiler {:output-to "resources/public/js/visibe_dbg.js"}
                              :optimizations :whitespace}}})
