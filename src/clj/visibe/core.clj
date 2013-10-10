@@ -33,7 +33,7 @@
 
           (include-js "js/libs/jquery.js" "js/libs/underscore.js"
                       "js/libs/backbone.js" "js/libs/bootstrap.js"
-                      "js/app.js" "js/visibe_dbg.js" "js/d3.v3.min.js")
+                      "js/app.js" "js/visibe_dbg.js" "js/libs/d3.v3.min.js")
           
           [:script {:type "text/template" :id "TopicCardView-template"}
            [:a {:href "/topic/4"}
