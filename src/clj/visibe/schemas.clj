@@ -43,7 +43,7 @@
    [:profile-image-url-https] String])
 
 (def-example-factory tweet tweet-schema
-  [{:keys [month day year]}]
+  []
   {:text  (random-str 140)
    :user  (random-str 10)
    :created-at (str (random-date-time))

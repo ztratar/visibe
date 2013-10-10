@@ -8,8 +8,10 @@
 (deftest trend-and-datum-storage
   
   ;; localhost, default port
-  (mg/connect!)
+  (mg/connect-via-uri! "mongodb://localhost:27017/local")
+
   (c/remove "trends")
+  (c/find-maps "trends")
 
   (let [tweets (n-sorted-tweets 10)
         [old new] ((juxt (partial take 5) (partial drop 5)) tweets)]

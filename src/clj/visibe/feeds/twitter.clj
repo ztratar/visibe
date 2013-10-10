@@ -18,10 +18,6 @@
 ;;; https://dev.twitter.com/docs/working-with-timelines
 ;;; https://dev.twitter.com/docs/api/1.1/get/search/tweets
 
-;;; XXX, Tue Oct 08 2013, Francis Wolke
-;;; As the twitter API makes no guarantees about what will be returned from the
-;;; time perspective. This code needs to be well tested.
-
 (defn twitter->rfc822
   "Accepts a twitter time string and returns a string in rfc822 format"
   [s]
