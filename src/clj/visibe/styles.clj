@@ -3,14 +3,23 @@
   visibe.styles
   (:require [garden.core :refer [css]]))
 
-(def major "#01D2FF")
-(def minor "#79C7EB")
-(def emphasis "#F8DAFB")
-(def text-c "#CDEFFF")
-(def background "#07060A")
+(def shadow "#245d82")
+(def deep-shadow "#183144")
+(def timeline-emphasis "#5b8fb5")
+(def fill "#3e80ab")
+(def emphasis "#9bb3c8")
+(def text-color "#fff")
+(def background "#286d99")
 
 (def css-data
   (css
+
+   ;; Common
+   
+   [:* {:margin 0 :padding 0
+        :color text-color :background background}]
+   [:h1 {:font-family "Gotham-Bold"}]
+
    ;; D3
    [:svg {:font "10px sans-serif"}]
    [:path {:fill "steelblue"
@@ -21,56 +30,52 @@
    [:.brush :.extent {:stroke "#fff"
                       :fill-opacity 0.125
                       :shape-rendering "crisp-edges"}]
-   
-   [:* {:margin 0 :padding 0 :text-color text-c}]
-   
-   ;; [:#actionbar {:position "absolute"
-   ;;               :top 0
-   ;;               :height "35px"
-   ;;               :width "100%"
-   ;;               :background minor
-   ;;               :border-bottom-style "solid"
-   ;;               :border-bottom-width "1px"
-   ;;               :border-bottom-color emphasis}
-    
-   ;;  [:ul {:height "60px"
-   ;;        :width "100%"}]
-    
-   ;;  [:li {:display :inline
-   ;;        :float :right
-   ;;        :list-style-type :none
-   ;;        :position :relative}]
-    
-   ;;  [:a :.menubtn {:display :block
-   ;;                 :width "100px"
-   ;;                 :background minor
-   ;;                 :height "35px"}]
 
-   ;;  [:a:hover :.menubtn:hover {:background major}]
-   ;;  ]
+   ;; Home
 
-   ;; ;; Profile
-               
-   ;; [:#profile {:position :relative
-   ;;             :margin-left :auto
-   ;;             :margin-right :auto
-   ;;             :width 800
+   [:#title {:margin-left "auto"
+             :margin-right "auto"
+             :text-align "center"
+             :margin-top "70px"
+             :width "450px"
+             :height "200px"}
+    [:h2 {:margin-top "20px"
+          :font-family "Sans-Serif"
+          :font-weight "100"}]]
+
+   [:#trends {:width "1300px"}]
+   [:.trend-card {:width "400px"
+                  :height "400px"
+                  :box-shadow (str "3px 5px 25px " deep-shadow)
+                  :background background}
+    [:h2 {:font-family "Helvetica Neue "
+          :font-size "25"
+          :color emphasis}]
+    
+    [:h3 {:color emphasis
+          :font-family "Helvetica Neue "
+          :font-size "15"}]
+
+    [:style {:color emphasis
+             :font-family "Helvetica Neue "
+             :font-size "15"}]]
    
-   ;;             :height 500
-   ;;             :background major}]
+   ;; Trend
 
-   ;; [:#login-button {:width 200
-   ;;                  :height 200
-   ;;                  :background "red"
-   ;;                  :position "relative"}]
-               
-   ;; [:#login {:position :absolute
-   ;;           :width "400px"
-   ;;           :height "400px"
-   ;;           :color major
-   ;;           :margin-left :auto
-   ;;           :margin-right :auto}]
+   [:#header {:width "100%"
+              :height "300px"}
+    
+    [:.button {:width "100px"
+               :height "100px"
+               :background deep-shadow}]]
+
+   [:.circle {:fill fill}]
+   [:.rect {:fill fill}]
+
+   [:#stream {:height "100%"
+              :background emphasis
+              :width "50px"}]
    ))
 
-(spit (java.io.File. "./resources/public/css/main.css") css-data)
+(spit (java.io.File. "./resources/public/css/style.css") css-data)
      

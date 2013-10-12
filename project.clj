@@ -14,6 +14,7 @@
                  [com.cemerick/piggieback "0.1.0" :exclusions [org.clojure/data.json]]
                  [com.cemerick/pomegranate "0.2.0"]
                  [com.draines/postal "1.11.0"]
+                 [net.drib/strokes "0.5.1"]
                  [com.keminglabs/c2 "0.2.2"]
                  [com.novemberain/monger "1.6.0"]
                  [twitter-api "0.7.4" :exclusions [org.clojure/data.json]]

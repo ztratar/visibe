@@ -7,10 +7,9 @@
           [:title "Visibe - Watch situations and reactions unfold as they happen"]
           [:meta {:charset "UTF-8"}]
           
-          (include-css "css/fonts.css" "css/bootstrap.css" "css/style.css")]
+          (include-css "css/fonts.css" "css/style.css")]
 
-         [:body (include-js "js/visibe_dbg.js" "js/libs/d3.v3.min.js")
+         [:body (include-js "js/libs/d3.v3.min.js" "js/visibe_dbg.js")
           [:div#content
-           [:script {:type "text/javascript"}
-            "eve.core.bootstrap_BANG_();"]]]))
-  
+           [:script {:type "text/javascript"} "eve.core.bootstrap_BANG_();"]]]))
+
