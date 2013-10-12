@@ -32,9 +32,10 @@
                  [org.clojure/core.logic "0.8.3"]
                  [org.clojure/tools.namespace "0.2.4"]
                  [org.clojure/tools.nrepl "0.2.3"]
-                 [org.clojure/tools.reader "0.7.7"]
+                 [org.clojure/tools.reader "0.7.9"]
                  [org.clojure/tools.trace "0.7.5"]
                  [org.toomuchcode/clara-rules "0.1.0"]
+                 [cljs-http "0.1.0"]
                  [prismatic/dommy "0.1.1"]
                  [prismatic/hiphip "0.1.0"]
                  [prismatic/plumbing "0.1.0"]
@@ -55,20 +56,16 @@
                (defn browser-repl []
                  (pb/cljs-repl :repl-env (brepl/repl-env :port 8002)))]
 
-  :plugins [[lein-cljsbuild "0.3.0"]]
+  :plugins [[lein-cljsbuild "0.3.3"]]
 
   :cljsbuild {:repl-listen-port 8002
               
-              :builds {:prod {:source-paths ["src/cljs"]
-                              :compiler {:output-to "resources/public/js/visibe.js"}
-                              :optimizations :advanced}
-
-                       :pre-prod {:source-paths ["src/cljs"]
-                                  :compiler {:output-to "resources/public/js/visibe_pre.js"}
-                                  :optimizations :simple}
-
-                       :dev {:pretty-print true
-                             :source-paths ["src/cljs"]
-                             :externs ["lib/d3.v3.js"]
-                             :compiler {:output-to "resources/public/js/visibe_dbg.js"}
-                             :optimizations :whitespace}}})
+              :builds [{:id "adv"
+                        :source-paths ["src/cljs"]
+                        :compiler {:optimizations :advanced
+                                   :pretty-print false
+                                   :output-dir "out"
+                                   :output-to "resources/public/js/main.js"
+                                   ;:source-map
+                                   ;"resources/public/js/main.js.map"
+                                   }}]})
