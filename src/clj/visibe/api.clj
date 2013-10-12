@@ -6,24 +6,28 @@
             [compojure.core :refer :all]
             [compojure.handler :as handler]))
 
-;;; TODO, Tue Oct 08 2013, Francis Wolke
-
-;;; Create a `defn-api-fn' macro that creates a route for the function. It
-;;; should be aware of the data encoding specified by the client.
-
 ; Boilerplate
 ;*******************************************************************************
 
-;; (def ^{:doc "Consumed by X which creates doc functions and `api-routes'."}
-;;   http-fns)
+(defn fn-name->route [sym]
+  (clojure.string/replace (str sym) "-" "/"))
 
-;; (defmacro def-api-fn [name docstring args & body])
+(defmacro expose [sym]
+  `(~'POST ~(str "/api/" (fn-name->route sym))
+           {~'body :body}
+           (str (let [~'body (when ~'body (read-string (slurp ~'body)))]
+                  (if ~'body
+                    (apply ~sym ~'body)
+                    (~sym))))))
 
-(defn create-channel!
-  "Creates a new channel"
-  [channel]
-  (defn open-new-channel [channel]
-  (swap! channels (fn [atom-val] (assoc atom-val channel {:stream-open? false})))))
+; WebSockets
+;*******************************************************************************
+
+;; (defn create-channel!
+;;   "Creates a new channel"
+;;   [channel]
+;;   (defn open-new-channel [channel]
+;;   (swap! channels (fn [atom-val] (assoc atom-val channel {:stream-open? false})))))
 
 (defn destroy-channel!
   "Destroys a channel"
@@ -41,14 +45,6 @@
 ;;           :else (hk/send! channel (rpc-call data) false))))
 
 
-; WebSockets
-;*******************************************************************************
-
-;;; It dosn't make any sense to have funtion calls made over websockets. HTTP
-;;; Will work for that, and then we can have websockets stream the data. This
-;;; will prevent any sort of duality of the API where it has to decide what
-;;; protocol to use
-
 (defn websocket-handler
   [request]
   (hk/with-channel request channel
@@ -64,24 +60,24 @@
 ; HTTP
 ;*******************************************************************************
 
-(defn open-stream!
-  "Begins streaming real time data to the client on the specifed trend."
-  ;; TODO, Tue Oct 08 2013, Francis Wolke
-  ;; Where will we get the channel info from? 
-  [channel trend]
-  (defn open-stream [channel trend]
-    (swap! channels (fn [atom-val] (assoc-in atom-val [channel :stream-open?] true)))
-    (future (loop []
-              (let [ks (select-keys (@channels channel) [:stream-open? :encoding])]
-                (case ks
-                  {:encoding :edn :stream-open? true} (do (Thread/sleep (/ 30000 30)) ; 1 sec 
-                                                          (hk/send! channel (str (tweet)) false)
-                                                          (recur))
-                  {:encoding :json :stream-open? true} (do (Thread/sleep (/ 30000 30)) ; 1 sec 
-                                                           (hk/send! channel (encode (tweet)) false)
-                                                           (recur))
-                  nil)))))
-  )
+;; (defn open-stream!
+;;   "Begins streaming real time data to the client on the specifed trend."
+;;   ;; TODO, Tue Oct 08 2013, Francis Wolke
+;;   ;; Where will we get the channel info from? 
+;;   [channel trend]
+;;   (defn open-stream [channel trend]
+;;     (swap! channels (fn [atom-val] (assoc-in atom-val [channel :stream-open?] true)))
+;;     (future (loop []
+;;               (let [ks (select-keys (@channels channel) [:stream-open? :encoding])]
+;;                 (case ks
+;;                   {:encoding :edn :stream-open? true} (do (Thread/sleep (/ 30000 30)) ; 1 sec 
+;;                                                           (hk/send! channel (str (tweet)) false)
+;;                                                           (recur))
+;;                   {:encoding :json :stream-open? true} (do (Thread/sleep (/ 30000 30)) ; 1 sec 
+;;                                                            (hk/send! channel (encode (tweet)) false)
+;;                                                            (recur))
+;;                   nil)))))
+;;   )
 
 ;; (defn close-stream!
 ;;   "Stops streaming data on the current trend to the specified channel"
@@ -90,25 +86,23 @@
 ;;   ;;   (swap! channels (fn [atom-val] (assoc-in atom-val [channel :stream-open?] false))))
 ;;   )
 
-;; (defn current-trends
-;;   "Returns current google trends for specified region"
-;;   []
-;;   (get-in @state [:google :trends]))
+(defn current-trends
+  "Returns current google trends for specified region"
+  []
+  (get-in @state [:google :trends]))
 
-;; (defn regions
-;;   "Returns trending regions"
-;;   []
-;;   (vals (google-mapping)))
+(defn regions
+  "Returns trending regions"
+  []
+  "regions"
+  #_(vals (google-mapping)))
 
-;; (defn previous-50-datums
-;;   "Returns the 50 last (sorted chronologically)"
-;;   [id]
-;;   )
+(defn previous-50-datums
+  "Returns the 50 last (sorted chronologically)"
+  [id]
+  "previous-50-datums")
 
-;; (defn doc
-;;   "Returns documentation associated with a symbol that is part of the API, HTTP
-;; or websockets."
-;;   ;; TODO, Tue Oct 08 2013, Francis Wolke
-;;   ;; Try via HTTP and WS to see which feels more natural
-;;   [sym]
-;;   )
+(defroutes api-routes
+  (expose current-trends)
+  (expose regions)
+  (expose previous-50-datums))

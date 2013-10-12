@@ -1,44 +1,73 @@
 (ns eve.core
-  (:require [clojure.browser.repl :as repl]))
+  (:require [clojure.browser.repl :as repl]
+            [cljs-http.client :as http]
+            [cljs.reader :as r]
+            [dommy.utils :as utils]
+            [dommy.core :as dommy]
+            [eve.state :refer [state assoc-in-state!]]
+            [cljs.core.async :refer [<!]])
+  (:require-macros [cljs.core.async.macros :as am]
+                   [dommy.macros :as m]))
+
+; Misc
+;*******************************************************************************
 
 (repl/connect "http://localhost:8002/repl")
 
-(def ^:export conn)
-
-(defn ^:export printc [& m]
+(defn printc [& m]
   (.log js/console (apply str m)))
 
-(defn ^:export process-socket-data [data]
-  ;; Add some predicates to this where we check what data comes across.
+(defn process-socket-data [data]
   (printc (.-data data)))
 
-(defn ^:export ws-connect []
-  (let [ws (js/WebSocket. "ws://localhost:4000/ws")
+(defn ws-connect []
+  (let [ws (js/WebSocket. "ws://localhost:9000/ws")
         _ (set! (.-onerror ws) #(printc "Websocket Error: " %))
         _ (set! (.-onmessage ws) process-socket-data)]
-    (def conn ws)))
+    (assoc-in-state! [:websocket-connection] ws)))
 
-(defn ^:export rpc-call [s]
-  (.send conn s))
+(defn update-current-trends! []
+  (am/go (let [response (<! (http/post "http://localhost:9000/api/current/trends"
+                                       {:headers {"content-type" "application/data"}}))]
+           (assoc-in-state! [:trends] (r/read-string (:body response))))))
 
-;;; Call these at the REPL.
+(defn route->fn-name [sym]
+  (clojure.string/replace (str sym) "/" "-"))
 
-;; (ws-connect)
+; Navigation + templates
+;*******************************************************************************
 
-;; (rpc-call "(open-stream)")
-;; (rpc-call "(close-stream)")
-;; (rpc-call "(doc FUNCTION)")
-;; (rpc-call "(trends :united-states)")
-;; (rpc-call "(help)")
+(defn swap-view! [node]
+  (dommy/replace! (m/sel1 :#content) node))
 
-;;; Each of these would then print something out to the REPL. The important ones here being `open-stream' and `close stream'. The idea is to:
+(m/deftemplate home []
+  [:div#content
+   [:div#title
+    [:h1 "Visibe"]
+    [:h2 "Watch social trends unfold in real-time"]]
+   `[:ul#trends
+     ;; FIXME, Fri Oct 11 2013, Francis Wolke
+     ;; If trends have not been pulled down yet, then have a watch on the atom
+     ;; That updates them?
 
-;; a) Fix the broken code. Which will yield a general API to work with that allows me to expose a few powerful functions that can yeild all possibe data you could use on the frontend. Then, you can 
+     ;; Also, these things should be links, not :p's
+     ~@(map (fn [trend] [:li.trend-card trend]) (:trends @state))]])
 
-;; b) call (trends REGION) to get a list of trends, use it to update the splash page.
+(m/deftemplate trend [trend]
+  [:div#content
+   [:div#title
+    [:h1 "Visibe"]
+    [:div.button#home]
+    [:h1 "Picture of trend here"]
+    [:h1#trend-title trend]]
+   [:div#feed
+    [:h1 "feed goes here."]]])
 
-;; c) Call (open-stream REGION) to begin streaming 'real-time' datums over websockets and produce the 'live feed' effect.
+(defn navigate! [view & args]
+  (swap-view! (case view
+                :trend (apply trend args)
+                :home (home))))
 
-;; c) Call (close-stream REGION) to stop streaming 'real-time' datums over websocket connection.
-
-;;; The other functions are there for utility.
+(defn ^:export bootstrap! []
+  (update-current-trends!)
+  (navigate! :home))
