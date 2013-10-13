@@ -34,10 +34,9 @@
 
                   :google {:trends []}}))
 
-(defn update-state! [path form]
-  ;; TODO, Wed Oct 09 2013, Francis Wolke
-  ;; Remove
-  (swap! state assoc-in path form))
+;;; TEST ME
+(defn update-in-state! [path f & args]
+  (swap! state update-in path f args)
 
 (defn assoc-in-state! [path form]
   (swap! state assoc-in path form))
@@ -62,4 +61,4 @@
                           (conj acc (map #(cons (ffirst d) %) h))))))
         data (map #(list (vec (take 2 %)) (last %)) (reduce into data))]
     (doseq [[f l] data]
-      (update-state! f l))))
+      (assoc-in-state! f l))))

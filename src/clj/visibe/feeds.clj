@@ -3,7 +3,7 @@
   (:require [clojure.set :as set]
             [visibe.feeds.twitter :as twitter]
             [visibe.feeds.storage :refer [create-trend]]
-            [visibe.state :refer [update-state!]]
+            [visibe.state :refer [assoc-in-state!]]
             [visibe.feeds.google-trends :as goog]))
 
 ;;; FIXME, Sat Oct 12 2013, Francis Wolke
@@ -15,13 +15,13 @@
 must be stubbed out."
   []
   (future (let [trends (:united-states (goog/google-trends))
-                _ (update-state! [:google :trends] trends)]
+                _ (assoc-in-state! [:google :trends] trends)]
             (loop [trends trends]
               ;; 5 min
               (Thread/sleep 300000)
               (recur (let [new-trends (:united-states (goog/google-trends))]
-                       (when-not (= trends new-trends)
-                         (update-state! [:google :trends] new-trends))
+                       (when-not (= (set trends) (set new-trends))
+                         (assoc-in-state! [:google :trends] new-trends))
                        new-trends))))))
 
 (defn scrape-and-persist-trends!
@@ -33,7 +33,7 @@ are tracked via twitter, and relevent tweets are persisted via `twitter/track-tr
     ;; I'm being lazy right now, and not dealing with data from other countries
     ;; until it we've got the system working from end to end.
     (let [trends (:united-states (goog/google-trends))
-          _ (update-state! [:google :trends] trends)
+          _ (assoc-in-state! [:google :trends] trends)
           _ (doseq [t trends]
               (create-trend t) 
               (twitter/track-trend t))]
@@ -42,7 +42,7 @@ are tracked via twitter, and relevent tweets are persisted via `twitter/track-tr
         (Thread/sleep 300000)
         (recur (let [new-trends (:united-states (goog/google-trends))]
                  (when (not= (set trends) (set new-trends))
-                   (update-state! [:google :trends] new-trends)
+                   (assoc-in-state! [:google :trends] new-trends)
                    (let [new-diff-trends (set/difference (set new-trends) (set trends))]
                      (doseq [t new-diff-trends]
                        (create-trend t) 

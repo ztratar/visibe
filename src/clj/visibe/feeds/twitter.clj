@@ -9,7 +9,7 @@
             [visibe.homeless :refer [sort-datums-by-timestamp]]
             [visibe.feeds.storage :refer [append-datums]]
             [clojure.data.codec.base64 :as b64]            
-            [visibe.state :refer [state update-state!]]))
+            [visibe.state :refer [state assoc-in-state!]]))
 
 ;;; NOTE, Thu Oct 03 2013, Francis Wolke
 ;;; If you want to understand what this code is doing, read these:
@@ -45,7 +45,7 @@
                   (json/read-json)
                   (:access_token))]
     
-    (update-state! [:twitter :bearer-token] token)))
+    (assoc-in-state! [:twitter :bearer-token] token)))
 
 (defn rate-limits
   "Convenience function. Returns rate limit data"

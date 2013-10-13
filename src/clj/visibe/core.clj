@@ -11,7 +11,7 @@
             [visibe.api :refer [api-routes websocket-handler]]
             [visibe.template :refer [index]]
             [cheshire.core :refer [decode]]
-            [visibe.state :refer [state update-state! read-config!]]
+            [visibe.state :refer [state assoc-in-state! read-config!]]
             [monger.core :as mg]
             [org.httpkit.server :as hk]
             [clojure.tools.nrepl.server :refer [start-server stop-server]]))
@@ -31,7 +31,7 @@
   (mg/connect-via-uri! (storage/conn-uri (:mongo @state)))
   (new-bearer-token!)
   (start-server :port (Integer. (get-in @state [:app :nrepl-port])))
-  (update-state! [:app :server] (hk/run-server #'app {:port (Integer. (get-in @state [:app :port]))}))
+  (assoc-in-state! [:app :server] (hk/run-server #'app {:port (Integer. (get-in @state [:app :port]))}))
   (case mode
     :dev (feeds/dev!)
     :production (feeds/production!)))
