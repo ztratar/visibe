@@ -6,6 +6,10 @@
             [visibe.state :refer [update-state!]]
             [visibe.feeds.google-trends :as goog]))
 
+;;; FIXME, Sat Oct 12 2013, Francis Wolke
+;;; What happends when we restart a worker process? Currently we don't check to
+;;; see if a trend aleady exists. This will cause data loss.
+
 (defn scrape-trends!
   "Scrapes trends, updates `state' but does not persist the data. Any datum feed
 must be stubbed out."
@@ -37,9 +41,7 @@ are tracked via twitter, and relevent tweets are persisted via `twitter/track-tr
         ;; 5 min
         (Thread/sleep 300000)
         (recur (let [new-trends (:united-states (goog/google-trends))]
-                 (when (not= trends new-trends)
-                   ;; TODO, Wed Oct 09 2013, Francis Wolke
-                   ;; Rename.
+                 (when (not= (set trends) (set new-trends))
                    (update-state! [:google :trends] new-trends)
                    (let [new-diff-trends (set/difference (set new-trends) (set trends))]
                      (doseq [t new-diff-trends]
