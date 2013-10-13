@@ -44,49 +44,39 @@
   ;; TODO, Sat Oct 12 2013, Francis Wolke
   ;; I doubt that identifying a client by a websocket connection is a good
   ;; idea. Modify so we use some sort of UUID scheme. Also, ask aound on IRC.
-  [channel trend]
-  (assoc-in-state! [:app :channels channel] {:trends #{trend}}))
+  [channel]
+  (assoc-in-state! [:app :channels channel] {:trends #{}}))
 
 (defn ^{:api :websocket :doc "Adds a new trend stream to a channel."}
-  add-trend-stream!
+  open-trend-stream!
   [channel trend]
   (update-in-state! [:app :channels channel :trends] conj trend))
 
 (defn ^{:api :websocket :doc "Removes trend stream from a channel."}
-  remove-trend-stream!
+  close-trend-stream!
   [channel trend]
   (update-in-state! [:app :channels channel :trends] (partial remove #{trend})))
 
-(defn ^{:api :websocket :doc "Registers a new channel with trend if it does not already exist, and adds a
-  new trend stream if it does."}
-  open-trend-stream!
-  [channel trend]
-  (if ((get-in @state [:app :channels]) channel)
-    (add-trend-stream! channel trend)
-    (register-new-channel! channel trend)))
-
 (def ^{:doc "Functions callable via websocket api."}
-  websocket-fns '#{add-trend-stream!
-                   remove-trend-stream!
-                   open-trend-stream!})
+  websocket-fns '#{open-trend-stream!
+                   close-trend-stream!})
 
 (defn ws-api-call [channel data]
+  (when-not (get-in @state [:app :channels channel])
+    (register-new-channel! channel))
   (let [ds (read-string data)
         fst (first ds)]
     ;; Should already be symbol
-    (if-let [f ((websocket-fns) (symbol fst))]
-      (apply (resolve f) (rest ds))
-      "Not a valid funtion. `doc' and `help' are not yet implemented.")))
+    (if-let [f (websocket-fns (symbol fst))]
+      ;; (apply (partial (resolve f) channel) (rest ds))
+      [f (rest ds)]
+      "Not a valid funtion. `help' and `doc' are not yet implemented.")))
 
 (defn websocket-handler
   [request]
   (hk/with-channel request channel
     (hk/on-close channel (fn [& _] (destroy-channel! channel)))
-    (hk/on-receive channel (fn [data] (hk/send! channel
-                                                ;; (str (ws-api-call
-                                                ;; channel data))
-                                                (str "ECHO:" data)
-                                                )))))
+    (hk/on-receive channel (fn [data] (hk/send! channel (str (ws-api-call channel data)))))))
 
 ; HTTP
 ;*******************************************************************************
