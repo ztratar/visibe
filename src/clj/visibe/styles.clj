@@ -19,6 +19,8 @@
    [:* {:margin 0 :padding 0
         :color text-color :background background}]
    [:h1 {:font-family "Gotham-Bold"}]
+   [:img {:margin-left :auto
+          :margin-right :auto}]
 
    ;; D3
    [:svg {:font "10px sans-serif"}]
@@ -44,20 +46,25 @@
           :font-weight "100"}]]
 
    [:#trends {:width "1300px"}]
-   [:.trend-card {:width "400px"
-                  :height "400px"
-                  :box-shadow (str "3px 5px 25px " deep-shadow)
+   [:.trend-card {:width "340px"
+                  :height "220px"
+                  :text-align :center
+                  :margin "20px"
+                  :padding "55px"
+                  :center-top "30px"
+                  :box-shadow (str "6px 7px 35px " deep-shadow)
                   :background background}
-    [:h2 {:font-family "Helvetica Neue "
-          :font-size "25"
-          :color emphasis}]
+
+    [:h2 {:font-family "Helvetica Neue"
+          :font-size "35px"
+          :color "#fff"}]
     
     [:h3 {:color emphasis
-          :font-family "Helvetica Neue "
+          :font-family "Helvetica Neue"
           :font-size "15"}]
 
     [:style {:color emphasis
-             :font-family "Helvetica Neue "
+             :font-family "Helvetica Neue"
              :font-size "15"}]]
    
    ;; Trend

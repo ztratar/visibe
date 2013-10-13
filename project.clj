@@ -21,6 +21,8 @@
                  [org.clojure/data.codec "0.1.0"]
                  [compojure "1.1.5" :exclusions [ring/ring-core]]
                  [instagram-api "0.1.6" :exclusions [org.clojure/data.json]]
+                 [net.drib/mrhyde "0.5.3"]
+                 [org.clojure/core.incubator "0.1.3"]
                  [criterium "0.4.2"]
                  [domina "1.0.2-SNAPSHOT"]
                  [garden "0.1.0-beta6"]

@@ -6,10 +6,13 @@
 ;;; Expect the names, structure and info associated with `state' to change
 ;;; often.
 
-;; TODO, Wed Oct 02 2013, Francis Wolke
-;; Use clj-schema to verify config file is correct.
+;;; TODO, Wed Oct 02 2013, Francis Wolke
+;;; Use clj-schema to verify config file is correct.
 
-;; Check that broken connections are not hanging around
+;;; Check `state' on every update. - allow changes that wern't supposed to
+;;; happen persist, but notify me.
+
+;; Verify that broken connections are not hanging around
 
 (def state (atom {:mongo {:username nil
                           :password nil
@@ -26,14 +29,17 @@
                   :app {:port nil
                         :nrepl-port nil
                         :server nil
-                        ;; :nrepl-server nil
+                        :nrepl-server nil
                         :channels {}}
 
                   :google {:trends []}}))
 
 (defn update-state! [path form]
   ;; TODO, Wed Oct 09 2013, Francis Wolke
-  ;; Confusing name. Rename.
+  ;; Remove
+  (swap! state assoc-in path form))
+
+(defn assoc-in-state! [path form]
   (swap! state assoc-in path form))
 
 (defn read-config!

@@ -1,7 +1,8 @@
 (ns ^{:doc "Websocket and HTTP API."}
   visibe.api
   (:require [org.httpkit.server :as hk]
-            [visibe.state :refer [state]]
+            [visibe.state :refer [state assoc-in-state! update-in-state!]]
+            [visibe.feeds.google-trends :as [google-mapping]]
             [compojure.route :as route]
             [compojure.core :refer :all]
             [compojure.handler :as handler]))
@@ -23,68 +24,55 @@
 ; WebSockets
 ;*******************************************************************************
 
-;; (defn create-channel!
-;;   "Creates a new channel"
-;;   [channel]
-;;   (defn open-new-channel [channel]
-;;   (swap! channels (fn [atom-val] (assoc atom-val channel {:stream-open? false})))))
+;;; Note, Sat Oct 12 2013, Francis Wolke
+
+;;; Make detailed notes about how this websocket scheme works so that it may be
+;;; citiqued without others having to read the code. Additionally, this will
+;;; allow me to more easily identify it's flaws.
+
+;;; TODO, Sat Oct 12 2013, Francis Wolke
+;;; Add tests
 
 (defn destroy-channel!
   "Destroys a channel"
-  [channel])
+  [channel]
+  (update-in-state! [:app :channels] dissoc channel))
 
-;; (defn test-handle [channel data]
-;;   (when-not (@channels channel)
-;;     (open-new-channel channel))
-;;   (let [d (read-string data)
-;;         f (first d)
-;;         r (rest d)]
-;;     (cond (= 'open-stream f) (open-stream channel data)
-;;           (= 'close-stream f) (do (close-stream! channel)
-;;                                   (hk/send! channel "Stream closed" false))
-;;           :else (hk/send! channel (rpc-call data) false))))
+(defn add-trend-stream!
+  "Adds a new trend stream to a channel."
+  [channel trend]
+  (update-in-state! [:app :channels channel :trends] conj trend))
 
+(defn remove-trend-stream!
+  "Removes trend stream from a channel."
+  [channel trend]
+  (update-in-state! [:app :channels channel :trends] (partial remove #{trend})))
+
+(defn register-new-channel!
+  "Adds new channel and associated context to `state'"
+  ;; TODO, Sat Oct 12 2013, Francis Wolke
+  ;; I doubt that identifying a client by a websocket connection is a good
+  ;; idea. Modify so we use some sort of UUID scheme. Also, ask aound on IRC.
+  [channel trend]
+  (assoc-in-state! [:app :channels channel]
+                   {:trends #{trend}))
+
+(defn open-trend-stream!
+  "Registers a new channel with trend if it does not already exist, and adds a
+  new trend stream if it does."
+  [channel trend]
+  (if ((get-in @state [:app :channels]) channel)
+    (add-trend-stream! channel trend)
+    (register-new-channel! channel trend)))
 
 (defn websocket-handler
   [request]
   (hk/with-channel request channel
-    ;; Remove me, and replace with something more appropriate.
-    ;; (swap! state update-in [:app :channels] conj channel)
-    (hk/on-close channel (fn [_] (destroy-channel! channel)))
-
-    ;; TODO, Tue Oct 08 2013, Francis Wolke
-    ;; If this is a new channel, then `create-channel!' in any other case
-    ;; We should never reciving data from the client. Send to dev/null
+    (hk/on-close channel (fn [& _] (destroy-channel! channel)))
     (hk/on-receive channel (fn [data] (hk/send! channel (str "ECHO:" data))))))
 
 ; HTTP
 ;*******************************************************************************
-
-;; (defn open-stream!
-;;   "Begins streaming real time data to the client on the specifed trend."
-;;   ;; TODO, Tue Oct 08 2013, Francis Wolke
-;;   ;; Where will we get the channel info from? 
-;;   [channel trend]
-;;   (defn open-stream [channel trend]
-;;     (swap! channels (fn [atom-val] (assoc-in atom-val [channel :stream-open?] true)))
-;;     (future (loop []
-;;               (let [ks (select-keys (@channels channel) [:stream-open? :encoding])]
-;;                 (case ks
-;;                   {:encoding :edn :stream-open? true} (do (Thread/sleep (/ 30000 30)) ; 1 sec 
-;;                                                           (hk/send! channel (str (tweet)) false)
-;;                                                           (recur))
-;;                   {:encoding :json :stream-open? true} (do (Thread/sleep (/ 30000 30)) ; 1 sec 
-;;                                                            (hk/send! channel (encode (tweet)) false)
-;;                                                            (recur))
-;;                   nil)))))
-;;   )
-
-;; (defn close-stream!
-;;   "Stops streaming data on the current trend to the specified channel"
-;;   [channel trend]
-;;   ;; (defn close-stream! [channel]
-;;   ;;   (swap! channels (fn [atom-val] (assoc-in atom-val [channel :stream-open?] false))))
-;;   )
 
 (defn current-trends
   "Returns current google trends for specified region"
@@ -94,8 +82,7 @@
 (defn regions
   "Returns trending regions"
   []
-  "regions"
-  #_(vals (google-mapping)))
+  (vals (google-mapping)))
 
 (defn previous-50-datums
   "Returns the 50 last (sorted chronologically)"
