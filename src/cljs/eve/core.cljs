@@ -14,7 +14,7 @@
 
 (repl/connect "http://localhost:8002/repl")
 
-(defonce d3 js/d3)
+(def d3 js/d3)
 
 (defn printc [& m]
   (.log js/console (apply str m)))
@@ -22,11 +22,14 @@
 (defn process-socket-data [data]
   (printc (.-data data)))
 
-(defn ws-connect []
+(defn ws-connect! []
   (let [ws (js/WebSocket. "ws://localhost:9000/ws")
         _ (set! (.-onerror ws) #(printc "Websocket Error: " %))
         _ (set! (.-onmessage ws) process-socket-data)]
     (assoc-in-state! [:websocket-connection] ws)))
+
+(defn ws-call [f]
+  (.send (:websocket-connection @state) (str f)))
 
 (defn update-current-trends! []
   (am/go (let [response (<! (http/post "http://localhost:9000/api/current/trends"
@@ -39,76 +42,76 @@
 ; Navigation + templates
 ;*******************************************************************************
 
-(defn clear! []
-  (.remove (.selectAll svg "circle"))
-  (.remove (.selectAll svg "image")))
+;; (defn clear! []
+;;   (.remove (.selectAll svg "circle"))
+;;   (.remove (.selectAll svg "image")))
 
-(defn svg! []
-    (def svg (-> d3
-               (.select "body")
-               (.append "svg")
-               (.attr "width" 700)
-               (.attr "height" 700))))
+;; (defn svg! []
+;;     (def svg (-> d3
+;;                (.select "body")
+;;                (.append "svg")
+;;                (.attr "width" 700)
+;;                (.attr "height" 700))))
 
-(defn trend-intro [img-uri]
-  ;; Add circle
-  (-> svg
-      (.append "circle")
-      (.attr "x" 200)
-      (.attr "y" 200)
-      (.attr "cx" 0)
-      (.attr "cy" 0)
-      (.attr "r" 0)
-      (.attr "class" "circle"))
+;; (defn trend-intro [img-uri]
+;;   ;; Add circle
+;;   (-> svg
+;;       (.append "circle")
+;;       (.attr "x" 200)
+;;       (.attr "y" 200)
+;;       (.attr "cx" 0)
+;;       (.attr "cy" 0)
+;;       (.attr "r" 0)
+;;       (.attr "class" "circle"))
 
-  ;; Add Image
-  (-> svg
-      (.append "image")
-      (.attr "xlink:href" "breaking-bad.png")
-      (.attr "x" 60)
-      (.attr "y" 60)
-      ;; (.attr "width" 100)
-      ;; (.attr "height" 100)
-      (.attr "opacity" 0))
+;;   ;; Add Image
+;;   (-> svg
+;;       (.append "image")
+;;       (.attr "xlink:href" "breaking-bad.png")
+;;       (.attr "x" 60)
+;;       (.attr "y" 60)
+;;       ;; (.attr "width" 100)
+;;       ;; (.attr "height" 100)
+;;       (.attr "opacity" 0))
 
-  (-> svg
-      (.select "circle")
-      (.transition)
-      (.duration 3000)
-      (.attr "x" 250)
-      (.attr "y" 250)
-      (.attr "cx" 250)
-      (.attr "cy" 250)
-      (.attr "r" 100)
-      (.ease "elastic"))
+;;   (-> svg
+;;       (.select "circle")
+;;       (.transition)
+;;       (.duration 3000)
+;;       (.attr "x" 250)
+;;       (.attr "y" 250)
+;;       (.attr "cx" 250)
+;;       (.attr "cy" 250)
+;;       (.attr "r" 100)
+;;       (.ease "elastic"))
 
-  (-> svg
-      (.select "image")
-      (.transition)
-      (.duration 3000)
-      (.attr "opacity" 1)))
+;;   (-> svg
+;;       (.select "image")
+;;       (.transition)
+;;       (.duration 3000)
+;;       (.attr "opacity" 1)))
 
 
-;; Add image
-(-> svg
-    (.append "image")
-    (.attr "xlink:href" "http://localhost:9000/breaking-bad.jpg")
-    (.attr "clip-path" "url(#clipping)")
-    (.attr "x" 0)
-    (.attr "y" 0)
-    (.attr "width" 200)
-    (.attr "height" 200))
+;; ;; Add image
+;; (-> svg
+;;     (.append "image")
+;;     (.attr "xlink:href" "http://localhost:9000/breaking-bad.jpg")
+;;     (.attr "clip-path" "url(#clipping)")
+;;     (.attr "x" 0)
+;;     (.attr "y" 0)
+;;     (.attr "width" 200)
+;;     (.attr "height" 200))
 
-;; Transitions
-(-> d3
-    (.selectAll "circle")
-    (.transition)
-    (.duration 3000)
-    (.attr "cx" 100)
-    (.attr "cy" 100)
-    (.attr "r" 100)
-    (.attr "opacity" 1)
-    (.ease "gradual"))
+;; ;; Transitions
+;; (-> d3
+;;     (.selectAll "circle")
+;;     (.transition)
+;;     (.duration 3000)
+;;     (.attr "cx" 100)
+;;     (.attr "cy" 100)
+;;     (.attr "r" 100)
+;;     (.attr "opacity" 1)
+;;     (.ease "gradual"))
 
 
 ;; (defn calc-metrics [trend]

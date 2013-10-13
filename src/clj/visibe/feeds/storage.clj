@@ -46,7 +46,7 @@ newer than those already in ':datums'"
     (c/update "trends" m (assoc m :datums (into datums new-datums)))))
 
 (defn previous-50-datums 
-  "Retuns 50 chronologically previous to the supplied datum"
+  "Retuns 50 datums chronologically previous to the supplied datum"
   [trend datum]
   (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]
     (take 50 (take-while (partial not= datum) datums))))
@@ -54,6 +54,7 @@ newer than those already in ':datums'"
 (defn after-datum
   ;; TODO, Tue Oct 08 2013, Francis Wolke
   ;; What about when we don't have the initial tweet?
+
   "Returns any tweets that come chronologically after the supplied datom"
   [trend supplied-datum]
   (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]

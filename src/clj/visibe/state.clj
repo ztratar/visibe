@@ -36,7 +36,7 @@
 
 ;;; TEST ME
 (defn update-in-state! [path f & args]
-  (swap! state update-in path f args)
+  (swap! state update-in path f args))
 
 (defn assoc-in-state! [path form]
   (swap! state assoc-in path form))
@@ -62,3 +62,6 @@
         data (map #(list (vec (take 2 %)) (last %)) (reduce into data))]
     (doseq [[f l] data]
       (assoc-in-state! f l))))
+
+(defn ^{:dev true} stop-server []
+  ((get-in @state [:app :server])))
