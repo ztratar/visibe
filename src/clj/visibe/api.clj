@@ -3,7 +3,7 @@
   (:require [org.httpkit.server :as hk]
             [visibe.state :refer [state assoc-in-state! update-in-state!]]
             [visibe.feeds.google-trends :refer [google-mapping]]
-            [visibe.feeds.storage :refer [previous-50-datums]]
+            [visibe.feeds.storage :refer [previous-50-datums after-datum]]
             [compojure.route :as route]
             [compojure.core :refer :all]
             [compojure.handler :as handler]))
@@ -49,7 +49,7 @@ when a channel is no longer in '[:app :channels']"
       (when (get-in @state [:app :channels channel])
         (do (let [dts (map (fn [[tnd l-datum]] [tnd (after-datum tnd l-datum)]) unsure)
                   to-recur (map (fn [[tnd datums]] [tnd (last datums)]) dts)]
-              (v/send! channel (str (into {} dts))) ; provide hashmap
+              (hk/send! channel (str (into {} dts))) ; provide hashmap
               ;; one minute
               (Thread/sleep 60000)
               (recur to-recur)))))))
