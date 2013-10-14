@@ -4,7 +4,7 @@
             [cljs.reader :as r]
             [dommy.utils :as utils]
             [dommy.core :as dommy]
-            [eve.state :refer [state assoc-in-state!]]
+            [eve.state :refer [state assoc-in-state! update-in-state!]]
             [cljs.core.async :refer [<!]])
   (:require-macros [cljs.core.async.macros :as am]
                    [dommy.macros :as m]))
@@ -29,7 +29,7 @@
     (assoc-in-state! [:websocket-connection] ws)))
 
 (defn ws-call [f]
-  (.send (:websocket-connection @state) (str f)))
+  (.send (:websocket-connection @state) (str f))) 
 
 (defn update-current-trends! []
   (am/go (let [response (<! (http/post "http://localhost:9000/api/current/trends"

@@ -17,18 +17,21 @@
                    (clojure.string/replace password "%" "%25") password)]
     (str "mongodb://" username ":" password "@" host ":" port "/" database)))
 
-(defn create-trend [trend]
-  (c/insert "trends"
-            {:trend trend
-             :datums []
+(defn create-trend
+  "Create trend if it does not exist"
+  [trend]
+  (when-not (c/find-one-as-map "trends" {:trend trend})
+      (c/insert "trends"
+                {:trend trend
+                 :datums []
 
-             ;; XXX, Tue Oct 08 2013, Francis Wolke
-                    
-             ;; I don't want to do this, but mongodb dosn't have a way of
-             ;; timestamping transactions. Look at other datastores?
-             ;; Also, I do belive that this is the wrong time
-             ;; format. Though, for the next day or two it won't matter.
-             :created-at (str (format-local-time (local-now) :date-time))}))
+                 ;; XXX, Tue Oct 08 2013, Francis Wolke
+                 
+                 ;; I don't want to do this, but mongodb dosn't have a way of
+                 ;; timestamping transactions. Look at other datastores?
+                 ;; Also, I do belive that this is the wrong time
+                 ;; format. Though, for the next day or two it won't matter.
+                 :created-at (str (format-local-time (local-now) :date-time))})))
 
 (defn append-datums
   "Adds new datums to the tail of the trend's datum seq. Datums must be sorted
@@ -55,6 +58,6 @@ newer than those already in ':datums'"
   "Returns any datums that come chronologically after the supplied datom"
   [trend supplied-datum]
   (if (nil? supplied-datum)
-    (c/find-one-as-map "trends" {:trend trend})
+    (:datums (c/find-one-as-map "trends" {:trend trend}))
     (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]
       (rest (drop-while (partial not= supplied-datum) datums)))))

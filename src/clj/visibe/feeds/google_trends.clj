@@ -5,6 +5,9 @@
             [clojure.data.json :refer [read-json]]
             [cheshire.core :refer [decode]]))
 
+;;; NOTE, Mon Oct 14 2013, Francis Wolke
+;;; Use the flickr 
+
 (defn raw-google-trends []
   ;; NOTE, Mon Sep 30 2013, Francis Wolke
   ;; For the time being we don't need phantom.js as they update this when

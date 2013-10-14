@@ -3,6 +3,7 @@
   (:require [org.httpkit.server :as hk]
             [visibe.state :refer [state assoc-in-state! update-in-state!]]
             [visibe.feeds.google-trends :refer [google-mapping]]
+            [visibe.schemas :refer [n-sorted-tweets]]
             [visibe.feeds.storage :refer [previous-50-datums after-datum]]
             [compojure.route :as route]
             [compojure.core :refer :all]
@@ -40,19 +41,44 @@
   (update-in-state! [:app :channels] dissoc channel))
 
 (defn stream-data!
-  "Provieds a live data stream on trends in a channels ':trends' returns `nil'
-when a channel is no longer in '[:app :channels']"
+  "Provides a live data stream on trends in a channels ':trends' returns `nil'
+when a channel is no longer in '[:app :channels]'"
   [channel]
   (future
     (loop [unsure (partition 2 (interleave (get-in @state [:app :channels channel :trends])
                                            (repeat nil)))]
-      (when (get-in @state [:app :channels channel])
-        (do (let [dts (map (fn [[tnd l-datum]] [tnd (after-datum tnd l-datum)]) unsure)
-                  to-recur (map (fn [[tnd datums]] [tnd (last datums)]) dts)]
-              (hk/send! channel (str (into {} dts))) ; provide hashmap
-              ;; one minute
-              (Thread/sleep 60000)
-              (recur to-recur)))))))
+      (when-let [channel-context (get-in @state [:app :channels channel])]
+        (if (:test-mode channel-context)
+          ;; Generate and send data
+          (do (hk/send! channel (str {:msg :trend-map
+                                      :data (into {} (partition 2 (interleave (:trends channel-context)
+                                                                              (repeat (n-sorted-tweets 5)))))}))
+              (Thread/sleep (/ 60000 10))
+              (recur unsure))
+          (do (let [dts (map (fn [[tnd l-datum]] [tnd (after-datum tnd l-datum)])
+                             unsure)
+                    ;; Remove trends without new data 
+                    dts (remove (fn [[_ d]] (nil? d)) dts)
+                    to-recur (map (fn [[tnd datums]] [tnd (last datums)]) dts)]
+                (hk/send! channel (str (into {} dts))) ; provide hashmap
+                ;; one minute
+                (Thread/sleep (/ 60000 10))
+                (recur to-recur))))))))
+
+;; (defn stream-data!
+;;   "Provides a live data stream on trends in a channels ':trends' returns `nil'
+;; when a channel is no longer in '[:app :channels]'"
+;;   [channel]
+;;   (future
+;;     (loop [unsure (partition 2 (interleave (get-in @state [:app :channels channel :trends])
+;;                                            (repeat nil)))]
+;;       (do
+;;         (hk/send! channel "foobar" (str {:msg :trend-map
+;;                                          :data (into {} (map vec (partition 2 (interleave (get-in @state [:app :channels channel :trends])
+;;                                                                                           (repeat (n-sorted-tweets 5))))))})
+;;                   )
+;;         (Thread/sleep (/ 60000 60))
+;;         (recur unsure)))))
 
 (defn register-new-channel!
   "Adds new channel and associated context to `state'"
@@ -60,13 +86,17 @@ when a channel is no longer in '[:app :channels']"
   ;; I doubt that identifying a client by a websocket connection is a good
   ;; idea. Modify so we use some sort of UUID scheme. Also, ask aound on IRC.
   [channel]  
-  (assoc-in-state! [:app :channels channel] {:trends #{}})
+  (assoc-in-state! [:app :channels channel] {:trends #{} :test-mode false})
   (stream-data! channel))
+
+(defn ^{:api :websocket :doc "Sends generated test data instead of whatever."}
+  toggle-test-mode!
+  [channel]
+  (update-in-state! [:app :channels channel :test-mode] #(if % false true)))
 
 (defn ^{:api :websocket :doc "Adds a new trend stream to a channel."}
   open-trend-stream!
   [channel trend]
-  ;; The issue is with channel equality, try from server side and add tests.
   (update-in-state! [:app :channels channel :trends] (fn [& args] (set (apply conj args))) trend))
 
 (defn ^{:api :websocket :doc "Removes trend stream from a channel."}
@@ -81,9 +111,10 @@ when a channel is no longer in '[:app :channels']"
   (let [ds (read-string data)
         fst (first ds)]
     ;; TODO, Sun Oct 13 2013, Francis Wolke
-    ;; Don't pass back all the data about the atom when we're in production
+    ;; Don't pass back all the data about `state' atom when we're in production
     (cond (= fst 'open-trend-stream!) (open-trend-stream! channel (second ds))
           (= fst 'close-trend-stream!) (close-trend-stream! channel (second ds))
+          (= fst 'toggle-test-mode!) (toggle-test-mode! channel)
           :else "Not a valid funtion. `help' and `doc' are not yet implemented.")))
 
 (defn websocket-handler

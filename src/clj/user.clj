@@ -7,8 +7,8 @@
             [cemerick.pomegranate :refer (add-dependencies)]
             [clojure.reflect :as r]))
 
-(defmacro c= [n body]
-  `(= ~n (count ~body)))
+(defn c= [n body]
+  (= n (count body)))
 
 (defn log [& s]
   (spit (java.io.File. "./log") (apply str s) :append true))

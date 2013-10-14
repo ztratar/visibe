@@ -21,8 +21,9 @@
 (defn random-str [length]
   (apply str (take length (repeatedly random-char))))
 
-(defn random-date-time []
-  (date-time 2013 10 (inc (rand-int 30)) (rand-int 24) (rand-int 60)))
+(defn random-date-rfc822 []
+  (to-long (f/parse (f/formatters :rfc822) s))
+  (str (date-time 2013 10 (inc (rand-int 30)) (rand-int 24) (rand-int 60))))
 
 ; Schemas
 ;*******************************************************************************
