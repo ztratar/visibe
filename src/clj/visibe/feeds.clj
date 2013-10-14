@@ -17,6 +17,8 @@ must be stubbed out."
   (future (let [trends (:united-states (goog/google-trends))
                 _ (assoc-in-state! [:google :trends] trends)]
             (loop [trends trends]
+              ;; TODO, Sun Oct 13 2013, Francis Wolke
+              ;; Inital data can be removed by moving `Thread/sleep' to `recur'
               ;; 5 min
               (Thread/sleep 300000)
               (recur (let [new-trends (:united-states (goog/google-trends))]
@@ -38,6 +40,8 @@ are tracked via twitter, and relevent tweets are persisted via `twitter/track-tr
               (create-trend t) 
               (twitter/track-trend t))]
       (loop [trends trends]
+        ;; TODO, Sun Oct 13 2013, Francis Wolke
+        ;; Inital data can be removed by moving `Thread/sleep' to `recur'
         ;; 5 min
         (Thread/sleep 300000)
         (recur (let [new-trends (:united-states (goog/google-trends))]

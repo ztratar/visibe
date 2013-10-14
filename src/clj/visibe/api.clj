@@ -39,13 +39,29 @@
   [channel]
   (update-in-state! [:app :channels] dissoc channel))
 
+(defn stream-data!
+  "Provieds a live data stream on trends in a channels ':trends' returns `nil'
+when a channel is no longer in '[:app :channels']"
+  [channel]
+  (future
+    (loop [unsure (partition 2 (interleave (get-in @state [:app :channels channel :trends])
+                                           (repeat nil)))]
+      (when (get-in @state [:app :channels channel])
+        (do (let [dts (map (fn [[tnd l-datum]] [tnd (after-datum tnd l-datum)]) unsure)
+                  to-recur (map (fn [[tnd datums]] [tnd (last datums)]) dts)]
+              (v/send! channel (str (into {} dts))) ; provide hashmap
+              ;; one minute
+              (Thread/sleep 60000)
+              (recur to-recur)))))))
+
 (defn register-new-channel!
   "Adds new channel and associated context to `state'"
   ;; TODO, Sat Oct 12 2013, Francis Wolke
   ;; I doubt that identifying a client by a websocket connection is a good
   ;; idea. Modify so we use some sort of UUID scheme. Also, ask aound on IRC.
-  [channel]
-  (assoc-in-state! [:app :channels channel] {:trends #{}}))
+  [channel]  
+  (assoc-in-state! [:app :channels channel] {:trends #{}})
+  (stream-data! channel))
 
 (defn ^{:api :websocket :doc "Adds a new trend stream to a channel."}
   open-trend-stream!

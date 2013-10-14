@@ -52,10 +52,9 @@ newer than those already in ':datums'"
     (take 50 (take-while (partial not= datum) datums))))
 
 (defn after-datum
-  ;; TODO, Tue Oct 08 2013, Francis Wolke
-  ;; What about when we don't have the initial tweet?
-
-  "Returns any tweets that come chronologically after the supplied datom"
+  "Returns any datums that come chronologically after the supplied datom"
   [trend supplied-datum]
-  (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]
-    (rest (drop-while (partial not= supplied-datum) datums))))
+  (if (nil? supplied-datum)
+    (c/find-one-as-map "trends" {:trend trend})
+    (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]
+      (rest (drop-while (partial not= supplied-datum) datums)))))
