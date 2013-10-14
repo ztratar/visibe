@@ -30,8 +30,6 @@
 
 (def-map-schema tweet-schema
   ;; TODO, Fri Oct 04 2013, Francis Wolke
-  
-  ;; :foo_bar -> :foo-bar
 
   ;; I'm ignoring time-zones for the time being
   [[:text] String

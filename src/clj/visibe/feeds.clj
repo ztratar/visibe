@@ -6,10 +6,6 @@
             [visibe.state :refer [assoc-in-state!]]
             [visibe.feeds.google-trends :as goog]))
 
-;;; FIXME, Sat Oct 12 2013, Francis Wolke
-;;; What happends when we restart a worker process? Currently we don't check to
-;;; see if a trend aleady exists. This will cause data loss.
-
 (defn scrape-trends!
   "Scrapes trends, updates `state' but does not persist the data. Any datum feed
 must be stubbed out."
