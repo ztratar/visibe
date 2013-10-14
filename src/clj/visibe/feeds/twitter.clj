@@ -18,6 +18,15 @@
 ;;; https://dev.twitter.com/docs/working-with-timelines
 ;;; https://dev.twitter.com/docs/api/1.1/get/search/tweets
 
+;;; NOTE, Sun Oct 13 2013, Francis Wolke
+
+;;; For the time being we are only tracking trends that are in the current
+;;; google trends. An implication of this is that if a bunch of users click
+;;; through to a trend and are watching it progress and then we stop tracking
+;;; it, their data feed will die. This dosn't matter for the time being, but if
+;;; we want users to have a good experience, this needs to change in the
+;;; future.
+
 (defn twitter->rfc822
   "Accepts a twitter time string and returns a string in rfc822 format"
   [s]
