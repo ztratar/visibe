@@ -36,8 +36,9 @@
 
 ;;; TODO, Sun Oct 13 2013, Francis Wolke
 ;;; & args 
-(defn update-in-state! [path f x]
-  (swap! state update-in path f x))
+(defn update-in-state!
+  ([path f] (swap! state update-in path f))
+  ([path f x] (swap! state update-in path f x)))
 
 (defn assoc-in-state! [path form]
   (swap! state assoc-in path form))

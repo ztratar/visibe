@@ -51,12 +51,13 @@
   open-trend-stream!
   [channel trend]
   ;; The issue is with channel equality, try from server side and add tests.
-  (update-in-state! [:app :channels channel :trends] conj trend))
+  (update-in-state! [:app :channels channel :trends] (fn [& args] (set (apply conj args))) trend))
 
 (defn ^{:api :websocket :doc "Removes trend stream from a channel."}
   close-trend-stream!
   [channel trend]
-  (update-in-state! [:app :channels channel :trends] remove #{trend}))
+  (update-in-state! [:app :channels channel :trends]
+                    (fn [st] (set (remove #{trend} st)))))
 
 (defn ws-api-call [channel data]
   (when-not (get-in @state [:app :channels channel])
