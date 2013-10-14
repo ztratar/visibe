@@ -2,7 +2,7 @@
 
 (def state (atom {:websocket-connection nil
                   :websocket-functions #{}
-                  :trends nil}))
+                  :trends {}}))
 
 (defn update-in-state!
   ([path f] (swap! state update-in path f))

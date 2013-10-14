@@ -19,6 +19,7 @@
    [:* {:margin 0 :padding 0
         :color text-color :background background}]
    [:h1 {:font-family "Gotham-Bold"}]
+   [:ul {:list-style "none"}]
    [:img {:margin-left :auto
           :margin-right :auto}]
 
@@ -53,7 +54,7 @@
                   :padding "55px"
                   :center-top "30px"
                   :box-shadow (str "6px 7px 35px " deep-shadow)
-                  :background background}
+                  :background "url(\"../breaking-bad.png\")"}
 
     [:h2 {:font-family "Helvetica Neue"
           :font-size "35px"
@@ -66,6 +67,8 @@
     [:style {:color emphasis
              :font-family "Helvetica Neue"
              :font-size "15"}]]
+
+   [:.trend-card:hover {:background "red"}]       
    
    ;; Trend
 
