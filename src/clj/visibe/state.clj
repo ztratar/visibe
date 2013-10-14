@@ -35,7 +35,7 @@
                   :google {:trends []}}))
 
 ;;; TODO, Sun Oct 13 2013, Francis Wolke
-;;; & args
+;;; & args 
 (defn update-in-state! [path f x]
   (swap! state update-in path f x))
 

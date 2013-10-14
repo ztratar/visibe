@@ -50,27 +50,24 @@
 (defn ^{:api :websocket :doc "Adds a new trend stream to a channel."}
   open-trend-stream!
   [channel trend]
+  ;; The issue is with channel equality, try from server side and add tests.
   (update-in-state! [:app :channels channel :trends] conj trend))
 
 (defn ^{:api :websocket :doc "Removes trend stream from a channel."}
   close-trend-stream!
   [channel trend]
-  (update-in-state! [:app :channels channel :trends] (partial remove #{trend})))
-
-(def ^{:doc "Functions callable via websocket api."}
-  websocket-fns '#{open-trend-stream!
-                   close-trend-stream!})
+  (update-in-state! [:app :channels channel :trends] remove #{trend}))
 
 (defn ws-api-call [channel data]
   (when-not (get-in @state [:app :channels channel])
     (register-new-channel! channel))
   (let [ds (read-string data)
         fst (first ds)]
-    ;; Should already be symbol
-    (if-let [f (websocket-fns (symbol fst))]
-      ;; (apply (partial (resolve f) channel) (rest ds))
-      [f (rest ds)]
-      "Not a valid funtion. `help' and `doc' are not yet implemented.")))
+    ;; TODO, Sun Oct 13 2013, Francis Wolke
+    ;; Don't pass back all the data about the atom when we're in production
+    (cond (= fst 'open-trend-stream!) (open-trend-stream! channel (second ds))
+          (= fst 'close-trend-stream!) (close-trend-stream! channel (second ds))
+          :else "Not a valid funtion. `help' and `doc' are not yet implemented.")))
 
 (defn websocket-handler
   [request]
