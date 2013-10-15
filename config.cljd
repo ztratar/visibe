@@ -1,0 +1,13 @@
+{:mongo {:username "visibe_dev"
+         :password "HkgwwGgvkgE8G2gDV8yh4gymm"
+         :host "ds047438.mongolab.com"
+         :database "visibe-dev"
+         :port 47438}
+ 
+ :twitter {:access-token "1001051377-Sm3ehnKtQ5uoUT9yLGqJ4665XiuOo6GeBaLlTKk"
+           :access-token-secret	"p8g1sWYZ5UybMdwDlA7TbjNmeqytZ5zLwsYUFsGB0"
+           :consumer-key"1oftkcxbHkQjxkV8KC5cZQ"
+           :consumer-secret "kPsebH8dwvRrgLwKc9wvdGGGKILC5t9XqVBKO46YB8"}
+ 
+ :app {:port 8000
+       :nrepl-port 8001}}
