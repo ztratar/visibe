@@ -16,20 +16,18 @@
 
 (def d3 js/d3)
 
-;;; https://github.com/noprompt/shodan
-;;;  shodan provides this
-
 (defn printc [& m]
   (.log js/console (apply str m)))
 
 (defn update-trend-data [datums]
-  (swap! state update-in (fn [])))
+  (swap! state update-in [:trends] (partial into datums)))
 
 (defn process-socket-data [data]
-  (let [data (r/data)]
-    (case (:msg data)
-      :trend-map (update-trend-data (:datums data))
-      (printc (.-data data)))))
+  (printc (.-data data))
+  #_(let [data (r/read-string data)]
+      (case (:msg data)
+        :trend-datums (update-trend-data (:datums data))
+        )))
 
 (defn ws-connect! []
   (let [ws (js/WebSocket. "ws://localhost:9000/ws")
@@ -38,12 +36,14 @@
     (assoc-in-state! [:websocket-connection] ws)))
 
 (defn ws-call [f]
-  (.send (:websocket-connection @state) (str f))) 
+  (if-let [conn (:websocket-connection @state)]
+    (.send conn (str f))
+    (printc "You must establish a WebSocket connection"))) 
 
 (defn update-current-trends! []
   (am/go (let [response (<! (http/post "http://localhost:9000/api/current/trends"
                                        {:headers {"content-type" "application/data"}}))]
-           (assoc-in-state! [:trends] (r/read-string (:body response))))))
+           (assoc-in-state! [:trends] (r/read-string (:body response)))))) 
 
 (defn route->fn-name [sym]
   (clojure.string/replace (str sym) "/" "-"))
@@ -81,8 +81,7 @@
      [:h1 "Visibe"]
      [:h1#trend-title trend]
      [:div#intro]]]
-   [:div#feed
-    [:h1 "feed goes here."]]])
+   [:ul#feed]])
 
 (defn trend-card  [trend]
   (m/node `[~(keyword (str "li.trend-card#" trend))
@@ -91,15 +90,19 @@
 (defn display-home! [trends]
   (dommy/append! (m/sel1 :body) (m/node [:ul#trends]))
   (doseq [t trends]
-    (dommy/append! (m/sel1 :#trends) (trend-card t))
-    (dommy/listen! (m/sel1 (keyword (str "#" t)))
-                   :click (fn [& _] (navigate! :trend t)))))
+    (let [tnode (trend-card t)]
+      (dommy/append! (m/sel1 :#trends) tnode)
+      (dommy/listen! tnode :click (fn [& _] (navigate! :trend t))))))
+
+(defn add-new-datum-to-feed [{text :text user :user created-at :created-at name :name
+                              screen-name :screen-name profile-image-url-https :profile-image-url-https}]
+  (dommy/prepend! (m/sel1 :#feed)
+                  (m/node [:li.feed-datum [:div.tweet [:ul [:li [:img {:src "zach_profile.png" :width "100px" :height "100px"}]]]]])))
 
 (defn swap-view! [node]
   ;; TODO, Mon Oct 14 2013, Francis Wolke
   ;; Hide these instead of replacing contents? 
-  ;; -> replace-contents!
-  (dommy/replace! (m/sel1 :#content) node))
+  (dommy/replace-contents! (m/sel1 :#content) node))
 
 (defn navigate! [view & args]
   (case view
@@ -108,14 +111,11 @@
 
 (defn ^:export bootstrap! []
   (update-current-trends!)
-  (navigate! :home))
+  (navigate! :home)
+  (ws-connect!))
 
 ; D3
 ;*******************************************************************************
-
-;;;
-;;;
-;;; 
 
 ;; (defn clear! []
 ;;   (.remove (.selectAll svg "circle"))

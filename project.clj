@@ -24,6 +24,7 @@
                  [net.drib/mrhyde "0.5.3"]
                  [org.clojure/core.incubator "0.1.3"]
                  [criterium "0.4.2"]
+                 [shodan "0.1.0"]
                  [domina "1.0.2-SNAPSHOT"]
                  [garden "0.1.0-beta6"]
                  [hiccup "1.0.3"]
