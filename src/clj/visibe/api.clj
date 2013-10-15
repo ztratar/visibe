@@ -46,7 +46,7 @@ when a channel is no longer in '[:app :channels]'"
   [channel]
   (letfn [(trend-dts->msg [sq]
             (str {:msg :trend-datums
-                  :datums (into {} (map vec sq))}))]
+                  :datums (vec sq)}))]
     (future
       ;; TODO, Mon Oct 14 2013, Francis Wolke
       ;; Move unsure computation out into it's own function and rename.
@@ -55,7 +55,7 @@ when a channel is no longer in '[:app :channels]'"
           (cond (not (:on channel-context)) (do (Thread/sleep (/ 60000 60))
                                                 (recur unsure))
                 ;; Test Mode
-                (:test-mode channel-context) (do (hk/send! channel (str (vec (n-sorted-tweets 5))))
+                (:test-mode channel-context) (do (hk/send! channel (str trend-dts->msg (n-sorted-tweets 5)))
                                                  (Thread/sleep (/ 60000 60))
                                                  (recur unsure))
                 ;; Production
@@ -112,7 +112,7 @@ when a channel is no longer in '[:app :channels]'"
     ;; Don't pass back all the data about `state' atom when we're in production
     (cond (= fst 'add-trend-stream!) (open-trend-stream! channel (second ds))
           (= fst 'remove-trend-stream!) (close-trend-stream! channel (second ds))
-          (= fst 'toggle-streaming!) (toggle-stream! channel)
+          (= fst 'toggle-stream!) (toggle-stream! channel)
           (= fst 'toggle-test-mode!) (do (toggle-test-mode! channel)
                                          (str {:test-mode (get-in @state [:app :channels channel :test-mode])}))
           :else "Not a valid funtion. `help' and `doc' are not yet implemented.")))
