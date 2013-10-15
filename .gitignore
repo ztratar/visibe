@@ -21,6 +21,7 @@ target/stale/extract-native.dependencies
 
 
 out/
+resources/public/css/style.css
 resources/public/js/visibe_dbg.js
 resources/public/js/visibe_pre.js
 resources/public/js/visibe.js

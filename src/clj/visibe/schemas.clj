@@ -12,8 +12,7 @@
 ;*******************************************************************************
 
 (def valid-chars
-  (map char (concat (range 66 91)    
-                    (range 97 123))))
+  (map char (concat (range 66 91) (range 97 123))))
 
 (defn random-char []
   (nth valid-chars (rand (count valid-chars))))
@@ -21,9 +20,8 @@
 (defn random-str [length]
   (apply str (take length (repeatedly random-char))))
 
-(defn random-date-rfc822 [s]
-  (to-long (f/parse (f/formatters :rfc822) s))
-  (str (date-time 2013 10 (inc (rand-int 30)) (rand-int 24) (rand-int 60))))
+(defn random-date-time []
+  (date-time 2013 10 (inc (rand-int 30)) (rand-int 24) (rand-int 60)))
 
 ; Schemas
 ;*******************************************************************************
@@ -45,7 +43,7 @@
   []
   {:text  (random-str 140)
    :user  (random-str 10)
-   :created-at (str (random-date-rfc822))
+   :created-at (str (random-date-time))
    :name  (random-str 10)
    :screen-name  (random-str 10)
    :profile-image-url-https
@@ -54,7 +52,12 @@
 ; Utils
 ;*******************************************************************************
 
+;;; TODO, Tue Oct 15 2013, Francis Wolke
+;;; Tweets are not being sorted
+
 (defn n-sorted-tweets
   "n tweets, sorted by timestamp, oldest first"
   [n]
   (sort-datums-by-timestamp (take n (iterate (fn [_] (tweet)) (tweet)))))
+
+

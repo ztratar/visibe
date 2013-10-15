@@ -5,6 +5,7 @@
             [dommy.utils :as utils]
             [dommy.core :as dommy]
             [eve.state :refer [state assoc-in-state! update-in-state!]]
+            [eve.templates :as templates]
             [cljs.core.async :refer [<!]])
   (:require-macros [cljs.core.async.macros :as am]
                    [dommy.macros :as m]))
@@ -19,13 +20,10 @@
 (defn printc [& m]
   (.log js/console (apply str m)))
 
-(defn update-trend-data [datums]
-  (swap! state update-in [:trends] (partial into datums)))
-
 (defn process-socket-data [data]
-  (let [data (.-data data)]
-    (update-trend-data (:datums (r/read-string data)))
-    (printc data)))
+  (let [msg (r/read-string (str (.-data data)))]
+    (cond (= :datums (:type msg)) (update-in-state! [:datums] (partial into (:data msg)))
+          :else (printc (:data msg)))))
 
 (defn ws-connect! []
   (let [ws (js/WebSocket. "ws://localhost:9000/ws")
@@ -33,7 +31,7 @@
         _ (set! (.-onmessage ws) process-socket-data)]
     (assoc-in-state! [:websocket-connection] ws)))
 
-(defn ws-call [f]
+(defn wsc [f]
   (if-let [conn (:websocket-connection @state)]
     (.send conn (str f))
     (printc "You must establish a WebSocket connection"))) 
@@ -49,53 +47,16 @@
 ; Navigation + templates
 ;*******************************************************************************
 
-;; (defn calc-metrics [trend]
-;;   [:p.metrics [:style "Posts "]
-;;    (str (* 1000 (rand-int 30))) "IN"
-;;    [:style (str (rand-int 10) "M")]])
-
-(m/deftemplate home []
-  ;; TODO, Mon Oct 14 2013, Francis Wolke
-  ;; https://blog.mozilla.org/webdev/2009/02/20/cross-browser-inline-block/
-  [:div#content
-   [:div#title
-    [:h1 "Visibe"]
-    [:h2 "Watch social trends unfold in real-time"]]
-   `[:ul#trends
-     ;; FIXME, Fri Oct 11 2013, Francis Wolke
-     ;; If trends have not been pulled down yet, then have a watch on the atom
-     ;; That updates them?
-
-     ;; Also, these things should be links, not :p's
-     ~@(map (fn [trend] [:li.trend-card
-                         [:h1 trend]
-                         #_(calc-metrics trend)]) (:trends @state))]])
-
-(m/deftemplate trend [trend]
-  [:div#content
-   [:#header 
-    [:div#title
-     [:div.button#home [:p "Home"]]
-     [:h1 "Visibe"]
-     [:h1#trend-title trend]
-     [:div#intro]]]
-   [:ul#feed]])
-
-(defn trend-card  [trend]
-  (m/node `[~(keyword (str "li.trend-card#" trend))
-            [:h1 ~trend]]))
-
 (defn display-home! [trends]
-  (dommy/append! (m/sel1 :body) (m/node [:ul#trends]))
   (doseq [t trends]
-    (let [tnode (trend-card t)]
+    (let [tnode (templates/trend-card t)]
       (dommy/append! (m/sel1 :#trends) tnode)
       (dommy/listen! tnode :click (fn [& _] (navigate! :trend t))))))
 
-(defn add-new-datum-to-feed [{text :text user :user created-at :created-at name :name
-                              screen-name :screen-name profile-image-url-https :profile-image-url-https}]
-  (dommy/prepend! (m/sel1 :#feed)
-                  (m/node [:li.feed-datum [:div.tweet [:ul [:li [:img {:src "zach_profile.png" :width "100px" :height "100px"}]]]]])))
+(defn add-new-datum-to-feed [datum]
+  ;; TODO, Tue Oct 15 2013, Francis Wolke
+  ;; If it's the first datom, then instead 
+  (dommy/prepend! (m/sel1 :#feed) (templates/datum-card datum)))
 
 (defn swap-view! [node]
   ;; TODO, Mon Oct 14 2013, Francis Wolke
@@ -103,9 +64,11 @@
   (dommy/replace-contents! (m/sel1 :#content) node))
 
 (defn navigate! [view & args]
+  ;; TODO, Tue Oct 15 2013, Francis Wolke
+  ;; Needs to update `state :view'
   (case view
-    :trend (swap-view! (apply trend args))
-    :home (do (swap-view! (home)))))
+    :trend (swap-view! (apply templates/trend args))
+    :home (swap-view! (templates/home))))
 
 (defn ^:export bootstrap! []
   (update-current-trends!)

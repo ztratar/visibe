@@ -9,5 +9,5 @@
            :consumer-key"1oftkcxbHkQjxkV8KC5cZQ"
            :consumer-secret "kPsebH8dwvRrgLwKc9wvdGGGKILC5t9XqVBKO46YB8"}
  
- :app {:port 8000
-       :nrepl-port 8001}}
+ :app {:port 9000
+       :nrepl-port 9001}}
