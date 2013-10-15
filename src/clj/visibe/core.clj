@@ -1,6 +1,6 @@
 (ns ^{:doc "Starting point."}
   visibe.core
-  (:use user
+  (:use user hiccup.core hiccup.page
         ring.middleware.refresh)
   (:require [compojure.route :as route]
             [compojure.core :refer :all]
@@ -15,6 +15,14 @@
             [monger.core :as mg]
             [org.httpkit.server :as hk]
             [clojure.tools.nrepl.server :refer [start-server stop-server]]))
+
+(defn index []
+  (html5 [:head
+          [:title "Visibe - Watch situations and reactions unfold as they happen"]
+          [:meta {:charset "UTF-8"}]
+          (include-css "css/fonts.css" "css/style.css")]
+         [:body (include-js "js/libs/d3.v3.min.js" "js/visibe_dbg.js")
+          [:div#content [:script {:type "text/javascript"} "eve.core.bootstrap_BANG_();"]]]))
 
 (defroutes app-routes
   (GET "/" [] (index))
