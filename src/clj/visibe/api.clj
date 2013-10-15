@@ -110,9 +110,10 @@ when a channel is no longer in '[:app :channels]'"
         fst (first ds)]
     ;; TODO, Sun Oct 13 2013, Francis Wolke
     ;; Don't pass back all the data about `state' atom when we're in production
-    (cond (= fst 'add-trend-stream!) (open-trend-stream! channel (second ds))
-          (= fst 'remove-trend-stream!) (close-trend-stream! channel (second ds))
-          (= fst 'toggle-stream!) (toggle-stream! channel)
+    ;; Check arglists.
+    (cond (= fst 'add-trend-stream!) (str (add-trend-stream! channel (second ds)))
+          (= fst 'remove-trend-stream!) (str (remove-trend-stream! channel (second ds)))
+          (= fst 'toggle-stream!) (str (toggle-stream! channel))
           (= fst 'toggle-test-mode!) (do (toggle-test-mode! channel)
                                          (str {:test-mode (get-in @state [:app :channels channel :test-mode])}))
           :else "Not a valid funtion. `help' and `doc' are not yet implemented.")))
@@ -138,5 +139,5 @@ when a channel is no longer in '[:app :channels]'"
 
 (defroutes api-routes
   (expose current-trends)
-  (expose regions)77777777
+  (expose regions)
   (expose previous-50-datums))

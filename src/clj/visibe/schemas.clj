@@ -45,7 +45,7 @@
   []
   {:text  (random-str 140)
    :user  (random-str 10)
-   :created-at (str (random-date-time))
+   :created-at (str (random-date-rfc822))
    :name  (random-str 10)
    :screen-name  (random-str 10)
    :profile-image-url-https

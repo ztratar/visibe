@@ -2,7 +2,7 @@
 
 (def state (atom {:websocket-connection nil
                   :websocket-functions #{}
-                  :trends {}}))
+                  :trends []}))
 
 (defn feed-watch [key identify old new]
   (.log js/console (apply str [key old "=>" new])))

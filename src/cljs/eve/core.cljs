@@ -23,11 +23,9 @@
   (swap! state update-in [:trends] (partial into datums)))
 
 (defn process-socket-data [data]
-  (printc (.-data data))
-  #_(let [data (r/read-string data)]
-      (case (:msg data)
-        :trend-datums (update-trend-data (:datums data))
-        )))
+  (let [data (.-data data)]
+    (update-trend-data (:datums (r/read-string data)))
+    (printc data)))
 
 (defn ws-connect! []
   (let [ws (js/WebSocket. "ws://localhost:9000/ws")

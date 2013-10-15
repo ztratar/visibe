@@ -18,7 +18,6 @@ target/stale/extract-native.dependencies
 .lein-failures
 .lein-plugins
 .lein-repl-history
-config.cljd
 
 
 out/
