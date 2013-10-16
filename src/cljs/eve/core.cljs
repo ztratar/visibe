@@ -54,8 +54,8 @@
   ;; If it's the first datom, then instead 
   (dommy/prepend! (m/sel1 :#feed) (templates/datum-card datum)))
 
-;; Bootstrap
-;; *******************************************************************************
+; Bootstrap
+;*******************************************************************************
 
 (defn ^:export bootstrap! []
   (update-current-trends!)

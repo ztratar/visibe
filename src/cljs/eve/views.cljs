@@ -13,7 +13,7 @@
 (defn swap-view! [node]
   ;; TODO, Mon Oct 14 2013, Francis Wolke
   ;; Hide these instead of replacing contents? 
-  (dommy/replace-contents! (m/sel1 :#content) node))
+  (dommy/replace-contents! (m/sel1 :#content) node)) 
 
 ; Home
 ;*******************************************************************************
@@ -25,8 +25,7 @@
       (let [trend-node (t/trend-card trend)]
         (dommy/append! trends-list trend-node)
         (dommy/listen! trend-node :click
-                       (fn [& _] #_(navigate! :trend trend)
-                         (console/log "cl")))))))
+                       (fn [& _] (navigate! :trend trend)))))))
 
 ; Trend
 ;*******************************************************************************
@@ -58,4 +57,3 @@
   (case view
     :trend (apply trend args)
     :home (home (:trends @state))))
-

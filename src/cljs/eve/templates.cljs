@@ -4,6 +4,9 @@
             [dommy.utils :as utils])
   (:require-macros [dommy.macros :as m]))
 
+; Home
+;*******************************************************************************
+
 (defn trend-card [trend]
   (m/node `[~(keyword (str "li.trend-card#" trend))
             [:h1 ~trend]]))
@@ -15,7 +18,10 @@
    [:div#title
     [:h1 "Visibe"]
     [:h2 "Watch social trends unfold in real-time"]]
-   `[:ul#trends ~@(map trend-card trends)]])
+   [:ul#trends]])
+
+; Trend
+;*******************************************************************************
 
 (defn datum-card [{text :text user :user created-at :created-at
                    name :name screen-name :screen-name
