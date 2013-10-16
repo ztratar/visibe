@@ -9,7 +9,6 @@
             [visibe.feeds.twitter :refer [new-bearer-token!]]
             [visibe.feeds :as feeds]
             [visibe.api :refer [api-routes websocket-handler]]
-            [visibe.template :refer [index]]
             [cheshire.core :refer [decode]]
             [visibe.state :refer [state assoc-in-state! read-config!]]
             [monger.core :as mg]
