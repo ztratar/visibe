@@ -3,7 +3,17 @@
             [dommy.utils :as utils])
   (:require-macros [dommy.macros :as m]))
 
-(def state (atom {:view :home 
+(defn add-new-datum-to-feed [{text :text user :user created-at :created-at name :name
+                              screen-name :screen-name profile-image-url-https :profile-image-url-https}]
+  (dommy/prepend! (m/sel1 :#feed)
+                  (m/node [:li.feed-datum [:div.tweet [:ul
+                                                       [:li [:img {:src "zach_profile.png" :width "100px" :height "100px"}]]
+                                                       [:li "text" text]
+                                                       [:li "user" user]
+                                                       [:li ]]]])))
+
+(def state (atom {:view :home
+                  :trends []
                   :websocket-connection nil
                   :websocket-functions #{}
                   :datums []}))
@@ -12,6 +22,8 @@
   (case (:view @state)
     :trend (doseq [datum (:datums @state)]
              (add-new-datum-to-feed datum))
+    ;; TODO, Wed Oct 16 2013, Francis Wolke
+    ;; Instead of a NoOp, remove it? Does this offer anything?
     (.log js/console "Feed update NoOp")))
 
 (defn update-in-state!

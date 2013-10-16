@@ -21,7 +21,8 @@
           [:meta {:charset "UTF-8"}]
           (include-css "css/fonts.css" "css/style.css")]
          [:body (include-js "js/libs/d3.v3.min.js" "js/visibe_dbg.js")
-          [:div#content [:script {:type "text/javascript"} "eve.core.bootstrap_BANG_();"]]]))
+          [:div#content
+           [:script {:type "text/javascript"} "eve.core.bootstrap_BANG_();"]]]))
 
 (defroutes app-routes
   (GET "/" [] (index))
