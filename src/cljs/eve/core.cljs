@@ -28,6 +28,7 @@
   (let [msg (r/read-string (str (.-data data)))]
     (case (:type msg)
       :datums (update-in-state! [:datums] (partial into (:data msg)))
+      :print (console/log (:data msg))
       :else (console/log (:data msg)))))
 
 (defn ws-connect! []

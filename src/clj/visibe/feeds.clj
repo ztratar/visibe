@@ -22,6 +22,20 @@ must be stubbed out."
                          (assoc-in-state! [:google :trends] new-trends))
                        new-trends))))))
 
+;; http://farm1.staticflickr.com/2/1418878_1e92283336_m.jpg
+
+;; http://farm1.staticflickr.com/3/10311253535
+;; <photo
+;; id="10311253535"
+;; owner="92468408@N03"
+;; secret="f8fcd1f9c7"
+;; server="2850"
+;; farm="3"
+;; title="Rolleiflex T2 vs Rolleicord Vb"
+;; ispublic="1"
+;; isfriend="0"
+;; isfamily="0" />
+
 (defn scrape-and-persist-trends!
   "Scrapes trends, updates `state' and perists the the data when it changes. Trends
 are tracked via twitter, and relevent tweets are persisted via `twitter/track-trend'."
