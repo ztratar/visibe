@@ -10,7 +10,7 @@
 ; Home
 ;*******************************************************************************
 
-(defn trend-card [trend]
+(defn trend-card [trend background-url]
   (m/node `[~(keyword (str "li.trend-card#" trend))
             [:h1.trend-card-title ~trend]]))
 
@@ -49,7 +49,7 @@
      [:h1 "HOME"]]
     [:div#title
      [:h1#visibe-title "VISIBE"]
-     [:img {:src "placeholder.png" :width "170px" :height "170px"
+     [:img {:src (get-in @state [:trends trends :img-uri]) :width "170px" :height "170px"
             :style {:margin-bottom "50px" :border-radius "85px"
                     :background-color "rgba(0,0,0,0.0)"}}]
      [:h1#trend-title trend]]]

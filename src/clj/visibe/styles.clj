@@ -9,7 +9,6 @@
 
 ;;; Garden has the concept of units, which will clean up this code.
 
-
 (def shadow "#245d82")
 (def deep-shadow "#183144")
 (def timeline-emphasis "#5b8fb5")
@@ -25,7 +24,7 @@
    [:* {:margin 0 :padding 0
         :color text-color :background background
         :font-family "Gotham-Bold"}]
-   [:h1 :background-color]
+   [:h1 {:background-color  "rgba(0,0,0,0.0)"}]
    [:ul {:list-style "none"}]
    [:img {:margin-left :auto
           :margin-right :auto
@@ -68,28 +67,27 @@
    [:.trend-card {:width "300px"
                   :height "180px"
                   :vertical-align "top"
+                  :opacity "0.8"
                   :text-align :center
-                  :background-color "rgba(0,0,0,0.0)"
                   :margin "10px"
                   :display :inline-block
                   :padding "50px"
                   :box-shadow (str "6px 7px 35px " deep-shadow)}
 
-    [:h2 {:font-family "Helvetica Neue"
-          :font-size "35px"
-          :color "#fff"}]
-    
-    
-    [:h3 {:color emphasis
-          :font-family "Helvetica Neue"
-          :font-size "15px"}]
-
     [:style {:color emphasis
              :font-family "Helvetica Neue"
-             :font-size "15px"}]
-    [:li  {:background-color "rgba(0,0,0,0.0)"}]]
+             :font-size "15px"}]]
+
+   [:h3 {:color emphasis
+         :font-family "Helvetica Neue"
+         :font-size "15px"}]
+
+   [:h2 {:font-family "Helvetica Neue"
+         :font-size "35px"
+         :color "#fff"}]
 
    [:.trend-card-title {:font-family "Helvetica Neue"
+                        :opacity "1.0"
                         :font-size "35px"
                         :margin-top "50px"}]
 
@@ -135,8 +133,8 @@
 
    ;; Datum card
 
-   [:.datum {:magin-left :auto
-             :magin-right :auto}]
+   [:.datum {:margin-left :auto
+             :margin-right :auto}]
 
    [:h4 {:font-size "20px"}]
    [:h5 {:font-size "20px"}]

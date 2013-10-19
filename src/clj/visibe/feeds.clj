@@ -1,10 +1,19 @@
 (ns ^{:doc "Coordination of different feeds"}
   visibe.feeds
   (:require [clojure.set :as set]
+            [clj-http.lite.client :as client]
             [visibe.feeds.twitter :as twitter]
             [visibe.feeds.storage :refer [create-trend]]
-            [visibe.state :refer [assoc-in-state!]]
+            [visibe.state :refer [assoc-in-state! gis state]]
             [visibe.feeds.google-trends :as goog]))
+
+;;; NOTE, Fri Oct 18 2013, Francis Wolke
+
+;;; To get the best images, we could pay someone minimum wage to be the brain
+;;; behind the image chooser. Whenever the trends update, they have to choose
+;;; the images that best represent the trends. We just present them with a
+;;; webpage that updates with the trends, and they select the images they find
+;;; fits best.
 
 (defn scrape-trends!
   "Scrapes trends, updates `state' but does not persist the data. Any datum feed
@@ -21,20 +30,6 @@ must be stubbed out."
                        (when-not (= (set trends) (set new-trends))
                          (assoc-in-state! [:google :trends] new-trends))
                        new-trends))))))
-
-;; http://farm1.staticflickr.com/2/1418878_1e92283336_m.jpg
-
-;; http://farm1.staticflickr.com/3/10311253535
-;; <photo
-;; id="10311253535"
-;; owner="92468408@N03"
-;; secret="f8fcd1f9c7"
-;; server="2850"
-;; farm="3"
-;; title="Rolleiflex T2 vs Rolleicord Vb"
-;; ispublic="1"
-;; isfriend="0"
-;; isfamily="0" />
 
 (defn scrape-and-persist-trends!
   "Scrapes trends, updates `state' and perists the the data when it changes. Trends

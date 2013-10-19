@@ -33,7 +33,7 @@
   ;; NOTE, Wed Oct 16 2013, Francis Wolke
   ;; The rest of the feed updates are handled in `eve.state' via a watcher
   (doseq [datum (:datums @state)]
-    (add-datum-to-feed datum))
+    (add-datum-to-feed datum)) 
   (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home))))
 
 ; misc

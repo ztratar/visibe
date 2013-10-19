@@ -14,7 +14,7 @@
   (dommy/prepend! (m/sel1 :#feed) (t/datum-card datum)))
 
 (def state (atom {:view :home
-                  :trends []
+                  :trends {} 
                   :websocket-connection nil
                   :websocket-functions #{}
                   :datums []}))

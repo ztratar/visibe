@@ -25,6 +25,9 @@
                             :consumer-key nil
                             :consumer-secret nil
                             :bearer-token nil}
+
+                  :flickr {:key nil
+                           :secret nil}
                   
                   :app {:port nil
                         :nrepl-port nil
@@ -42,6 +45,11 @@
 
 (defn assoc-in-state! [path form]
   (swap! state assoc-in path form))
+
+(defn gis
+  "[g]et [i]n [s]tate"
+  [path]
+  (get-in @state path))
 
 (defn read-config!
   "Associates information from a specified file with `state'"

@@ -25,6 +25,7 @@
                  [org.clojure/core.incubator "0.1.3"]
                  [criterium "0.4.2"]
                  [shodan "0.1.0"]
+                 [com.flickr4java/flickr "2.5"]
                  [domina "1.0.2-SNAPSHOT"]
                  [garden "0.1.0-beta6"]
                  [hiccup "1.0.3"]
@@ -44,6 +45,7 @@
                  [prismatic/hiphip "0.1.0"]
                  [prismatic/plumbing "0.1.0"]
                  [rhizome "0.1.8"]
+                 [org.clojure/data.xml "0.0.7"]
                  [ring-refresh "0.1.1"]
                  [ring/ring-jetty-adapter "1.2.0"]
                  [ring/ring-json "0.2.0"]
@@ -52,6 +54,9 @@
                  ]
 
   :main visibe.core/main-
+
+  :repositories [["JCenter" {:url "http://jcenter.bintray.com"
+                             :snapshots false}]]
 
   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 

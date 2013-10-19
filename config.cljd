@@ -3,6 +3,9 @@
          :host "ds047438.mongolab.com"
          :database "visibe-dev"
          :port 47438}
+
+ :flickr {:key "1a863c37ded8716297cadcad28947471"
+          :secret "0e18c3807fc63af6"}
  
  :twitter {:access-token "1001051377-Sm3ehnKtQ5uoUT9yLGqJ4665XiuOo6GeBaLlTKk"
            :access-token-secret	"p8g1sWYZ5UybMdwDlA7TbjNmeqytZ5zLwsYUFsGB0"
