@@ -1,51 +1,64 @@
 (ns ^{:doc "..."}
   visibe.feeds.instagram
   (:use instagram.oauth
+        ring.util.codec
         instagram.callbacks
         instagram.callbacks.handlers
         instagram.api.endpoint)
+  (:require [visibe.state :refer [assoc-in-state! gis]]
+            [clj-time.format :])
   (:import instagram.callbacks.protocols.SyncSingleCallback))
 
-(search-media)
-(get-media )
+;;; TODO, Thu Oct 24 2013, Francis Wolke
 
+;;; Use the pagination facilities to get more media
 
-;; ztratar
-;; qvqzqOinWrbNN64B
+;;; We should prolly be storing all of the data and selectively querying against
+;;; it. To prevent a loss of data, and keep it for future use, but it was easier
+;;; to just discard it so I implemented that first.
 
-;;; All requests must be made over SSL.
+;;; Handle video
 
-(def ^:dynamic *creds* (make-oauth-creds *client-id*
-                                         *client-secret*
-                                         *redirect-uri*))
+(defn generate-oauth-creds! []
+  (assoc-in-state! [:instagram :creds]
+                   (make-oauth-creds (gis [:instagram :client-id])
+                                     (gis [:instagram :client-secret])
+                                     (gis [:instagram :redirect-url]))))
 
-; Generate the authorization url
-(def ^:dynamic *auth-url* (authorization-url *creds* "likes comments relationships"))
+(defn trend->tag [trend]
+  ;; XXX, Thu Oct 24 2013, Francis Wolke
+  ;; Currently discarding all but one tag.
+  (let [trend (clojure.string/replace trend " " "")]
+    (:name (first (:data (:body (search-tags :oauth (gis [:instagram :creds]) :params {:q (url-encode trend)})))))))
 
-; Exchange the code to get the user's access token
-(let [access-token (-> (get-access-token *creds* "code-from-IG") :body :access_token)]
-                                        ; do stuff with access-token, save it somewhere etc.
-  (println access-token))
+(defn instagram-media
+  "Accepts a trend, converts it to a tag name, searches instagram and returns
+relevent media."
+  [trend]
+  (:data (:body (get-tagged-medias :oauth (gis [:instagram :creds])
+                                   :params {:tag_name (trend->tag trend)}))))
 
-; You can make unauthentificated calls without access token, but you
-; still needs to send your app credentials. Some API calls won't work without
-; an access token, check the Instagram documentation.
+(defn store-instagram-media
+  "Instagram returns their datums with the newest first"
+  [datums]
+  ;; XXX, Thu Oct 24 2013, Francis Wolke
+  ;; UNIX time is in seconds, whereas java time is in milliseconds. To fix this,
+  ;; we multiply by 1000.
+  (map #(update-in % [:created_time] ) datums)
+  )
 
-(get-popular :oauth *creds*)
+(defn track-trend
+  "Tracks a trend while it's still an active trend, persisting data related to
+it."
+  ;; NOTE, Thu Oct 24 2013, Francis Wolke
+  ;; This trend tracking functionality could be pulled out into a marco.
+  [trend]
+  (future (loop [media #{}]
+            (when (some #{trend} (keys (gis [:google :trends])))
+              (let [new-media-q (instagram-media trend)
+                    new-datums (clojure.set/difference (set media) (set new-media-q))]
+                (store-instagram-media new-datums)
+                (Thread/sleep 180000)
+                (recur new-media-q))))))
 
-; The same API call, to get popular photos, but with the user’s access token.
-
-(get-popular :access-token *access-token*)
-
-; Some endpoints require parameters, see instagram.api.endpoint and the Instagram
-; documentation. Here are some examples:
-
-; Search a user
-(search-users :access-token *access-token* :params {:q "rydgel"})
-
-; Get medias from an user
-(get-user-medias :access-token *access-token* :params {:user_id "36783"})
-
-
-
-
+(def foo (instagram-media "cnet"))

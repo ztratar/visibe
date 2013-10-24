@@ -50,8 +50,6 @@
 ;;; Add client-side tests for API.
 
 (defn ds->ws-message
-  ;; TODO, Tue Oct 15 2013, Francis Wolke
-  ;; Add validation for `:type'
   ([ds] (ds->ws-message :print ds)) 
   ([type ds] (str {:type type :data ds})))
 
@@ -87,10 +85,6 @@
   "Adds new channel and associated context to `state'"
   [channel]
   ;; `and' is used to guarantee transaction succeeds before esablishing a channel's loop.
-
-  ;; TODO, Sat Oct 12 2013, Francis Wolke
-  ;; I doubt that identifying a client by a websocket connection is a good
-  ;; idea. Modify so we use some sort of UUID scheme. Also, ask aound on IRC.
   (and (assoc-in-state! [:app :channels channel] {:trends #{} :test-mode false :on false})
        (establish-stream-loop! channel)))
 

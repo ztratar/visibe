@@ -4,6 +4,10 @@
          :database "visibe-dev"
          :port 47438}
 
+ :instagram {:client-id "a20483e98c844e89982efffc3e9c6f46"
+             :client-secret "609000d79809488daa7abe2b1729f99f"
+             :redirect-url "http://www.visibe.com/oauth_redirect"}
+
  :flickr {:key "1a863c37ded8716297cadcad28947471"
           :secret "0e18c3807fc63af6"}
  

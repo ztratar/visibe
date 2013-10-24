@@ -21,4 +21,4 @@ Relevent page: http://www.flickr.com/services/api/misc.urls.html"}
         ;; NOTE, Fri Oct 18 2013, Francis Wolke
         ;; Photos sorted by most recent (by default)
         {farm-id :farm server-id :server id :id secret :secret} (:attrs (first (:content (first (:content ds)))))]
-    (str "http://farm" farm-id ".staticflickr.com/" server-id "/" id "_" secret ".jpg")))
+    (str "http://farm" farm-id ".staticflickr.com/" server-id "/" id "_" secret ".jpg")))<

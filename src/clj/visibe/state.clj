@@ -2,17 +2,9 @@
   dependencies."}
   visibe.state)
 
-;;; NOTE, Tue Oct 08 2013, Francis Wolke
-;;; Expect the names, structure and info associated with `state' to change
-;;; often.
-
-;;; TODO, Wed Oct 02 2013, Francis Wolke
-;;; Use clj-schema to verify config file is correct.
-
-;;; Check `state' on every update. - allow changes that wern't supposed to
-;;; happen persist, but notify me.
-
-;; Verify that broken connections are not hanging around
+;;; TODO, Thu Oct 24 2013, Francis Wolke
+;;; Check `state' on every update against a schema. Allow all transactions to
+;;; persist, but notify me if something unexpected happens.
 
 (def state (atom {:mongo {:username nil
                           :password nil
@@ -37,8 +29,6 @@
 
                   :google {:trends []}}))
 
-;;; TODO, Sun Oct 13 2013, Francis Wolke
-;;; & args 
 (defn update-in-state!
   ([path f] (swap! state update-in path f))
   ([path f x] (swap! state update-in path f x)))

@@ -20,17 +20,12 @@
   "Scrapes trends, updates `state' but does not persist the data. Any datum feed
 must be stubbed out."
   []
-  (future (let [trends (:united-states (goog/google-trends))
-                _ (assoc-in-state! [:google :trends] trends)]
-            (loop [trends trends]
-              ;; TODO, Sun Oct 13 2013, Francis Wolke
-              ;; Inital data can be removed by moving `Thread/sleep' to `recur'
-              ;; 5 min
-              (Thread/sleep 300000)
-              (recur (let [new-trends (:united-states (goog/google-trends))]
-                       (when-not (= (set trends) (set new-trends))
-                         (assoc-in-state! [:google :trends] new-trends))
-                       new-trends))))))
+  (future (loop [trends trends]
+            (recur (let [new-trends (:united-states (goog/google-trends))]
+                     (when-not (= (set trends) (set new-trends))
+                       (assoc-in-state! [:google :trends] new-trends))
+                     (Thread/sleep 300000) ; 5 min
+                     new-trends)))))
 
 (defn scrape-and-persist-trends!
   "Scrapes trends, updates `state' with trends and the corresponding photos and perists the the data when it changes. Trends

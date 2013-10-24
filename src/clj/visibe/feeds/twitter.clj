@@ -122,14 +122,12 @@ returns `nil` when trend is no longer in `(current-trends)'"
   ;; Twitter's rate limit window is 15 minutes. We are allowed 450 requests over
   ;; this peiod of time. (/ (* 15 60) 450) => 2 sec
   (future
-    ;; TODO, Sun Oct 13 2013, Francis Wolke
-    ;; Inital data can be removed by moving `Thread/sleep' to `recur'
     (let [tweet-data (search-tweets trend)
           _ (store-tweets trend (:statuses tweet-data))]
       (loop [tweet-data tweet-data]
-        ;; 3 min
-        (Thread/sleep 180000)
+        
         (let [new-query (:refresh_url (:search_metadata tweet-data))]
-          (when (some #{trend} tweet-data)
+          (when (some #{trend} (keys (gis [:google :trends])))
             (do (store-tweets trend tweet-data)
+                (Thread/sleep 180000)   ; 3 min
                 (recur (twitter-q new-query)))))))))

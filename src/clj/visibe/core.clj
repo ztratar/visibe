@@ -7,6 +7,7 @@
             [compojure.handler :as handler]
             [visibe.feeds.storage :as storage]
             [visibe.feeds.twitter :refer [new-bearer-token!]]
+            [visibe.feeds.instagram :as instagram]
             [visibe.feeds :as feeds]
             [visibe.api :refer [api-routes websocket-handler]]
             [cheshire.core :refer [decode]]
@@ -40,6 +41,7 @@
   (new-bearer-token!)
   (start-server :port (Integer. (get-in @state [:app :nrepl-port])))
   (assoc-in-state! [:app :server] (hk/run-server #'app {:port (Integer. (get-in @state [:app :port]))}))
+  (instagram/generate-oauth-creds!)
   (case mode
     :dev (feeds/dev!)
     :production (feeds/production!)))
