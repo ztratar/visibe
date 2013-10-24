@@ -19,7 +19,7 @@
 
 (defn home [trends]
   ;; TODO, Thu Oct 24 2013, Francis Wolke
-  ;; The home view 'knows' to place 9 trends - this isn't correct.
+  ;; The home view 'knows' to grab only 9 trends. Thats most likely not right.
   (let [trend-m trends
         trends (take 9 (keys trend-m))]
     (swap-view! (t/home trends))
@@ -41,7 +41,7 @@
   (dommy/append! (m/sel1 :#feed) (t/datum-card datum)))
 
 (defn trend [trend]
-  (swap-view! (t/trend trend))
+  (swap-view! (t/trend trend ((:trends @state) trend)))
   ;; NOTE, Wed Oct 16 2013, Francis Wolke
   ;; The rest of the feed updates are handled in `eve.state' via a watcher
   (doseq [datum (:datums @state)]
