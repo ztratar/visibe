@@ -1,6 +1,6 @@
 (ns ^{:doc "Used to generate urls for popular trending photos. 
 Relevent page: http://www.flickr.com/services/api/misc.urls.html"}
-  visibe.feeds
+  visibe.feeds.flickr
   (:use ring.util.codec)
   (:require [clj-http.lite.client :as client]
             [clojure.xml :as xml]
@@ -9,10 +9,10 @@ Relevent page: http://www.flickr.com/services/api/misc.urls.html"}
            java.net.URL
            java.io.ByteArrayInputStream))
 
-(defn flickr-trend-photo-url
+(defn trend->photo-url
   "Returns a URL associated with a trend"
   ;; TODO, Fri Oct 18 2013, Francis Wolke
-  ;; This will pull back images that are too small for our needs. There needs to be 'intelligence' to pick suitable images.
+  ;; This will pull back images that are too small (or larges) for our needs. There needs to be 'intelligence' to pick suitable images.
   [trend]
   (let [req-body (:body (client/get (str "http://api.flickr.com/services/rest/?method=flickr.photos.search&api_key="
                                          (gis [:flickr :key]) "&text=" (url-encode trend))))
@@ -20,6 +20,5 @@ Relevent page: http://www.flickr.com/services/api/misc.urls.html"}
         ds (xml/parse url-data)
         ;; NOTE, Fri Oct 18 2013, Francis Wolke
         ;; Photos sorted by most recent (by default)
-        {farm-id :farm server-id :server id :id secret :secret} (:attrs (first (:content (first (:content ds)))))
-        ]
+        {farm-id :farm server-id :server id :id secret :secret} (:attrs (first (:content (first (:content ds)))))]
     (str "http://farm" farm-id ".staticflickr.com/" server-id "/" id "_" secret ".jpg")))

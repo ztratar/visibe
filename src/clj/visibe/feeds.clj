@@ -3,6 +3,7 @@
   (:require [clojure.set :as set]
             [clj-http.lite.client :as client]
             [visibe.feeds.twitter :as twitter]
+            [visibe.feeds.flickr :as flickr]
             [visibe.feeds.storage :refer [create-trend]]
             [visibe.state :refer [assoc-in-state! gis state]]
             [visibe.feeds.google-trends :as goog]))
@@ -32,31 +33,29 @@ must be stubbed out."
                        new-trends))))))
 
 (defn scrape-and-persist-trends!
-  "Scrapes trends, updates `state' and perists the the data when it changes. Trends
-are tracked via twitter, and relevent tweets are persisted via `twitter/track-trend'."
+  "Scrapes trends, updates `state' with trends and the corresponding photos and perists the the data when it changes. Trends
+are tracked via twitter, and relevent tweets are persisted via
+  `twitter/track-trend'."
+  ;; FIXME, Fri Oct 04 2013, Francis Wolke
+  ;; I'm being lazy right now, and not dealing with data from other countries
+  ;; until it we've got the system working from end to end.
   []
   (future
-    ;; FIXME, Fri Oct 04 2013, Francis Wolke
-    ;; I'm being lazy right now, and not dealing with data from other countries
-    ;; until it we've got the system working from end to end.
-    (let [trends (:united-states (goog/google-trends))
-          _ (assoc-in-state! [:google :trends] trends)
-          _ (doseq [t trends]
-              (create-trend t) 
-              (twitter/track-trend t))]
-      (loop [trends trends]
-        ;; TODO, Sun Oct 13 2013, Francis Wolke
-        ;; Inital data can be removed by moving `Thread/sleep' to `recur'
-        ;; 5 min
-        (Thread/sleep 300000)
-        (recur (let [new-trends (:united-states (goog/google-trends))]
-                 (when (not= (set trends) (set new-trends))
-                   (assoc-in-state! [:google :trends] new-trends)
-                   (let [new-diff-trends (set/difference (set new-trends) (set trends))]
-                     (doseq [t new-diff-trends]
-                       (create-trend t) 
-                       (twitter/track-trend t)))
-                   new-trends)))))))
+    (loop [trends #{}]
+      (recur (let [new-trends (:united-states (goog/google-trends))
+                   trends-and-photo-urls (mapv (fn [trend] [trend (flickr/trend->photo-url trend)]) new-trends)
+                   new-trends (into {} trends-and-photo-urls)]
+               (when (not= trends new-trends)
+                 ;; Google trends and flickr
+                 (assoc-in-state! [:google :trends] new-trends)
+                 ;; Twitter
+                 (let [new-diff-trends (set/difference (keys new-trends) (keys trends))]
+                   (doseq [t new-diff-trends]
+                     (create-trend t)
+                     (twitter/track-trend t)))
+                 
+                 (do (Thread/sleep 300000) ; 5 min
+                     new-trends)))))))
 
 (defn dev! []
   (scrape-trends!))

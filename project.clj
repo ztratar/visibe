@@ -48,6 +48,7 @@
                  [rhizome "0.1.8"]
                  [org.clojure/data.xml "0.0.7"]
                  [ring-refresh "0.1.1"]
+                 [clj-wamp "1.0.0-rc1"]
                  [ring/ring-jetty-adapter "1.2.0"]
                  [ring/ring-json "0.2.0"]
                  [shoreleave/shoreleave-remote "0.3.0"]

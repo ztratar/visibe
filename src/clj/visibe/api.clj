@@ -137,7 +137,8 @@
 ;*******************************************************************************
 
 (defn current-trends
-  "Returns current google trends for specified region"
+  "Returns current google trends for specified region along with their
+associated flickr urls"
   []
   (get-in @state [:google :trends]))
 
