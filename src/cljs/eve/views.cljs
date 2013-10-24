@@ -9,17 +9,14 @@
 
 ;;; FIXME, Sat Oct 19 2013, Francis Wolke
 
-;;; You are unable to open a stream, get a bunch of datums related to a topic,
-;;; and then visit a trend page. This throws.
-
 ;;; trends -> topics 
 
 ; Home
 ;*******************************************************************************
 
 (defn home [trends]
-  ;; TODO, Thu Oct 24 2013, Francis Wolke
-  ;; The home view 'knows' to grab only 9 trends. Thats most likely not right.
+  ;; FIXME, Thu Oct 24 2013, Francis Wolke
+  ;; The home view 'knows' to grab 9 trends. This is wrong.
   (let [trend-m trends
         trends (take 9 (keys trend-m))]
     (swap-view! (t/home trends))
@@ -32,20 +29,12 @@
 ; Trend
 ;*******************************************************************************
 
-(defn add-datum-to-feed
-  [
-   ;; {text :text user :user created-at :created-at name :name
-   ;;  screen-name :screen-name profile-image-url-https :profile-image-url-https}
-   ;; orientation
-   datum]
-  (dommy/append! (m/sel1 :#feed) (t/datum-card datum)))
-
 (defn trend [trend]
   (swap-view! (t/trend trend ((:trends @state) trend)))
   ;; NOTE, Wed Oct 16 2013, Francis Wolke
   ;; The rest of the feed updates are handled in `eve.state' via a watcher
-  (doseq [datum (:datums @state)]
-    (add-datum-to-feed datum)) 
+  #_(doseq [datum (:datums @state)]
+      (add-datum-to-feed datum)) 
   (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home))))
 
 ; misc

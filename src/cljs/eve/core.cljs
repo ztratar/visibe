@@ -50,11 +50,6 @@
 (defn route->fn-name [sym]
   (clojure.string/replace (str sym) "/" "-"))
 
-(defn add-new-datum-to-feed [datum]
-  ;; TODO, Tue Oct 15 2013, Francis Wolke
-  ;; If it's the first datom, then instead 
-  (dommy/prepend! (m/sel1 :#feed) (templates/datum-card datum)))
-
 ; Bootstrap
 ;*******************************************************************************
 
@@ -72,5 +67,3 @@
               (recur)
               (do (v/navigate! :home)
                   (close! ch))))))))
-
-

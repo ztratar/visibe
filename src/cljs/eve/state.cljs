@@ -11,7 +11,9 @@
    ;;  screen-name :screen-name profile-image-url-https :profile-image-url-https}
    ;; orientation
    datum]
-  (dommy/prepend! (m/sel1 :#feed) (t/datum-card datum)))
+  (if (dommy/html (m/sel1 :#feed))
+    (dommy/prepend! (m/sel1 :#feed) (t/datum-card datum))
+    (dommy/append! (m/sel1 :#feed) (t/datum-card datum))))
 
 (def state (atom {:view :home
                   :trends {} 
