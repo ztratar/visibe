@@ -23,9 +23,3 @@ Relevent page: http://www.flickr.com/services/api/misc.urls.html"}
         {farm-id :farm server-id :server id :id secret :secret} (:attrs (first (:content (first (:content ds)))))
         ]
     (str "http://farm" farm-id ".staticflickr.com/" server-id "/" id "_" secret ".jpg")))
-
-
-(flickr-trend-photo-url     "Nexus 5")
-
-
-"http://farm8.staticflickr.com/7408/10347710855_5efe66d507.jpg"

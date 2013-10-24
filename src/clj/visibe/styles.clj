@@ -39,12 +39,12 @@
    [:path {:fill "steelblue"
            :background "steelblue"}]
 
-   ;; [:.axis :path
-   ;;  :.axis :line
-   ;;  {:fill "none" :stroke "#000" :shape-rendering "crisp-edges"}]
-   ;; [:.brush :.extent {:stroke "#fff"
-   ;;                    :fill-opacity 0.125
-   ;;                    :shape-rendering "crisp-edges"}]
+   [:.axis :path
+    :.axis :line
+    {:fill "none" :stroke "#000" :shape-rendering "crispEdges"}]
+   [:.brush :.extent {:stroke "#fff"
+                      :fill-opacity 0.125
+                      :shape-rendering "crispEdges"}]
 
    ;; Home
 

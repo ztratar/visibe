@@ -22,6 +22,7 @@
                  [compojure "1.1.5" :exclusions [ring/ring-core]]
                  [instagram-api "0.1.6" :exclusions [org.clojure/data.json]]
                  [net.drib/mrhyde "0.5.3"]
+                 [org.clojure/core.match "0.2.0"]                 
                  [org.clojure/core.incubator "0.1.3"]
                  [criterium "0.4.2"]
                  [shodan "0.1.0"]

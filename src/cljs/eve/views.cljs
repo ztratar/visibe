@@ -7,6 +7,13 @@
             [eve.state :refer [state assoc-in-state!]])
   (:require-macros [dommy.macros :as m]))
 
+;;; FIXME, Sat Oct 19 2013, Francis Wolke
+
+;;; You are unable to open a stream, get a bunch of datums related to a topic,
+;;; and then visit a trend page. This throws.
+
+;;; trends -> topics 
+
 ; Home
 ;*******************************************************************************
 
