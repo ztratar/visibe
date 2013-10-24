@@ -18,12 +18,17 @@
 ;*******************************************************************************
 
 (defn home [trends]
-  (swap-view! (t/home trends))
-  (let [trends-list (m/sel1 :#trends)]
-    (doseq [trend trends]
-      (let [trend-node (t/trend-card trend)]
-        (dommy/append! trends-list trend-node)
-        (dommy/listen! trend-node :click (fn [& _] (navigate! :trend trend))))))) 
+  ;; TODO, Thu Oct 24 2013, Francis Wolke
+  ;; The home view 'knows' to place 9 trends - this isn't correct.
+  (let [trend-m trends
+        trends (take 9 (keys trend-m))]
+    (swap-view! (t/home trends))
+    (let [trends-list (m/sel1 :#trends)]
+      (doseq [trend trends]
+        (let [trend-node (t/trend-card trend)]
+          (dommy/append! trends-list trend-node)
+          (dommy/set-style! trend-node :background (str "url(" (trend-m trend) ")"))
+          (dommy/listen! trend-node :click (fn [& _] (navigate! :trend trend)))))))) 
 ; Trend
 ;*******************************************************************************
 
@@ -60,4 +65,4 @@
     :trend (do (assoc-in-state! [:view] :trend)
                (apply trend args))
     :home (do (assoc-in-state! [:view] :home)
-              (home (take 9 (:trends @state))))))
+              (home (:trends @state)))))
