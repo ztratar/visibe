@@ -2,7 +2,7 @@
   eve.templates
   (:require [dommy.core :as dommy]
             [dommy.utils :as utils])
-  (:require-macros [dommy.macros :as m]))
+  (:require-macros [dommy.macros :as m :refer [deftemplate]]))
 
 ;;; TODO, Thu Oct 17 2013, Francis Wolke
 ;;; Move style information into styles.clj
@@ -24,6 +24,9 @@
 ; Trend
 ;*******************************************************************************
 
+;;; TODO, Thu Oct 24 2013, Francis Wolke
+;;; Rename to tweet
+
 (m/deftemplate datum-card [{text :text user :user created-at :created-at
                             name :name screen-name :screen-name
                             profile-image-url-https :profile-image-url-https}]
@@ -41,6 +44,30 @@
                                    [:li [:h3 "text " text]]
                                    [:li [:h4 (str "On " "twitter at " created-at)]]]]]]])
 
+(deftemplate instagram-photo [{{{url :url} :standard_resolution} :images
+                               created-time :created_time
+                               {username :username profile-pic :profile_picture
+                                name :full_name} :user tags :tags}]
+  [:div.instagram-photo-card
+   [:img.profile {:src profile-pic :style {:width "50px" :height "50px"}}]
+   [:ul
+    [:li (str "X whatever ago" created-time)]
+    [:li (str "username" username)]
+    [:li (str "actual name" name)]
+    [:li (str "tags" (map #(str "#" %) tags))]]])
+
+(deftemplate instagram-video [{}]
+  ;; Assign a custom ID that only it knows
+  [:div.datum-card
+   [:video {:width "400px" :height "400px"}
+    [:source {:src "http://distilleryimage11.s3.amazonaws.com/5ec92b043ad411e3bc9822000ab78150_101.mp4":type "video/mp4"} ]]
+   [:ul
+    [:li [:button#play]]
+    [:li [:button#pause]]]])
+
+(deftemplate vine [datum]
+  [:div.datum-card [:p "implement me!"]])
+
 (m/deftemplate trend [trend image-url]
   [:div#content
    [:#stream]
@@ -55,5 +82,3 @@
                     :background-color "rgba(0,0,0,0.0)"}}]
      [:h1#trend-title trend]]]
    [:ul#feed]])
-
-

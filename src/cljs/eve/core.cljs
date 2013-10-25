@@ -4,6 +4,7 @@
             [cljs.reader :as r]
             [shodan.console :as console]
             [eve.views :as v]
+            [eve.views.trend :refer [feed-update!]]
             [dommy.utils :as utils]
             [dommy.core :as dommy]
             [eve.state :refer [state assoc-in-state! update-in-state!]]
@@ -56,6 +57,7 @@
 (defn ^:export bootstrap! []
   (update-current-trends!)
   (ws-connect!)
+  (add-watch state :feed feed-update)
   (let [ch (chan)]
     (go (loop [v (:trends @state)]
           (>! ch v)

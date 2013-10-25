@@ -26,17 +26,7 @@
           (dommy/append! trends-list trend-node)
           (dommy/set-style! trend-node :background (str "url(" (trend-m trend) ")"))
           (dommy/listen! trend-node :click (fn [& _] (navigate! :trend trend)))))))) 
-; Trend
-;*******************************************************************************
-
-(defn trend [trend]
-  (swap-view! (t/trend trend ((:trends @state) trend)))
-  ;; NOTE, Wed Oct 16 2013, Francis Wolke
-  ;; The rest of the feed updates are handled in `eve.state' via a watcher
-  #_(doseq [datum (:datums @state)]
-      (add-datum-to-feed datum)) 
-  (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home))))
-
+!
 ; misc
 ;*******************************************************************************
 
