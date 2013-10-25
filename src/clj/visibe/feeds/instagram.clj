@@ -6,7 +6,8 @@
         instagram.callbacks.handlers
         instagram.api.endpoint)
   (:require [visibe.state :refer [assoc-in-state! gis]]
-            [clj-time.format :])
+            [visibe.feeds.storage :refer [append-datums]]
+            [clj-time.coerce :refer [from-long]])
   (:import instagram.callbacks.protocols.SyncSingleCallback))
 
 ;;; TODO, Thu Oct 24 2013, Francis Wolke
@@ -40,12 +41,14 @@ relevent media."
 
 (defn store-instagram-media
   "Instagram returns their datums with the newest first"
-  [datums]
-  ;; XXX, Thu Oct 24 2013, Francis Wolke
-  ;; UNIX time is in seconds, whereas java time is in milliseconds. To fix this,
-  ;; we multiply by 1000.
-  (map #(update-in % [:created_time] ) datums)
-  )
+  [trend datums]
+  (let [
+        ;; XXX, Thu Oct 24 2013, Francis Wolke
+        ;; UNIX time is in seconds, whereas java time is in milliseconds. To fix this,
+        ;; we multiply by 1000.
+        datums (map (fn [d] (update-in d [:created_time]
+                                       #(str (from-long (* 1000 (read-string %)))))) datums)]
+    (append-datums trend datums)))
 
 (defn track-trend
   "Tracks a trend while it's still an active trend, persisting data related to
@@ -57,8 +60,6 @@ it."
             (when (some #{trend} (keys (gis [:google :trends])))
               (let [new-media-q (instagram-media trend)
                     new-datums (clojure.set/difference (set media) (set new-media-q))]
-                (store-instagram-media new-datums)
+                (store-instagram-media trend new-datums)
                 (Thread/sleep 180000)
                 (recur new-media-q))))))
-
-(def foo (instagram-media "cnet"))
