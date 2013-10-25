@@ -10,16 +10,6 @@
             [clj-time.coerce :refer [from-long]])
   (:import instagram.callbacks.protocols.SyncSingleCallback))
 
-;;; TODO, Thu Oct 24 2013, Francis Wolke
-
-;;; Use the pagination facilities to get more media
-
-;;; We should prolly be storing all of the data and selectively querying against
-;;; it. To prevent a loss of data, and keep it for future use, but it was easier
-;;; to just discard it so I implemented that first.
-
-;;; Handle video
-
 (defn generate-oauth-creds! []
   (assoc-in-state! [:instagram :creds]
                    (make-oauth-creds (gis [:instagram :client-id])
@@ -28,7 +18,7 @@
 
 (defn trend->tag [trend]
   ;; XXX, Thu Oct 24 2013, Francis Wolke
-  ;; Currently discarding all but one tag.
+  ;; Currently discarding all but one of the returned tag.
   (let [trend (clojure.string/replace trend " " "")]
     (:name (first (:data (:body (search-tags :oauth (gis [:instagram :creds]) :params {:q (url-encode trend)})))))))
 
@@ -36,6 +26,9 @@
   "Accepts a trend, converts it to a tag name, searches instagram and returns
 relevent media."
   [trend]
+  ;; FIXME, Thu Oct 24 2013, Francis Wolke
+  ;; Currently we are not grabbing all of the data that we could be. Make use of
+  ;; the pagination feature.
   (:data (:body (get-tagged-medias :oauth (gis [:instagram :creds])
                                    :params {:tag_name (trend->tag trend)}))))
 
