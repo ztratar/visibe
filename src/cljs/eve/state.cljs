@@ -5,33 +5,12 @@
             [shodan.console :as console])
   (:require-macros [dommy.macros :as m]))
 
-
-
-(defn add-datum-to-feed
-  [
-   ;; {text :text user :user created-at :created-at name :name
-   ;;  screen-name :screen-name profile-image-url-https :profile-image-url-https}
-   ;; orientation
-   {type :type :as datum}]
-  ;; TODO, Thu Oct 24 2013, Francis Wolke
-  ;; this does not belong here
-  (case type 
-    :instagram
-    :vine
-    :tweet (if (dommy/html (m/sel1 :#feed))
-             (dommy/prepend! (m/sel1 :#feed) (t/datum-card datum))
-             (dommy/append! (m/sel1 :#feed) (t/datum-card datum)))))
-
 (def state (atom {:view :home
                   :trends {} 
                   :websocket-connection nil
                   :websocket-functions #{}
                   :last-datum nil
                   :datums []}))
-
-
-
-
 
 (defn gis
   ;; TODO, Thu Oct 24 2013, Francis Wolke

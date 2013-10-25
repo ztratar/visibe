@@ -10,11 +10,11 @@
 ; Home
 ;*******************************************************************************
 
-(defn trend-card [trend background-url]
+(defn trend-card [trend]
   (m/node `[~(keyword (str "li.trend-card#" trend))
             [:h1.trend-card-title ~trend]]))
 
-(m/deftemplate home [trends]
+(deftemplate home [trends]
   [:div#content
    [:div#title
     [:h1 "Visibe"]
@@ -24,15 +24,11 @@
 ; Trend
 ;*******************************************************************************
 
-;;; TODO, Thu Oct 24 2013, Francis Wolke
-;;; Rename to tweet
+(deftemplate tweet [{text :text user :user created-at :created-at
+                     name :name screen-name :screen-name
+                     profile-image-url-https :profile-image-url-https}]
 
-(m/deftemplate datum-card [{text :text user :user created-at :created-at
-                            name :name screen-name :screen-name
-                            profile-image-url-https :profile-image-url-https}]
-
-  [:table.datum {:border "0"
-                 :background "rgba(0,0,0,0.0)"}
+  [:table.datum {:border "0" :background "rgba(0,0,0,0.0)"}
    [:tr
     [:td [:img.nub {:src "datum-node.png"
                     :style {:background "rgba(0,0,0,0.0)"}}] [:td]]
@@ -56,19 +52,19 @@
     [:li (str "actual name" name)]
     [:li (str "tags" (map #(str "#" %) tags))]]])
 
-(deftemplate instagram-video [{}]
+(deftemplate instagram-video [{id :id}]
   ;; Assign a custom ID that only it knows
   [:div.datum-card
    [:video {:width "400px" :height "400px"}
     [:source {:src "http://distilleryimage11.s3.amazonaws.com/5ec92b043ad411e3bc9822000ab78150_101.mp4":type "video/mp4"} ]]
-   [:ul
-    [:li [:button#play]]
-    [:li [:button#pause]]]])
+   `[:ul
+     [:li [~(keyword (str "button#play-" id))]]
+     [:li [~(keyword (str "button#pause-" id))]]]])
 
 (deftemplate vine [datum]
   [:div.datum-card [:p "implement me!"]])
 
-(m/deftemplate trend [trend image-url]
+(deftemplate trend [trend image-url]
   [:div#content
    [:#stream]
    [:#header
