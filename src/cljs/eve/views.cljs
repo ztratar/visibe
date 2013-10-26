@@ -38,23 +38,21 @@
 
 (defn add-datum! [{type :type id :id :as datum}]
   (let [datum-card (case type
-                     ;; FIXME, NOTE, Fri Oct 25 2013, Francis Wolke
-                     ;; Instagram's carry the type with them by default
                      :instagram-video (t/instagram-video datum)
                      :instagram-photo (t/instagram-photo datum)
                      :vine (t/vine datum)
-                     :tweet (t/tweet datum))])
-  (if (= "" (sel1 :#feed))
-    (append! :#feed datum-card)
-    (prepend! :#feed datum-card))
-  ;; NOTE, Thu Oct 24 2013, Francis Wolke
-  ;; Setup pause / play functionality. We create buttons with id's based 
-  ;; on the instagram datum id in the template.
-  (when (= :instagram-video type)
-    (dommy/listen! (sel1 (keyword (str "button#play-" id)))
-                   (fn [& _] (play-video (keyword (str "button#play-" id)))))
-    (dommy/listen! (sel1 (keyword (str "button#pause-" id)))
-                   (fn fn [& _] (pause-video (keyword (str "button#play-" id)))))))
+                     :tweet (t/tweet datum))]
+    (if (= "" (sel1 :#feed))
+      (append! (sel1 :#feed) datum-card)
+      (prepend! (sel1 :#feed) datum-card))
+    ;; NOTE, Thu Oct 24 2013, Francis Wolke
+    ;; Setup pause / play functionality. We create buttons with id's based 
+    ;; on the instagram datum id in the template.
+    (when (= :instagram-video type)
+      (dommy/listen! (sel1 (keyword (str "button#play-" id)))
+                     (fn [& _] (play-video (keyword (str "button#play-" id)))))
+      (dommy/listen! (sel1 (keyword (str "button#pause-" id)))
+                     (fn [& _] (pause-video (keyword (str "button#play-" id))))))))
 
 (defn add-new-datums!
   "Adds undisplayed datums to feed"
@@ -79,7 +77,7 @@
     :trend (add-new-datums!)
     (console/log "Feed update NoOp")))
 
-g; misc
+; misc
 ;*******************************************************************************
 
 (defn swap-view! [node]

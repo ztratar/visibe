@@ -3,7 +3,7 @@
   (:require [org.httpkit.server :as hk]
             [visibe.state :refer [state assoc-in-state! update-in-state!]]
             [visibe.feeds.google-trends :refer [google-mapping]]
-            [visibe.schemas :refer [n-sorted-tweets]]
+            [visibe.schemas :refer [n-sorted-datums]]
             [visibe.feeds.storage :refer [previous-50-datums after-datum]]
             [compojure.route :as route]
             [compojure.core :refer :all]
@@ -64,7 +64,7 @@
         (cond (not (:on channel-context)) (do (Thread/sleep (/ 60000 60))
                                               (recur last-sent-datums))
               ;; Test Mode
-              (:test-mode channel-context) (do (hk/send! channel (ds->ws-message :datums (n-sorted-tweets 5)))
+              (:test-mode channel-context) (do (hk/send! channel (ds->ws-message :datums (n-sorted-datums 5)))
                                                (Thread/sleep (/ 60000 60))
                                                (recur last-sent-datums))
               ;; Production

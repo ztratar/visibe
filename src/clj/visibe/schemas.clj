@@ -130,20 +130,21 @@
 ; Utils
 ;*******************************************************************************
 
-;;; FIXME, Thu Oct 24 2013, Francis Wolke
-;;; Nothing here is being sorted
+;;; FIXME, XXX Thu Oct 24 2013, Francis Wolke
+;;; Nothing here is being sorted by time. Until I move everything into the same
+;;; internal time reprentation, it's likely to stay that way.
 
 (defn n-sorted-tweets
   "n tweets, sorted by timestamp, oldest first"
   [n]
-  (sort-datums-by-timestamp (take n (iterate (fn [_] (tweet)) (tweet)))))
+  (take n (repeatedly #(tweet))))
 
 (defn n-sorted-instagrams
   "n instagrams, sorted by timestamp, oldest first"
   [n]
-  )
+  (take n (repeatedly #(if (zero? (rand-int 2)) (instagram-photo) (instagram-video)))))
 
 (defn n-sorted-datums
-  "n datums, sorted by timestamp, oldest first"
+  "~n datums, sorted by timestamp, oldest first"
   [n]
-  )
+  (take n (set (into (n-sorted-tweets n) (n-sorted-instagrams n)))))

@@ -54,9 +54,8 @@
     [:li (str "actual name" name)]
     [:li (str "tags" (map #(str "#" %) tags))]]])
 
-(deftemplate instagram-video [{link :link tags :tags id :id
-                               created-at :created-at username :username
-                               profile-pic :profile-picture
+(deftemplate instagram-video [{link :link tags :tags id :id created-at :created-at
+                               username :username profile-pic :profile-picture
                                poster-image-url :poster-image-url
                                video-url :video-url
                                name :full-name}]
@@ -69,11 +68,12 @@
 
      [:source {:src ~video-url :type "video/mp4"}]]
    [:img.profile {:src profile-pic :style {:width "50px" :height "50px"}}]
-   [:ul [[:li "tags" (map (partial str "#") tags)]
-         [:li "link" link]
-         [:li "name" name]
-         [:li "username" username]
-         [:li "created-at" created-at]]]])
+   [:ul
+    [:li "tags" (map (partial str "#") tags)]
+    [:li "link" link]
+    [:li "name" name]
+    [:li "username" username]
+    [:li "created-at" created-at]]])
 
 (deftemplate vine [datum]
   [:div.datum-card [:p "implement me!"]])

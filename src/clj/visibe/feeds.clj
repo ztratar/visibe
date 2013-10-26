@@ -31,9 +31,12 @@ must be stubbed out."
   "Scrapes trends, updates `state' with trends and the corresponding photos and perists the the data when it changes. Trends
 are tracked via twitter, and relevent tweets are persisted via
   `twitter/track-trend'."
-  ;; FIXME, Fri Oct 04 2013, Francis Wolke
+  ;; TODO, FIXME, Fri Oct 04 2013, Francis Wolke
+  
   ;; I'm being lazy right now, and not dealing with data from other countries
   ;; until it we've got the system working from end to end.
+
+  ;; use `future-cancel' here and in trend-tracking
   []
   (future
     (loop [trends #{}]
