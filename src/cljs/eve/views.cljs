@@ -4,12 +4,14 @@
             [dommy.utils :as utils]
             [eve.templates :as t]
             [shodan.console :as console]
+            [cljs.core.async :as async :refer [<! >! chan put! timeout close!]]
             [eve.state :refer [state assoc-in-state! gis]])
-  (:require-macros [dommy.macros :as m :refer [sel1]]))
+  (:require-macros [cljs.core.async.macros :refer [go alt!]]
+                   [dommy.macros :as m :refer [sel1]]))
 
 ;;; FIXME, Sat Oct 19 2013, Francis Wolke
 
-;;; trends -> topics 
+;;; trends -> topics
 
 ; Home
 ;*******************************************************************************
@@ -18,7 +20,7 @@
   ;; FIXME, Thu Oct 24 2013, Francis Wolke
   ;; The home view 'knows' to grab 9 trends. This is wrong.
   (let [trend-m trends
-        trends (take 9 (keys trend-m))]
+        trends (take 9 (set (keys trend-m)))]
     (swap-view! (t/home trends))
     (let [trends-list (m/sel1 :#trends)]
       (doseq [trend trends]
@@ -44,15 +46,7 @@
                      :tweet (t/tweet datum))]
     (if (= "" (sel1 :#feed))
       (append! (sel1 :#feed) datum-card)
-      (prepend! (sel1 :#feed) datum-card))
-    ;; NOTE, Thu Oct 24 2013, Francis Wolke
-    ;; Setup pause / play functionality. We create buttons with id's based 
-    ;; on the instagram datum id in the template.
-    (when (= :instagram-video type)
-      (dommy/listen! (sel1 (keyword (str "button#play-" id)))
-                     (fn [& _] (play-video (keyword (str "button#play-" id)))))
-      (dommy/listen! (sel1 (keyword (str "button#pause-" id)))
-                     (fn [& _] (pause-video (keyword (str "button#play-" id))))))))
+      (prepend! (sel1 :#feed) datum-card))))
 
 (defn add-new-datums!
   "Adds undisplayed datums to feed"
@@ -91,7 +85,7 @@
   ;; This has a bug, if you don't pass anything to trend, it'll work, but without a trend,
   ;; It should throw, unless the issue is me not catching it??
   (case view
-    :trend (do (assoc-in-state! [:view] :trend)
-               (apply trend args))
-    :home (do (assoc-in-state! [:view] :home)
-              (home (:trends @state)))))
+    :trend (do (apply trend args)
+               (assoc-in-state! [:view] :trend))
+    :home (do (home (:trends @state))
+              (assoc-in-state! [:view] :home))))

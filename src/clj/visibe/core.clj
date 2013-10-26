@@ -24,11 +24,7 @@
                        ;; "css/video-js.min.css" 
                        "css/video-js.css")]
          [:body (include-js "js/libs/d3.v3.min.js" "js/visibe_dbg.js" "js/libs/video-js/video.js")
-          [:div#content
-           [:script {:type "text/javascript"} "eve.core.bootstrap_BANG_();"]
-           ;; TODO, Fri Oct 25 2013, Francis Wolke
-           ;; Move me into eve.core
-           [:script {:type "text/javascript"} "videojs.options.flash.swf = \"js/video-js/video-js.swf\";"]]]))
+          [:div#content]]))
 
 (defroutes app-routes
   (GET "/" [] (index))

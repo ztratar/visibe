@@ -1,4 +1,5 @@
-(ns eve.core
+(ns ^{:doc "Conceptual start of the program."}
+  eve.core
   (:require [clojure.browser.repl :as repl]
             [cljs-http.client :as http]
             [cljs.reader :as r]
@@ -24,17 +25,25 @@
 ; Websockets
 ;*******************************************************************************
 
-(defn process-socket-data [data]
-  (let [msg (r/read-string (str (.-data data)))]
-    (case (:type msg)
-      :datums (update-in-state! [:datums] (partial into (:data msg)))
-      :print (console/log (:data msg))
-      :else (console/log (:data msg)))))
+(def send (chan))
+(def receive (chan))
+
+;;; 
+
+(defn process-socket-data []
+  (go
+   (while true
+     (let [data (<! receive)
+           msg (r/read-string (str (.-data data)))]
+       (case (:type msg)
+         :datums (update-in-state! [:datums] (partial into (:data msg)))
+         :print (console/log (:data msg))
+         :else (console/log (:data msg)))))))
 
 (defn ws-connect! []
   (let [ws (js/WebSocket. "ws://localhost:9000/ws")
         _ (set! (.-onerror ws) #(console/error "WebSocket: " %))
-        _ (set! (.-onmessage ws) process-socket-data)]
+        _ (set! (.-onmessage ws) (fn [msg] (put! receive msg)))]
     (assoc-in-state! [:websocket-connection] ws)))
 
 (defn wsc [f]
@@ -53,9 +62,12 @@
 ; Bootstrap
 ;*******************************************************************************
 
-(defn ^:export bootstrap! []
+(defn bootstrap! []
+  (set! (-> js/videojs (.-options) (.-flash) (.-swf))
+        "js/video-js/video-js.swf")
   (update-current-trends!)
   (ws-connect!)
+  (process-socket-data)
   ;; (add-watch state :feed feed-update!)
   (let [ch (chan)]
     (go (loop [v (:trends @state)]
@@ -63,8 +75,12 @@
           (when (empty? v)
             (recur (:trends @state)))))
     (go (loop []
-          (let [v (<! ch)]
+          (let [v (<! ch)]xo
             (if (empty? v)
               (recur)
               (do (v/navigate! :home)
                   (close! ch))))))))
+
+(def on-load (set! (.-onload js/window) bootstrap!))
+
+

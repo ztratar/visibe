@@ -40,38 +40,37 @@
                                    [:li [:h3 "text " text]]
                                    [:li [:h4 (str "On " "twitter at " created-at)]]]]]]])
 
-(deftemplate instagram-photo [{link :link created-at :created_time tags :tags
-                               {username :username profile-pic
-                                :profile-picture name :full_name} :user
-                               {{instagram-url :url} :standard_resolution} :images}]
+(deftemplate instagram-photo [{tags :tags created-at :created-at type :type
+                               username :username profile-picture :profile-picture
+                               full-name :full-name link :link
+                               {height :height url :url width :width} :photo}]
   [:div.instagram-photo-card
-   [:img.profile {:src profile-pic :style {:width "50px" :height "50px"}}]
-   [:img.instagram-photo {:src instagram-url :style {:width "500px" :height "500px"}}]
+   [:img.profile {:src profile-picture :style {:width "50px" :height "50px"}}]
+   [:img.instagram-photo {:src url :style {:width "500px" :height "500px"}}]
    [:ul
     [:li (str "X whatever ago" created-at)]
     [:li (str "username" username)]
-    [:li (str "link" link)]
-    [:li (str "actual name" name)]
-    [:li (str "tags" (map #(str "#" %) tags))]]])
+    [:li [:href {:a link} "original"]]
+    [:li (str "actual name" full-name)]
+    [:li (apply str (cons "tags"  (interpose " " (map #(str "#" %) tags))))]]])
 
-(deftemplate instagram-video [{link :link tags :tags id :id created-at :created-at
-                               username :username profile-pic :profile-picture
-                               poster-image-url :poster-image-url
-                               video-url :video-url
-                               name :full-name}]
+(deftemplate instagram-video [{tags :tags id :id created-at :created-at
+                               type :type username :username
+                               profile-picture :profile-picture
+                               full-name :full-name link :link
+                               {height :height url :url width :width} :video}]
   [:div.instagram-video-card
    `[~(keyword (str "video#" id)) {:width "550px" :height "550px"
                                    :class "video-js vjs-default-skin vjs-big-play-centered"
                                    :controls "true"
-                                   :preload "auto"
-                                   :poster ~poster-image-url}
+                                   :preload "auto"}
 
-     [:source {:src ~video-url :type "video/mp4"}]]
-   [:img.profile {:src profile-pic :style {:width "50px" :height "50px"}}]
+     [:source {:src ~url :type "video/mp4"}]]
+   [:img.profile {:src profile-picture :style {:width "50px" :height "50px"}}]
    [:ul
     [:li "tags" (map (partial str "#") tags)]
     [:li "link" link]
-    [:li "name" name]
+    [:li "name" full-name]
     [:li "username" username]
     [:li "created-at" created-at]]])
 
