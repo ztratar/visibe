@@ -40,30 +40,38 @@ relevent media."
         ;; XXX, Thu Oct 24 2013, Francis Wolke
         ;; UNIX time is in seconds, whereas java time is in milliseconds. To compenstate,
         ;; we multiply by 1000.
-        datums (map (fn [d] (update-in d [:created_time]
-                                       #(str (from-long (* 1000 (read-string %)))))) datums)]
+        datums (map (fn [d] ) datums)]
     (append-datums trend datums)))
 
 (defn- instagram-photo->datum [m]
   (let [a (partial get-in m)]
-    (merge (select-keys m [:tags :id :created_time :link])
-           {:full-name (a [:user :full_name])
-            :profile-picture (a [:user :profile_picture])
-            :username (a [:user :username])
-            :photo (a [:images :standard_resolution])
-            :type :instagram-photo})))
+    (-> m
+        (select-keys [:tags :id :created_time :link])
+        (merge {:full-name (a [:user :full_name])
+                :profile-picture (a [:user :profile_picture])
+                :username (a [:user :username])
+                :photo (a [:images :standard_resolution])
+                :type :instagram-photo})
+        (rename-keys {:created_time :created-at}))))
 
 (defn- instagram-video->datum [m]
-  (let []
-    
-    ))
+  (let [a (partial get-in m)]
+    (-> m
+        (select-keys [:tags :id :created_time :link])
+        (merge {:full-name (a [:user :full_name])
+                :profile-picture (a [:user :profile_picture])
+                :username (a [:user :username])
+                :video (a [:videos :standard_resolution])
+                :type :instagram-video})
+        (rename-keys {:created_time :created-at}))))
 
 (defn- instagram-media->datum
   "Accepts and instagram media map and returns it's essential constituents."
   [m]
-  (if (= "image" (:type m))
-    (instagram-photo->essentials m)
-    (instagram-video->essentials m)))
+  (-> (if (= "image" (:type m))
+        (instagram-photo->datum m)
+        (instagram-video->datum m))
+      (update-in [:created-at] #(str (from-long (* 1000 (read-string %)))))))
 
 (defn track-trend
   "Tracks a trend while it's still an active trend, persisting data related to

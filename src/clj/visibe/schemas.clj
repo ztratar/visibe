@@ -1,16 +1,17 @@
 (ns ^{:doc "Data generation and validation"}
   visibe.schemas
+  (:use faker.name
+        faker.lorem)
   (:require [clj-schema.example :refer :all]
             [clj-time.core :refer [date-time]]
             [visibe.homeless :refer [sort-datums-by-timestamp]]
             [clj-time.coerce :refer [to-long from-long]]
             [clj-time.format :as f]
             [clj-schema.schema :refer :all]
-            [clj-schema.validation :refer :all]))
+            [clj-schema.validation :refer :all]
+            [faker.lorem :as fl]))
 
 ;;; TODO, Thu Oct 24 2013, Francis Wolke
-
-;;; Use faker for test data generation
 
 ;;; Unify these schemas
 
@@ -63,30 +64,31 @@
    [:profile-image-url-https] String])
 
 (def-map-schema instagram-media-schema []
-  
-  )
+  [[:url] String
+   [:width] Number
+   [:height] Number])
 
 (def-map-schema instagram-photo-schema
-  [[:created_time] String
-   [:type] :instagram-photo
-   [:full_name] String 
+  [[:type] :instagram-photo
+   [:created-at] String
+   [:full-name] String 
    [:id] String
    [:link] String
-   [:photo-url] String
+   [:photo] instagram-media-schema
    [:profile-picture] String
    [:tags] (sequence-of string?)
    [:username] String])
 
 (def-map-schema instagram-video-schema
-  [[:created-at] String
+  [[:type] :instagram-video
+   [:created-at] String
    [:full-name] String
    [:id] String
    [:link] String
-   [:poster-image-url] String
+   [:video] instagram-media-schema
    [:profile-picture] String
    [:tags] (sequence-of string?)
-   [:username] String
-   [:video-url] String])
+   [:username] String])
 
 ; Factories 
 ;*******************************************************************************
@@ -101,29 +103,34 @@
    :profile-image-url-https
    "https://si0.twimg.com/profile_images/2622165696/o20xkpll5fr57alshtnd_normal.jpeg"})
 
-(def-example-factory tweet instagram-photo-schema []
-  {:text  (random-str 140)
+(def-example-factory instagram-photo instagram-photo-schema []
+  {:created-at (str (random-date-time))
    :type :instagram-photo
-   :user  (random-str 10)
-   :created-at (str (random-date-time))
-   :name  (random-str 10)
-   :screen-name  (random-str 10)
-   :profile-image-url-https
-   "https://si0.twimg.com/profile_images/2622165696/o20xkpll5fr57alshtnd_normal.jpeg"})
+   :photo {:url "http://distilleryimage2.s3.amazonaws.com/dfcf86743e0f11e3880922000ae8030e_8.jpg"
+           :width 640 :height 640}
+   :username (str (first-name) (last-name))
+   :profile-picture "http://images.ak.instagram.com/profiles/profile_29299173_75sq_1371200325.jpg"
+   :full-name (first-name)
+   :link "http://instagram.com/p/f7BN_IQTrK/"
+   :id  (apply str (take 10 (repeatedly #(rand-int 42))))
+   :tags (take 5 (words))})
 
-(def-example-factory tweet instagram-video-schema []
-  {:text  (random-str 140)
-   :type :tweet
-   :user  (random-str 10)
+(def-example-factory instagram-video instagram-video-schema []
+  {:video {:width 640 :height 640
+           :url "http://distilleryimage5.s3.amazonaws.com/087d432afb2d11e282f822000a1fbd33_101.mp4"}
+   :link "http://instagram.com/p/cf2L-dx5h1/"
+   :full-name (str (first-name) (last-name))
+   :profile-picture "http://images.ak.instagram.com/profiles/profile_2119581_75sq_1358723016.jpg"
+   :username (first-name)
+   :type :instagram-video
    :created-at (str (random-date-time))
-   :name  (random-str 10)
-   :screen-name  (random-str 10)
-   :profile-image-url-https "https://si0.twimg.com/profile_images/2622165696/o20xkpll5fr57alshtnd_normal.jpeg"})
+   :id (apply str (take 10 (repeatedly #(rand-int 42))))
+   :tags (take 5 (words))})
 
 ; Utils
 ;*******************************************************************************
 
-;;; TODO, Thu Oct 24 2013, Francis Wolke
+;;; FIXME, Thu Oct 24 2013, Francis Wolke
 ;;; Nothing here is being sorted
 
 (defn n-sorted-tweets
@@ -131,10 +138,10 @@
   [n]
   (sort-datums-by-timestamp (take n (iterate (fn [_] (tweet)) (tweet)))))
 
-;; (defn n-sorted-instagrams
-;;   "n instagrams, sorted by timestamp, oldest first"
-;;   [n]
-;;   )
+(defn n-sorted-instagrams
+  "n instagrams, sorted by timestamp, oldest first"
+  [n]
+  )
 
 (defn n-sorted-datums
   "n datums, sorted by timestamp, oldest first"
