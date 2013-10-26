@@ -47,7 +47,9 @@ are tracked via twitter, and relevent tweets are persisted via
                  (let [new-diff-trends (set/difference (keys new-trends) (keys trends))]
                    (doseq [t new-diff-trends]
                      (create-trend t)
-                     (twitter/track-trend t)))
+                     (twitter/track-trend t)
+                     ;; (instagram/track-trend t)
+                     ))
                  
                  (do (Thread/sleep 300000) ; 5 min
                      new-trends)))))))

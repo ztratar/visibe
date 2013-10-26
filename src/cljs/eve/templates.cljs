@@ -24,7 +24,7 @@
 ; Trend
 ;*******************************************************************************
 
-(deftemplate tweet [{text :text user :user created-at :created-at
+(deftemplate tweet [{text :text user :user created-at :created_time
                      name :name screen-name :screen-name
                      profile-image-url-https :profile-image-url-https}]
 
@@ -40,26 +40,40 @@
                                    [:li [:h3 "text " text]]
                                    [:li [:h4 (str "On " "twitter at " created-at)]]]]]]])
 
-(deftemplate instagram-photo [{{{url :url} :standard_resolution} :images
-                               created-time :created_time
-                               {username :username profile-pic :profile_picture
-                                name :full_name} :user tags :tags}]
+(deftemplate instagram-photo [{link :link created-at :created_time tags :tags
+                               {username :username profile-pic
+                                :profile-picture name :full_name} :user
+                               {{instagram-url :url} :standard_resolution} :images}]
   [:div.instagram-photo-card
    [:img.profile {:src profile-pic :style {:width "50px" :height "50px"}}]
+   [:img.instagram-photo {:src instagram-url :style {:width "500px" :height "500px"}}]
    [:ul
-    [:li (str "X whatever ago" created-time)]
+    [:li (str "X whatever ago" created-at)]
     [:li (str "username" username)]
+    [:li (str "link" link)]
     [:li (str "actual name" name)]
     [:li (str "tags" (map #(str "#" %) tags))]]])
 
-(deftemplate instagram-video [{id :id}]
-  ;; Assign a custom ID that only it knows
-  [:div.datum-card
-   [:video {:width "400px" :height "400px"}
-    [:source {:src "http://distilleryimage11.s3.amazonaws.com/5ec92b043ad411e3bc9822000ab78150_101.mp4":type "video/mp4"} ]]
-   `[:ul
-     [:li [~(keyword (str "button#play-" id))]]
-     [:li [~(keyword (str "button#pause-" id))]]]])
+(deftemplate instagram-video [{link :link tags :tags id :id
+                               created-at :created-at username :username
+                               profile-pic :profile-picture
+                               poster-image-url :poster-image-url
+                               video-url :video-url
+                               name :full-name}]
+  [:div.instagram-video-card
+   `[~(keyword (str "video#" id)) {:width "550px" :height "550px"
+                                   :class "video-js vjs-default-skin vjs-big-play-centered"
+                                   :controls "true"
+                                   :preload "auto"
+                                   :poster ~poster-image-url}
+
+     [:source {:src ~video-url :type "video/mp4"}]]
+   [:img.profile {:src profile-pic :style {:width "50px" :height "50px"}}]
+   [:ul [[:li "tags" (map (partial str "#") tags)]
+         [:li "link" link]
+         [:li "name" name]
+         [:li "username" username]
+         [:li "created-at" created-at]]]])
 
 (deftemplate vine [datum]
   [:div.datum-card [:p "implement me!"]])

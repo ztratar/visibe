@@ -38,6 +38,8 @@
 
 (defn add-datum! [{type :type id :id :as datum}]
   (let [datum-card (case type
+                     ;; FIXME, NOTE, Fri Oct 25 2013, Francis Wolke
+                     ;; Instagram's carry the type with them by default
                      :instagram-video (t/instagram-video datum)
                      :instagram-photo (t/instagram-photo datum)
                      :vine (t/vine datum)
@@ -77,7 +79,7 @@
     :trend (add-new-datums!)
     (console/log "Feed update NoOp")))
 
-; misc
+g; misc
 ;*******************************************************************************
 
 (defn swap-view! [node]

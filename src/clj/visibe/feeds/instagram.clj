@@ -7,7 +7,8 @@
         instagram.api.endpoint)
   (:require [visibe.state :refer [assoc-in-state! gis]]
             [visibe.feeds.storage :refer [append-datums]]
-            [clj-time.coerce :refer [from-long]])
+            [clj-time.coerce :refer [from-long]]
+            [clojure.set :refer [rename-keys]])
   (:import instagram.callbacks.protocols.SyncSingleCallback))
 
 (defn generate-oauth-creds! []
@@ -16,7 +17,7 @@
                                      (gis [:instagram :client-secret])
                                      (gis [:instagram :redirect-url]))))
 
-(defn trend->tag [trend]
+(defn- trend->tag [trend]
   ;; XXX, Thu Oct 24 2013, Francis Wolke
   ;; Currently discarding all but one of the returned tag.
   (let [trend (clojure.string/replace trend " " "")]
@@ -37,17 +38,36 @@ relevent media."
   [trend datums]
   (let [
         ;; XXX, Thu Oct 24 2013, Francis Wolke
-        ;; UNIX time is in seconds, whereas java time is in milliseconds. To fix this,
+        ;; UNIX time is in seconds, whereas java time is in milliseconds. To compenstate,
         ;; we multiply by 1000.
         datums (map (fn [d] (update-in d [:created_time]
                                        #(str (from-long (* 1000 (read-string %)))))) datums)]
     (append-datums trend datums)))
 
+(defn- instagram-photo->datum [m]
+  (let [a (partial get-in m)]
+    (merge (select-keys m [:tags :id :created_time :link])
+           {:full-name (a [:user :full_name])
+            :profile-picture (a [:user :profile_picture])
+            :username (a [:user :username])
+            :photo (a [:images :standard_resolution])
+            :type :instagram-photo})))
+
+(defn- instagram-video->datum [m]
+  (let []
+    
+    ))
+
+(defn- instagram-media->datum
+  "Accepts and instagram media map and returns it's essential constituents."
+  [m]
+  (if (= "image" (:type m))
+    (instagram-photo->essentials m)
+    (instagram-video->essentials m)))
+
 (defn track-trend
   "Tracks a trend while it's still an active trend, persisting data related to
 it."
-  ;; NOTE, Thu Oct 24 2013, Francis Wolke
-  ;; This trend tracking functionality could be pulled out into a marco.
   [trend]
   (future (loop [media #{}]
             (when (some #{trend} (keys (gis [:google :trends])))
@@ -56,3 +76,5 @@ it."
                 (store-instagram-media trend new-datums)
                 (Thread/sleep 180000)
                 (recur new-media-q))))))
+
+

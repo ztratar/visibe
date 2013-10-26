@@ -16,6 +16,7 @@
                  [com.draines/postal "1.11.0"]
                  [io.aviso/pretty "0.1.1"]
                  [net.drib/strokes "0.5.1"]
+                 [faker "0.2.2"]
                  [com.keminglabs/c2 "0.2.2"]
                  [com.novemberain/monger "1.6.0"]
                  [twitter-api "0.7.4" :exclusions [org.clojure/data.json]]
