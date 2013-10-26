@@ -7,6 +7,19 @@
             [cemerick.pomegranate :refer (add-dependencies)]
             [clojure.reflect :as r]))
 
+(defn m->ds
+  "Accepts a hashmap, which is then converted into its destructuring syntax."
+  [m]
+  (loop [ks (keys m)
+         acc {}]
+    (if (empty? ks)
+      acc
+      (recur (rest ks)
+             (let [fk (first ks)
+                   v (get m fk)
+                   sfk (symbol (apply str (rest (str fk))))]
+               (assoc acc (if (map? v) (map->ds v) sfk) fk))))))
+
 (defn c= [n body]
   (= n (count body)))
 
