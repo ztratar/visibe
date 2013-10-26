@@ -9,7 +9,7 @@
             [visibe.homeless :refer [sort-datums-by-timestamp]]
             [visibe.feeds.storage :refer [append-datums]]
             [clojure.data.codec.base64 :as b64]            
-            [visibe.state :refer [state assoc-in-state!]]))
+            [visibe.state :refer [state gis assoc-in-state!]]))
 
 ;;; NOTE, Thu Oct 03 2013, Francis Wolke
 ;;; If you want to understand what this code is doing, read these:

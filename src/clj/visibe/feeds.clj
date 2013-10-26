@@ -20,7 +20,7 @@
   "Scrapes trends, updates `state' but does not persist the data. Any datum feed
 must be stubbed out."
   []
-  (future (loop [trends trends]
+  (future (loop [trends (:united-states (goog/google-trends))]
             (recur (let [new-trends (:united-states (goog/google-trends))]
                      (when-not (= (set trends) (set new-trends))
                        (assoc-in-state! [:google :trends] new-trends))

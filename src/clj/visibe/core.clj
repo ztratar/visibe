@@ -11,7 +11,7 @@
             [visibe.feeds :as feeds]
             [visibe.api :refer [api-routes websocket-handler]]
             [cheshire.core :refer [decode]]
-            [visibe.state :refer [state assoc-in-state! read-config!]]
+            [visibe.state :refer [state gis assoc-in-state! read-config!]]
             [monger.core :as mg]
             [org.httpkit.server :as hk]
             [clojure.tools.nrepl.server :refer [start-server stop-server]]))
