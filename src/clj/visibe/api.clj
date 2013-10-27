@@ -3,7 +3,7 @@
   (:require [org.httpkit.server :as hk]
             [visibe.state :refer [state assoc-in-state! update-in-state!]]
             [visibe.feeds.google-trends :refer [google-mapping]]
-            [visibe.schemas :refer [n-sorted-datums]]
+            [visibe.schemas :refer [n-sorted-datums n-sorted-tweets]]
             [visibe.feeds.storage :refer [previous-50-datums after-datum]]
             [compojure.route :as route]
             [compojure.core :refer :all]
