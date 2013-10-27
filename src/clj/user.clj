@@ -32,7 +32,7 @@
              (let [fk (first ks)
                    v (get m fk)
                    sfk (symbol (apply str (rest (str fk))))]
-               (assoc acc (if (map? v) (map->ds v) sfk) fk))))))
+               (assoc acc (if (map? v) (m->ds v) sfk) fk))))))
 
 (defn c= [n body]
   (= n (count body)))
