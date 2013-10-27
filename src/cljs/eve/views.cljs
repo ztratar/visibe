@@ -10,17 +10,20 @@
                    [dommy.macros :as m :refer [sel1]]))
 
 ;;; FIXME, Sat Oct 19 2013, Francis Wolke
-
 ;;; trends -> topics
+
+(declare swap-view!)
+(declare navigate!)
 
 ; Home
 ;*******************************************************************************
 
 (defn home [trends]
-  ;; FIXME, Thu Oct 24 2013, Francis Wolke
-  ;; The home view 'knows' to grab 9 trends. This is wrong.
   (let [trend-m trends
-        trends (take 9 (set (keys trend-m)))]
+        trends (loop [acc #{}]
+                 (if (= (* 3 (quot (count trends) 3)) (count acc))
+                   acc
+                   (recur (conj acc (rand-nth (keys trend-m))))))]
     (swap-view! (t/home trends))
     (let [trends-list (m/sel1 :#trends)]
       (doseq [trend trends]
@@ -32,11 +35,7 @@
 ; Trend
 ;*******************************************************************************
 
-(defn play-video [selector]
-  (.play (m/sel1 selector)))
-
-(defn pause-video [selector]
-  (.pause (m/sel1 selector)))
+(def)
 
 (defn add-datum! [{type :type id :id :as datum}]
   (let [datum-card (case type
@@ -81,9 +80,7 @@
 
 (defn navigate! [view & args]
   ;; TODO, Tue Oct 15 2013, Francis Wolke
-  ;; Needs to update `state :view'
-  ;; This has a bug, if you don't pass anything to trend, it'll work, but without a trend,
-  ;; It should throw, unless the issue is me not catching it??
+  ;; Buggy - if you don't pass in a trend, it'll throw. Add checks.
   (case view
     :trend (do (apply trend args)
                (assoc-in-state! [:view] :trend))
