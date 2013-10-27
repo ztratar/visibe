@@ -7,6 +7,20 @@
             [cemerick.pomegranate :refer (add-dependencies)]
             [clojure.reflect :as r]))
 
+;; (defn ss
+;;   "[S]mart [s]elect. Given a start map and set of goal-keys, generates a function
+;; to convert one to the other (start to goal). EG:
+;; ... call ...
+;; ;=> (defn foo [in out] {:key1 (get-in in [:foo :bar]) ...})
+    
+
+;;  If multiple paths exist to any of the 
+;; goal keys, a hashmap is returned {:duplicate-key [[:path :to :key] [:other :path] ...]} keyed by 
+;; duplicates with the "
+;;   ([start goal-keys]
+;;      (loop [goal-keys]))
+;;   ([start goal-keys path-map]))
+
 (defn m->ds
   "Accepts a hashmap, which is then converted into its destructuring syntax."
   [m]
