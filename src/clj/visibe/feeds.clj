@@ -37,6 +37,14 @@ are tracked via twitter, and relevent tweets are persisted via
   ;; until it we've got the system working from end to end.
 
   ;; use `future-cancel' here and in trend-tracking
+
+  ;; TODO, Sun Oct 27 2013, Francis Wolke
+  ;; We need to be saving these trends into mongo - the query for them prolly shouldn't be fetching them from memory
+
+  ;; XXX, Sun Oct 27 2013, Francis Wolke
+  ;; We are also have an issue where starting up the application causes the client side to block, this is because we
+  ;; don't have any trends. This can be resolved by fetching them from mongo when we can't find them in memory, solving
+  ;; Both the speed problems and the other issues
   []
   (future
     (loop [trends #{}]
