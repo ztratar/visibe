@@ -35,8 +35,6 @@
 ; Trend
 ;*******************************************************************************
 
-(def)
-
 (defn add-datum! [{type :type id :id :as datum}]
   (let [datum-card (case type
                      :instagram-video (t/instagram-video datum)
@@ -47,27 +45,18 @@
       (append! (sel1 :#feed) datum-card)
       (prepend! (sel1 :#feed) datum-card))))
 
-(defn add-new-datums!
-  "Adds undisplayed datums to feed"
-  []
-  ;; XXX, TODO, Thu Oct 24 2013, Francis Wolke
-  ;; I have the sneaking suspicion that this code is buggy due to the transactional
-  ;; semantics of `state'. Revisit.
-  (let [datums (:datums @state)
-        new-datums (take-while (partial not= (gis [:last-datum])) datums)
-        new-last-datum (first new-datums)]
-    (doseq [datum datums]
-      (add-datum! datum))
-    (assoc-in-state! [:last-datum] new-last-datum)))
-
 (defn trend [trend]
   (swap-view! (t/trend trend ((:trends @state) trend)))
-  (add-new-datums!)
-  (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home))))
+  (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home)))
+  (doseq [d (:datums @state)] (add-datum! d)))
 
 (defn feed-update! [key identify old new]
+  (console/log "testing")
   (case (:view @state)
-    :trend (add-new-datums!)
+    :trend (let [to-add (take-while (partial not= (first (:datums old)))
+                                    (:datums new))]
+             (doseq [d (reverse to-add)]
+               (add-datum! d)))
     (console/log "Feed update NoOp")))
 
 ; misc

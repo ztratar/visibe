@@ -63,12 +63,11 @@
 ;*******************************************************************************
 
 (defn bootstrap! []
-  (set! (-> js/videojs (.-options) (.-flash) (.-swf))
-        "js/video-js/video-js.swf")
+  (set! (-> js/videojs (.-options) (.-flash) (.-swf)) "js/video-js/video-js.swf")
   (update-current-trends!)
   (ws-connect!)
   (process-socket-data)
-  ;; (add-watch state :feed feed-update!)
+  (add-watch state :feed feed-update!)
   (let [ch (chan)]
     (go (loop [v (:trends @state)]
           (>! ch v)
