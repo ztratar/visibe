@@ -75,7 +75,7 @@
           (when (empty? v)
             (recur (:trends @state)))))
     (go (loop []
-          (let [v (<! ch)]xo
+          (let [v (<! ch)]
             (if (empty? v)
               (recur)
               (do (v/navigate! :home)
