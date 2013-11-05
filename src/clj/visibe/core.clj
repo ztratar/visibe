@@ -44,8 +44,8 @@
   (assoc-in-state! [:app :server] (hk/run-server #'app {:port (Integer. (get-in @state [:app :port]))}))
   (instagram/generate-oauth-creds!)
   (case mode
-    :dev (feeds/dev!)
-    :production (feeds/production!)))
+    :dev (feeds/scrape-trends!)
+    :production (feeds/scrape-and-persist-trends!)))
 
 (defn main-
   ([] (println "Please specify one of #{help dev production}"))

@@ -35,7 +35,7 @@
                         {"clojars" "http://clojars.org/repo"})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Hackage
+;;; Hack
 
 (defn m->ds
   "Accepts a hashmap, returns it's destructuring syntax."

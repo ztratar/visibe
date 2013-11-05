@@ -11,8 +11,9 @@ Relevent page: http://www.flickr.com/services/api/misc.urls.html"}
            java.io.ByteArrayInputStream
            javax.imageio.ImageIO))
 
-(defn buffered-images-equal? [image-1 image-2]
+(defn buffered-images-equal?
   "Checks for byte equality against 'PROJECT_ROOT/resources/public/flickr-not-found.jpg'"
+  [image-1 image-2]
   (let [i1-width (.getWidth image-1)
         i1-height (.getHeight image-1)
 
@@ -57,7 +58,7 @@ Relevent page: http://www.flickr.com/services/api/misc.urls.html"}
         photo-urls (map (fn [{farm-id :farm server-id :server id :id secret :secret}]
                           (str "http://farm" farm-id ".staticflickr.com/" server-id "/" id "_" secret ".jpg"))
                         photos-essentials)
-        valid-url (some not-found? photo-urls)]
+        valid-url (some valid-url? photo-urls)]
     valid-url))
 
 

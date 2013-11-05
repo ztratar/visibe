@@ -29,8 +29,7 @@ must be stubbed out."
 
 (defn scrape-and-persist-trends!
   "Scrapes trends, updates `state' with trends and the corresponding photos and perists the the data when it changes. Trends
-are tracked via twitter, and relevent tweets are persisted via
-  `twitter/track-trend'."
+are tracked via twitter, and relevent tweets are persisted via `twitter/track-trend'."
   ;; TODO, FIXME, Fri Oct 04 2013, Francis Wolke
   
   ;; I'm being lazy right now, and not dealing with data from other countries
@@ -64,9 +63,3 @@ are tracked via twitter, and relevent tweets are persisted via
                  
                  (do (Thread/sleep 300000) ; 5 min
                      new-trends)))))))
-
-(defn dev! []
-  (scrape-trends!))
-
-(defn production! []
-  (scrape-and-persist-trends!))
