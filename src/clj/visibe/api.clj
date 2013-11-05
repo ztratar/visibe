@@ -12,29 +12,40 @@
 ; WebSockets API
 ;*******************************************************************************
 
-(defn ^{:api :websocket :doc "Sends generated test data instead of whatever."}
+(defn ^{:api :websocket :doc "Sends generated test data instead of whatever"}
   toggle-stream!
   [channel]
   (update-in-state! [:app :channels channel :on] #(not %))
   {:on (get-in @state [:app :channels channel :on])})
 
-(defn ^{:api :websocket :doc "Sends generated test data instead of whatever."}
+(defn ^{:api :websocket :doc "If in test mode streaming will send test data"}
   toggle-test-mode!
   [channel]
   (update-in-state! [:app :channels channel :test-mode] #(not %))
   {:test-mode (get-in @state [:app :channels channel :test-mode])})
 
-(defn ^{:api :websocket :doc "Adds a new trend stream to a channel."}
+(defn ^{:api :websocket :doc "Adds a new trend stream to a channel"}
   add-trend-stream!
   [channel trend]
   (update-in-state! [:app :channels channel :trends] (fn [& args] (set (apply conj args))) trend)
   {:trends (get-in @state [:app :channels channel :trends])})
 
-(defn ^{:api :websocket :doc "Removes trend stream from a channel."}
+(defn ^{:api :websocket :doc "Removes trend stream from a channel"}
   remove-trend-stream!
   [channel trend]
   (update-in-state! [:app :channels channel :trends] (fn [st] (set (remove #{trend} st))))
   {:trends (get-in @state [:app :channels channel :trends])})
+
+(defn help ^{:api :websocket :doc "Returns information about the API for consumtion by  human, or near human intelligences"}
+  []
+  (apply str (cons "The funtions you have avalible to you are:\n"
+                   (interleave (repeat "\n")
+                               ["toggle-stream!"
+                                "toggle-test-mode!"
+                                "add-trend-stream!"
+                                "remove-trend-stream!"
+                                "help"
+                                "\nI regret to inform you that we do not have `doc' implemented yet."]))))
 
 
 ; WebSockets Boilerplate
@@ -102,6 +113,7 @@
         fst (first ds)]
     (ds->ws-message (cond (= fst 'add-trend-stream!)    (add-trend-stream! channel (second ds))
                           (= fst 'remove-trend-stream!) (remove-trend-stream! channel (second ds))
+                          (= fst 'help)                 (help)
                           (= fst 'toggle-stream!)       (toggle-stream! channel)
                           (= fst 'toggle-test-mode!)    (do (toggle-test-mode! channel)
                                                             (str {:test-mode (get-in @state [:app :channels channel :test-mode])}))
