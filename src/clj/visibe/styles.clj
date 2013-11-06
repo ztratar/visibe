@@ -18,12 +18,12 @@
 (def background "#286d99")
 
 (def css-data
-  (css
+  (css {:pretty-print? true}
    ;; Common
    
    [:* {:margin 0 :padding 0
-        :color text-color :background background
-        :font-family "Gotham-Bold"}]
+    :color text-color :background background
+    :font-family "Gotham-Bold"}]
    [:h1 {:background-color  "rgba(0,0,0,0.0)"}]
    [:ul {:list-style "none"}]
    [:img {:margin-left :auto

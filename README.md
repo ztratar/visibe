@@ -12,6 +12,7 @@ lein test # assumes you have a mongo instance running on localhost with default 
 - Save everything to the database
 - Sharing functionality
 - Deploy
+- Vines
 
 ## License
 

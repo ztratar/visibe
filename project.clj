@@ -30,7 +30,7 @@
                  [shodan "0.1.0"]
                  [com.flickr4java/flickr "2.5"]
                  [domina "1.0.2-SNAPSHOT"]
-                 [garden "0.1.0-beta6"]
+                 [garden "1.1.3"]
                  [hiccup "1.0.3"]
                  [http-kit "2.1.4"]
                  [org.clojars.runa/clj-schema "0.9.4"]
