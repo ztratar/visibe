@@ -28,8 +28,6 @@
 (def send (chan))
 (def receive (chan))
 
-;;; 
-
 (defn process-socket-data []
   (go
    (while true

@@ -28,17 +28,15 @@
                      name :name screen-name :screen-name
                      profile-image-url-https :profile-image-url-https}]
 
-  [:table.datum {:border "0" :background "rgba(0,0,0,0.0)"}
-   [:tr
-    [:td [:img.nub {:src "datum-node.png"
-                    :style {:background "rgba(0,0,0,0.0)"}}] [:td]]
-    [:td [:img.profile {:src "https://si0.twimg.com/profile_images/2622165696/o20xkpll5fr57alshtnd_normal.jpeg"
-                        :style {:background "rgba(0,0,0,0.0)"
-                                :width "50px" :height "50px"
-                                :border-radius "25px"}}] [:td]]
-    [:td [:h3 "Zach Tratar"] [:td [:ul
-                                   [:li [:h3 "text " text]]
-                                   [:li [:h4 (str "On " "twitter at " created-at)]]]]]]])
+  [:div.datum.tweet
+   [:div.profile-pic [:img {:src profile-image-url-https
+                            :width "50px" :height "50px"
+                            :border-radius "25px"}]
+    [:div.tweet-block [:ul
+                       [:li [:h3.tweet-name name]]
+                       [:li [:h4.datum-meta-info "On" [:i "Twitter"] " 3 minutes  ago"]]
+                       [:br]
+                       [:li [:h2.tweet-text text]]]]]])
 
 (deftemplate instagram-photo [{tags :tags created-at :created-at type :type
                                username :username profile-picture :profile-picture
