@@ -29,28 +29,18 @@
                      profile-image-url-https :profile-image-url-https}]
 
   [:div.datum.tweet
-   [:div.profile-pic [:img {:src profile-image-url-https
-                            :width "50px" :height "50px"
-                            :border-radius "25px"}]
-    [:div.tweet-block [:ul
-                       [:li [:h3.tweet-name name]]
-                       [:li [:h4.datum-meta-info "On" [:i "Twitter"] " 3 minutes  ago"]]
-                       [:br]
-                       [:li [:h2.tweet-text text]]]]]])
+   [:div.profile-pic [:img {:src profile-image-url-https}]
+    [:div.tweet-block
+     [:ul
+      [:li [:h3.tweet-name name]]
+      [:li [:h4.datum-metadata "On" [:i "Twitter"] " 3 minutes  ago"]]
+      [:br]
+      [:li [:h2.tweet-text text]]]]]])
 
 (deftemplate instagram-photo [{tags :tags created-at :created-at type :type
                                username :username profile-picture :profile-picture
                                full-name :full-name link :link
-                               {height :height url :url width :width} :photo}]
-  [:div.instagram-photo-card
-   [:img.profile {:src profile-picture :style {:width "50px" :height "50px"}}]
-   [:img.instagram-photo {:src url :style {:width "500px" :height "500px"}}]
-   [:ul
-    [:li (str "X whatever ago" created-at)]
-    [:li (str "username" username)]
-    [:li [:href {:a link} "original"]]
-    [:li (str "actual name" full-name)]
-    [:li (apply str (cons "tags"  (interpose " " (map #(str "#" %) tags))))]]])
+                               {height :height url :url width :width} :photo}]) 
 
 (deftemplate instagram-video [{tags :tags id :id created-at :created-at
                                type :type username :username
@@ -58,19 +48,20 @@
                                full-name :full-name link :link
                                {height :height url :url width :width} :video}]
   [:div.instagram-video-card
-   `[~(keyword (str "video#" id)) {:width "550px" :height "550px"
-                                   :class "video-js vjs-default-skin vjs-big-play-centered"
-                                   :controls "true"
-                                   :preload "auto"}
-
+   [:img.profile-pic {:src profile-picture}]
+   [:ul.instagram-datum
+    [:li [:h3.datum-name full-name]]
+    [:li [:h4.datum-metadata "On" [:i "Instagram"] " 3 minutes ago"]]
+    [:li.tweet-text "The first time that I had nutella"]]
+   ;; TODO, Wed Nov 06 2013, Francis Wolke
+   ;; Is the custom ID even neccecary
+   `[~(keyword (str "video.instagram-video#" id))
+     {:width "550px" :height "550px"
+      :class "video-js vjs-default-skin vjs-big-play-centered"
+      :controls "true"
+      :preload "auto"}
      [:source {:src ~url :type "video/mp4"}]]
-   [:img.profile {:src profile-picture :style {:width "50px" :height "50px"}}]
-   [:ul
-    [:li "tags" (map (partial str "#") tags)]
-    [:li "link" link]
-    [:li "name" full-name]
-    [:li "username" username]
-    [:li "created-at" created-at]]])
+   ])
 
 (deftemplate vine [datum]
   [:div.datum-card [:p "implement me!"]])

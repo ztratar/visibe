@@ -143,7 +143,22 @@
                   :width "10px"}]
 
        ;; Datum cards
-   
+
+       [:.datum-metadata {:margin-top "7px"
+                          :color timeline-emphasis
+                          :font-family font0
+                          :font-size "14px"}
+        [:i {:margin-top "7px"
+             :color timeline-emphasis
+             :font-family font0
+             :font-size "14px"}]]
+
+       [:.datum-name {:color "#fff"
+                      :font-size "16px"
+                      :font-family font0}]
+
+       [:.profile-pic {:border-radius "50px" :width "100px" :height "100px"}]
+       
        ;; Tweet Card
 
        [:.datum.tweet {:margin-left "50%"
@@ -151,7 +166,7 @@
                        :position :absolute
                        :background "rgba(0,0,0,0.0)"}]
 
-       [:.tweet-block {:margin-left "70px"
+       [:.tweet-block {:margin-left "85px"
                        :margin-top "-50px"
                        :position :relative}]
 
@@ -159,21 +174,25 @@
                       :font-size "16px"
                       :font-family font0}]
 
-       [:.datum-meta-info {:margin-top "7px"
-                           :color timeline-emphasis
-                           :font-family font0
-                           :font-size "14px"}
-        [:i {:margin-top "7px"
-             :color timeline-emphasis
-             :font-family font0
-             :font-size "14px"}]]
-
        [:.tweet-text {:color "#fff"
                       :font-size "16px"
                       :font-family font3
                       :word-wrap :break-word
                       :width "400px"}]
-   
+
+       ;; Instagram video card
+
+       [:.instagram-datum {:margin-left "120px"
+                           :margin-top "-100px"
+                           :position :relative
+                           :background "rgba(0,0,0,0.0)"}]
+
+       [:.instagram-video-card {:margin-left "50%"
+                                :margin-right "50%"
+                                :position :absolute}]
+
+       [:.instagram-video {:margin-left "120px"
+                           :margin-top "10px"}]
        ))
 
 (spit (java.io.File. "./resources/public/css/style.css") css-data)
