@@ -35,10 +35,10 @@ are tracked via twitter, and relevent tweets are persisted via `twitter/track-tr
   ;; I'm being lazy right now, and not dealing with data from other countries
   ;; until it we've got the system working from end to end.
 
-  ;; use `future-cancel' here and in trend-tracking
+  ;; use `future-cancel' here and in trend-tracking. It might be worthwile to store a pointer to all launched futures so that I can kill them at the REPL.
 
   ;; TODO, Sun Oct 27 2013, Francis Wolke
-  ;; We need to be saving these trends into mongo - the query for them prolly shouldn't be fetching them from memory
+  ;; We need to be saving these trends into mongo - the query for them shouldn't be fetching them from memory
 
   ;; XXX, Sun Oct 27 2013, Francis Wolke
   ;; We are also have an issue where starting up the application causes the client side to block, this is because we

@@ -74,8 +74,7 @@ relevent media."
       (update-in [:created-at] #(str (from-long (* 1000 (read-string %)))))))
 
 (defn track-trend
-  "Tracks a trend while it's still an active trend, persisting data related to
-it."
+  "Tracks a trend while it's still an active trend, persisting data related to it."
   [trend]
   (future (loop [media #{}]
             (when (some #{trend} (keys (gis [:google :trends])))

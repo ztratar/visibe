@@ -35,7 +35,7 @@
 ; Trend
 ;*******************************************************************************
 
-(defn add-datum! [{type :type id :id :as datum}]
+(defn add-new-datum! [{type :type id :id :as datum}]
   (let [datum-card (case type
                      :instagram-video (t/instagram-video datum)
                      :instagram-photo (t/instagram-photo datum)
@@ -48,15 +48,14 @@
 (defn trend [trend]
   (swap-view! (t/trend trend ((:trends @state) trend)))
   (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home)))
-  (doseq [d (:datums @state)] (add-datum! d)))
+  (doseq [d (:datums @state)] (add-new-datum! d)))
 
 (defn feed-update! [key identify old new]
-  (console/log "testing")
   (case (:view @state)
     :trend (let [to-add (take-while (partial not= (first (:datums old)))
                                     (:datums new))]
              (doseq [d (reverse to-add)]
-               (add-datum! d)))
+               (add-new-datum! d)))
     (console/log "Feed update NoOp")))
 
 ; misc

@@ -46,14 +46,10 @@
    [:img.profile-pic {:src profile-picture}]
    [:ul.instagram-datum
     [:li [:h3.datum-name full-name]]
-    [:li [:h4.datum-metadata "On" [:i "Instagram"] " 3 minutes ago"]]
+    [:li [:h4.datum-metadata "On " [:i "Instagram"] " 3 minutes ago"]]
     [:li.tweet-text "Photo whatever"]]
-   [:video.instagram-photo
-    {:width "550px" :height "550px"
-     :class "video-js vjs-default-skin vjs-big-play-centered"
-     :controls "true"
-     :preload "auto"}
-    [:source {:src ~url :type "video/mp4"}]]]) 
+   [:div.instagram-photo
+    [:img {:src url}]]]) 
 
 (deftemplate instagram-video [{tags :tags id :id created-at :created-at
                                type :type username :username
@@ -65,10 +61,10 @@
    [:img.profile-pic {:src profile-picture}]
    [:ul.instagram-datum
     [:li [:h3.datum-name full-name]]
-    [:li [:h4.datum-metadata "On" [:i "Instagram"] " 3 minutes ago"]]
+    [:li [:h4.datum-metadata "On " [:i "Instagram"] " 3 minutes ago"]]
     [:li.tweet-text "The first time that I had nutella"]]
    ;; TODO, Wed Nov 06 2013, Francis Wolke
-   ;; Is the custom ID even neccecary
+   ;; Is the custom ID even neccecary?
    `[~(keyword (str "video.instagram-video" id))
      {:width "550px" :height "550px"
       :class "video-js vjs-default-skin vjs-big-play-centered"
