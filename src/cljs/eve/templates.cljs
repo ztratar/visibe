@@ -40,13 +40,27 @@
 (deftemplate instagram-photo [{tags :tags created-at :created-at type :type
                                username :username profile-picture :profile-picture
                                full-name :full-name link :link
-                               {height :height url :url width :width} :photo}]) 
+                               {height :height url :url width :width} :photo}]
+
+  [:div.instagram-photo-card
+   [:img.profile-pic {:src profile-picture}]
+   [:ul.instagram-datum
+    [:li [:h3.datum-name full-name]]
+    [:li [:h4.datum-metadata "On" [:i "Instagram"] " 3 minutes ago"]]
+    [:li.tweet-text "Photo whatever"]]
+   [:video.instagram-photo
+    {:width "550px" :height "550px"
+     :class "video-js vjs-default-skin vjs-big-play-centered"
+     :controls "true"
+     :preload "auto"}
+    [:source {:src ~url :type "video/mp4"}]]]) 
 
 (deftemplate instagram-video [{tags :tags id :id created-at :created-at
                                type :type username :username
                                profile-picture :profile-picture
                                full-name :full-name link :link
                                {height :height url :url width :width} :video}]
+
   [:div.instagram-video-card
    [:img.profile-pic {:src profile-picture}]
    [:ul.instagram-datum
@@ -55,13 +69,12 @@
     [:li.tweet-text "The first time that I had nutella"]]
    ;; TODO, Wed Nov 06 2013, Francis Wolke
    ;; Is the custom ID even neccecary
-   `[~(keyword (str "video.instagram-video#" id))
+   `[~(keyword (str "video.instagram-video" id))
      {:width "550px" :height "550px"
       :class "video-js vjs-default-skin vjs-big-play-centered"
       :controls "true"
       :preload "auto"}
-     [:source {:src ~url :type "video/mp4"}]]
-   ])
+     [:source {:src ~url :type "video/mp4"}]]])
 
 (deftemplate vine [datum]
   [:div.datum-card [:p "implement me!"]])
@@ -74,9 +87,9 @@
      [:h1 "HOME"]]
     [:div#title
      [:h1#visibe-title "VISIBE"]
-     [:img {:src image-url
-            :width "170px" :height "170px"
-            :style {:margin-bottom "50px" :border-radius "85px"
-                    :background-color "rgba(0,0,0,0.0)"}}]
+     [:img.trend-img {:src image-url
+                      :width "170px" :height "170px"
+                      :style {:margin-bottom "50px" :border-radius "85px"
+                              :background-color "rgba(0,0,0,0.0)"}}]
      [:h1#trend-title trend]]]
    [:ul#feed]])
