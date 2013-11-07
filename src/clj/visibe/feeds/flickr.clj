@@ -28,19 +28,26 @@ Relevent page: http://www.flickr.com/services/api/misc.urls.html"}
          ;; unless we happen to get an image with the exact same dimensions as
          ;; 'flickr-image-not-found.jpg'. In that case, we will have filtered
          ;; out an image that we shouldn't have. ¯\_(:/)_/¯
-         #_(loop [coords [0 0]]
-             (let [[x y] coords]
-               (cond (= [x y] [i2-width i2-height]) true
-                     (= (.getRGB image-1 x y)
-                        (.getRGB image-2 x y)) (recur (if (= x i1-width) [0 (inc y)] [(inc x) y]))
-                     :else false))))))
+
+         ;; (loop [coords [0 0]]
+         ;;     (let [[x y] coords]
+         ;;       (cond (= [x y] [i2-width i2-height]) true
+         ;;             (= (.getRGB image-1 x y)
+         ;;                (.getRGB image-2 x y)) (recur (if (= x i1-width) [0 (inc y)] [(inc x) y]))
+         ;;             :else false)))
+         )))
+
+(defn too-small? [img]
+  (or (>= 300 (.getWidth img))
+      (>= 180 (.getHeight img))))
 
 (defn valid-url?
   "Checks for byte equality against 'PROJECT_ROOT/resources/public/flickr-image-not-found.jpg'"
   [url]
-  (when-not (buffered-images-equal? (ImageIO/read (URL. url))
-                                    (ImageIO/read (File. "./resources/public/flickr-image-not-found.jpg")))
-    url))
+  (let [img (ImageIO/read (URL. url))]
+    (when-not (or (buffered-images-equal? img (ImageIO/read (File. "./resources/public/flickr-image-not-found.jpg")))
+                  (too-small? img))
+      url)))
 
 (defn trend->photo-url
   "Returns 10 URLs for associated with a trend"

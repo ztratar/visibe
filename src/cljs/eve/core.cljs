@@ -20,8 +20,6 @@
 
 (repl/connect "http://localhost:8002/repl")
 
-;; (def d3 js/d3)
-
 ; Websockets
 ;*******************************************************************************
 
@@ -79,5 +77,3 @@
                   (close! ch))))))))
 
 (def on-load (set! (.-onload js/window) bootstrap!))
-
-

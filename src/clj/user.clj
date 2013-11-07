@@ -2,6 +2,7 @@
   (:require [clojure.repl :refer :all]
             [cljs.repl.browser :refer [repl-env]]
             [cemerick.piggieback :as p]
+            [clj-http.lite.client :as client]
             [cljs.repl :refer [-setup]]
             [clojure.pprint :refer [pprint print-table]]
             [cemerick.pomegranate :refer (add-dependencies)]
