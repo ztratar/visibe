@@ -17,6 +17,14 @@
                    (clojure.string/replace password "%" "%25") password)]
     (str "mongodb://" username ":" password "@" host ":" port "/" database)))
 
+(defn persist-google-trends-and-photos
+  "Does what you would think, and saves the time that the transaction occured as
+':created-at' so that we can reference this data at a later date"
+  [trends-and-photos-hashmap]
+  (->> trends-and-photos-hashmap
+       (merge {:created-at (str (format-local-time (local-now) :date-time))})
+       (c/insert "google-trends")))
+
 (defn create-trend
   "Create trend if it does not exist"
   [trend]
@@ -44,12 +52,15 @@ newer than those already in ':datums'"
   [trend new-datums]
   ;; TODO, Tue Oct 08 2013, Francis Wolke
   ;; This is horrible, I find it really hard to belive that there isn't an
-  ;; append function. Revisit.
+  ;; append function (native to mongodb). Revisit.
   (let [{datums :datums :as m} (c/find-one-as-map "trends" {:trend trend})]
     (c/update "trends" m (assoc m :datums (into datums new-datums)))))
 
 (defn previous-50-datums 
   "Retuns 50 datums chronologically previous to the supplied datum"
+  ;; XXX, Thu Nov 07 2013, Francis Wolke
+  ;; Does not cover case where we've had more than 50 datums appended before the
+  ;; supplied 'marker'.
   [trend datum]
   (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]
     (take 50 (take-while (partial not= datum) datums))))
@@ -61,3 +72,12 @@ newer than those already in ':datums'"
     (:datums (c/find-one-as-map "trends" {:trend trend}))
     (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]
       (rest (drop-while (partial not= supplied-datum) datums)))))
+
+;; (defn most-recent-google-trend
+;;   []
+;;   (dissoc (c/find-one-as-map "google-trends") :_id))
+
+(defn add-new-trends
+  "Trends and their associated images"
+  [trend-and-images-hashmap]
+  (c/insert "google-trends" trend-and-images-hashmap))

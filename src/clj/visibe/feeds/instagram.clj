@@ -19,7 +19,7 @@
 
 (defn- trend->tag [trend]
   ;; XXX, Thu Oct 24 2013, Francis Wolke
-  ;; Currently discarding all but one of the returned tag.
+  ;; Currently discarding all but one of the returned tags.
   (let [trend (clojure.string/replace trend " " "")]
     (:name (first (:data (:body (search-tags :oauth (gis [:instagram :creds]) :params {:q (url-encode trend)})))))))
 
@@ -83,5 +83,3 @@ relevent media."
                 (store-instagram-media trend new-datums)
                 (Thread/sleep 180000)
                 (recur new-media-q))))))
-
-

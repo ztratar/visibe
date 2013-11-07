@@ -4,7 +4,7 @@
             [clj-http.lite.client :as client]
             [visibe.feeds.twitter :as twitter]
             [visibe.feeds.flickr :as flickr]
-            [visibe.feeds.storage :refer [create-trend]]
+            [visibe.feeds.storage :refer [create-trend persist-google-trends-and-photos]]
             [visibe.state :refer [assoc-in-state! gis state]]
             [visibe.feeds.google-trends :as goog]))
 
@@ -28,31 +28,23 @@ must be stubbed out."
                      new-trends)))))
 
 (defn scrape-and-persist-trends!
-  "Scrapes trends, updates `state' with trends and the corresponding photos and perists the the data when it changes. Trends
-are tracked via twitter, and relevent tweets are persisted via `twitter/track-trend'."
+  "Main loop that starts all trend related data gathering. For each API other that google-trends we have a `track-trend' function that runs in it's own thread (a future) and persists it's own data. Google trend data is persisted in this loop."
   ;; TODO, FIXME, Fri Oct 04 2013, Francis Wolke
   
   ;; I'm being lazy right now, and not dealing with data from other countries
   ;; until it we've got the system working from end to end.
 
   ;; use `future-cancel' here and in trend-tracking. It might be worthwile to store a pointer to all launched futures so that I can kill them at the REPL.
-
-  ;; TODO, Sun Oct 27 2013, Francis Wolke
-  ;; We need to be saving these trends into mongo - the query for them shouldn't be fetching them from memory
-
-  ;; XXX, Sun Oct 27 2013, Francis Wolke
-  ;; We are also have an issue where starting up the application causes the client side to block, this is because we
-  ;; don't have any trends. This can be resolved by fetching them from mongo when we can't find them in memory, solving
-  ;; Both the speed problems and the other issues
   []
   (future
     (loop [trends #{}]
       (recur (let [new-trends (:united-states (goog/google-trends))
                    trends-and-photo-urls (mapv (fn [trend] [trend (flickr/trend->photo-url trend)]) new-trends)
                    new-trends (into {} trends-and-photo-urls)]
+               ;; persist the new hashmap of trends and their photos
+               (persist-google-trends-and-photos new-trends)
                (when (not= trends new-trends)
-                 ;; Google trends and flickr
-                 (assoc-in-state! [:google :trends] new-trends)
+                 (assoc-in-state! [:google :trends] new-trends) ; Google trends and associated flickr images
                  ;; Twitter
                  (let [new-diff-trends (set/difference (keys new-trends) (keys trends))]
                    (doseq [t new-diff-trends]
