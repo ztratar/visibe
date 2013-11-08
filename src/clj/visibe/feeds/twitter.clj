@@ -6,7 +6,7 @@
             [clj-time.coerce :refer [to-long from-long]]
             [clj-time.format :as f]
             [clj-time.core :refer [date-time]]
-            [visibe.homeless :refer [sort-datums-by-timestamp]]
+            [visibe.homeless :refer [sort-datums-by-timestamp rfc822-str->long]]
             [visibe.feeds.storage :refer [append-datums]]
             [clojure.data.codec.base64 :as b64]            
             [visibe.state :refer [state gis assoc-in-state!]]))
@@ -27,11 +27,11 @@
 ;;; we want users to have a good experience, this needs to change in the
 ;;; future.
 
-(defn twitter->rfc822
+(defn twitter-time->long
   "Accepts a twitter time string and returns a string in rfc822 format"
   [s]
   (let [[weekday month day time ? year] (clojure.string/split s #" ")]
-    (clojure.string/join " " [(str weekday ",") day month year time ?])))
+    (rfc822-str->long (clojure.string/join " " [(str weekday ",") day month year time ?]))))
 
 (defn bearer-token []
   (get-in @state [:twitter :bearer-token]))
@@ -106,7 +106,7 @@
   (-> (merge (select-keys tweet [:text :profile_image_url_https :created_at])
              (select-keys (:user tweet) [:name :screen_name]))
       (underscore->hyphen)
-      (update-in [:created-at] twitter->rfc822)))
+      (update-in [:created-at] twitter-time->long)))
 
 (defn- store-tweets
   [trend tweets]

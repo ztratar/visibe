@@ -22,7 +22,7 @@
 ':created-at' so that we can reference this data at a later date"
   [trends-and-photos-hashmap]
   (->> trends-and-photos-hashmap
-       (merge {:created-at (str (format-local-time (local-now) :date-time))})
+       (merge {:created-at (to-long (format-local-time (local-now) :date-time))})
        (c/insert "google-trends")))
 
 (defn create-trend

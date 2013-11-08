@@ -7,6 +7,7 @@
         instagram.api.endpoint)
   (:require [visibe.state :refer [assoc-in-state! gis]]
             [visibe.feeds.storage :refer [append-datums]]
+            [visibe.homeless :refer [rfc822-str->long]]
             [clj-time.coerce :refer [from-long]]
             [clojure.set :refer [rename-keys]])
   (:import instagram.callbacks.protocols.SyncSingleCallback))
@@ -71,7 +72,7 @@ relevent media."
   (-> (if (= "image" (:type m))
         (instagram-photo->datum m)
         (instagram-video->datum m))
-      (update-in [:created-at] #(str (from-long (* 1000 (read-string %)))))))
+      (update-in [:created-at] #(* 1000 (read-string %)))))
 
 (defn track-trend
   "Tracks a trend while it's still an active trend, persisting data related to it."
@@ -81,5 +82,5 @@ relevent media."
               (let [new-media-q (instagram-media trend)
                     new-datums (clojure.set/difference (set media) (set new-media-q))]
                 (store-instagram-media trend new-datums)
-                (Thread/sleep 180000)
+                (Thread/sleep 180000)   ; minutes
                 (recur new-media-q))))))
