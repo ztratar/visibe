@@ -55,7 +55,7 @@
   ;; I'm ignoring time-zones for the time being
   [[:text] String
    [:user] String
-   [:created-at] String
+   [:created-at] Long
    [:name] String
    [:screen-name] String
    [:type] keyword
@@ -70,7 +70,7 @@
 
 (def-map-schema instagram-photo-schema
   [[:type] :instagram-photo
-   [:created-at] String
+   [:created-at] Long
    [:full-name] String 
    [:id] String
    [:link] String
@@ -81,7 +81,7 @@
 
 (def-map-schema instagram-video-schema
   [[:type] :instagram-video
-   [:created-at] String
+   [:created-at] Long
    [:full-name] String
    [:id] String
    [:link] String
@@ -97,14 +97,14 @@
   {:text  (random-str 140)
    :type :tweet
    :user  (random-str 10)
-   :created-at (str (random-date-time))
+   :created-at (to-long (random-date-time))
    :name  (random-str 10)
    :screen-name  (random-str 10)
    :profile-image-url-https
    "https://si0.twimg.com/profile_images/2622165696/o20xkpll5fr57alshtnd_normal.jpeg"})
 
 (def-example-factory instagram-photo instagram-photo-schema []
-  {:created-at (str (random-date-time))
+  {:created-at (to-long (random-date-time))
    :type :instagram-photo
    :photo {:url "http://distilleryimage2.s3.amazonaws.com/dfcf86743e0f11e3880922000ae8030e_8.jpg"
            :width 640 :height 640}
@@ -123,7 +123,7 @@
    :profile-picture "http://images.ak.instagram.com/profiles/profile_2119581_75sq_1358723016.jpg"
    :username (first-name)
    :type :instagram-video
-   :created-at (str (random-date-time))
+   :created-at (to-long (random-date-time))
    :id (apply str (take 10 (repeatedly #(rand-int 42))))
    :tags (take 5 (words))})
 

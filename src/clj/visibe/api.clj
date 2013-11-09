@@ -36,7 +36,7 @@
   (update-in-state! [:app :channels channel :trends] (fn [st] (set (remove #{trend} st))))
   {:trends (get-in @state [:app :channels channel :trends])})
 
-(defn help ^{:api :websocket :doc "Returns information about the API for consumtion by  human, or near human intelligences"}
+(defn help ^{:api :websocket :doc "Returns information about the API for consumtion by human, or near human intelligences"}
   []
   (apply str (cons "The funtions you have avalible to you are:\n"
                    (interleave (repeat "\n")
@@ -69,7 +69,7 @@
   [channel]
   (future
     ;; TODO, Mon Oct 14 2013, Francis Wolke
-    ;; Move unsure computation out into it's own function and rename.
+    ;; Move `unsure' computation out into it's own function and rename.
     (loop [last-sent-datums (partition 2 (interleave (get-in @state [:app :channels channel :trends]) (repeat nil)))]
       (let [channel-context (get-in @state [:app :channels channel])]
         (cond (not (:on channel-context)) (do (Thread/sleep (/ 60000 60))
@@ -117,7 +117,7 @@
                           (= fst 'toggle-stream!)       (toggle-stream! channel)
                           (= fst 'toggle-test-mode!)    (do (toggle-test-mode! channel)
                                                             (str {:test-mode (get-in @state [:app :channels channel :test-mode])}))
-                          :else "Not a valid funtion. `help' and `doc' are not yet implemented."))))
+                          :else "Try `help'. `doc' is not yet implemented."))))
 
 (defn websocket-handler
   [request]
