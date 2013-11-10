@@ -41,13 +41,19 @@
                      :instagram-video (t/instagram-video datum)
                      :instagram-photo (t/instagram-photo datum)
                      :vine (t/vine datum)
-                     :tweet (t/tweet datum))]
+                     :tweet (t/tweet datum)
+                     (t/automagic datum))]
     (if (= "" (sel1 :#feed))
       (append! (sel1 :#feed) datum-card)
       (prepend! (sel1 :#feed) datum-card))))
 
+(defn datums-for
+  "Returns datums associated with the specified trend"
+  [trend]
+  (filter (comp (partial = trend) :trend) (gis [:datums])))
+
 (defn trend [trend]
-  ;; Swap
+  ;; Swap views
   (let [img-m ((:trends @state) trend)
         thumbnail (:thumb img-m)
         thumbnail (when thumbnail (str "http://localhost:9000/cropped-images/" thumbnail ".png"))]
@@ -55,7 +61,7 @@
 
   ;; Population and addition of logic
   (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home)))
-  (let [trend-datums (filter #(= trend (:trend %)) (:datums @state))]
+  (let [trend-datums (datums-for trend)]
     (if (empty? trend-datums)
       ;; TODO, FIXME Sun Nov 10 2013, Francis Wolke Realistially, this should
       ;; never happen (in production), but if it does, we can just display

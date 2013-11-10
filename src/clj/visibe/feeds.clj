@@ -21,7 +21,7 @@
 (defn uuid [] (str (java.util.UUID/randomUUID)))
 
 (defn write-out-as-file [buffered-file file-with-path]
-  (let [resized-file (File. (fs/new-filename file-with-path))]
+  (let [resized-file (File. file-with-path)]
     (ImageIO/write buffered-file (fs/extension file-with-path) resized-file)
     (.getAbsolutePath resized-file)))
 

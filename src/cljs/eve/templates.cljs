@@ -4,8 +4,15 @@
             [dommy.utils :as utils])
   (:require-macros [dommy.macros :as m :refer [deftemplate]]))
 
-;;; TODO, Thu Oct 17 2013, Francis Wolke
-;;; Move style information into styles.clj
+; Misc
+;*******************************************************************************
+
+(deftemplate ^{:doc "Generates a template for the supplied data structure"}
+  automagic
+  [hashmap-of-some-sort]
+  [:div.automagic-template
+   `[:ul ~(mapv (fn [[a b]] [:li [:p (str a "  " b)]])
+                (into [] hashmap-of-some-sort))]])
 
 ; Home
 ;*******************************************************************************

@@ -42,9 +42,11 @@
   (update-in-state! [:app :channels channel :trends] (fn [st] (set (remove #{trend} st))))
   {:trends (get-in @state [:app :channels channel :trends])})
 
+;;; TODO, Sun Nov 10 2013, Francis Wolke
+;;; Make `help' work dynamically
 (defn help ^{:api :websocket :doc "Returns information about the API for consumtion by human, or near human intelligences"}
   []
-  (apply str (cons "The funtions you have avalible to you are:\n"
+  (apply str (cons "The funtions you have avalible to you are NOTE THAT THIS IS NOT UP TO DATE:\n"
                    (interleave (repeat "\n")
                                ["toggle-stream!"
                                 "toggle-test-mode!"

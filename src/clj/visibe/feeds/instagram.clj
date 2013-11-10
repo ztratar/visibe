@@ -1,4 +1,4 @@
-(ns ^{:doc "..."}
+(ns ^{:doc "Boilerplate for gathering trend data from instagram"}
   visibe.feeds.instagram
   (:use instagram.oauth
         ring.util.codec
@@ -19,9 +19,9 @@
         (merge {:full-name (a [:user :full_name])
                 :profile-picture (a [:user :profile_picture])
                 :username (a [:user :username])
-                :photo (a [:images :standard_resolution])
-                :type :instagram-photo})
-        (rename-keys {:created_time :created-at}))))
+                :photo (a [:images :standard_resolution])})
+        (rename-keys {:created_time :created-at})
+        (assoc :type :instagram-photo))))
 
 (defn- instagram-video->datum [m]
   (let [a (partial get-in m)]
@@ -30,9 +30,9 @@
         (merge {:full-name (a [:user :full_name])
                 :profile-picture (a [:user :profile_picture])
                 :username (a [:user :username])
-                :video (a [:videos :standard_resolution])
-                :type :instagram-video})
-        (rename-keys {:created_time :created-at}))))
+                :video (a [:videos :standard_resolution])})
+        (rename-keys {:created_time :created-at})
+        (assoc :type :instagram-video))))
 
 (defn generate-oauth-creds! []
   (assoc-in-state! [:instagram :creds]
@@ -80,5 +80,5 @@ relevent media."
               (let [new-media-q (instagram-media trend)
                     new-datums (clojure.set/difference (set media) (set new-media-q))]
                 (store-instagram-media trend new-datums)
-                (Thread/sleep 180000)   ; minutes
+                (Thread/sleep (/ 180000 3)) ; 1 minute
                 (recur new-media-q))))))

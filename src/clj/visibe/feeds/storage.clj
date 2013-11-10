@@ -87,4 +87,4 @@ newer than those already in ':datums'"
   "Accepts a seq of trends, returns a seq of the most 20 recent datums of each type. "
   [trends]
   (reduce into (map (fn [trend] (map #(assoc % :trend trend)
-                                     (:datums (c/find-one-as-map "trends" {:trend trend})))) trends)))
+                                     (take 30 (:datums (c/find-one-as-map "trends" {:trend trend}))))) trends)))
