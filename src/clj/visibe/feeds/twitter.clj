@@ -106,7 +106,8 @@
   (-> (merge (select-keys tweet [:text :profile_image_url_https :created_at])
              (select-keys (:user tweet) [:name :screen_name]))
       (underscore->hyphen)
-      (update-in [:created-at] twitter-time->long)))
+      (update-in [:created-at] twitter-time->long)
+      (assoc :type :tweet)))
 
 (defn store-tweets
   [trend tweets]

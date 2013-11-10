@@ -12,6 +12,28 @@
             [clojure.set :refer [rename-keys]])
   (:import instagram.callbacks.protocols.SyncSingleCallback))
 
+(defn- instagram-photo->datum [m]
+  (let [a (partial get-in m)]
+    (-> m
+        (select-keys [:tags :id :created_time :link])
+        (merge {:full-name (a [:user :full_name])
+                :profile-picture (a [:user :profile_picture])
+                :username (a [:user :username])
+                :photo (a [:images :standard_resolution])
+                :type :instagram-photo})
+        (rename-keys {:created_time :created-at}))))
+
+(defn- instagram-video->datum [m]
+  (let [a (partial get-in m)]
+    (-> m
+        (select-keys [:tags :id :created_time :link])
+        (merge {:full-name (a [:user :full_name])
+                :profile-picture (a [:user :profile_picture])
+                :username (a [:user :username])
+                :video (a [:videos :standard_resolution])
+                :type :instagram-video})
+        (rename-keys {:created_time :created-at}))))
+
 (defn generate-oauth-creds! []
   (assoc-in-state! [:instagram :creds]
                    (make-oauth-creds (gis [:instagram :client-id])
@@ -37,34 +59,7 @@ relevent media."
 (defn store-instagram-media
   "Instagram returns their datums with the newest first"
   [trend datums]
-  (let [
-        ;; XXX, Thu Oct 24 2013, Francis Wolke
-        ;; UNIX time is in seconds, whereas java time is in milliseconds. To compenstate,
-        ;; we multiply by 1000.
-        datums (map (fn [d] ) datums)]
-    (append-datums trend datums)))
-
-(defn- instagram-photo->datum [m]
-  (let [a (partial get-in m)]
-    (-> m
-        (select-keys [:tags :id :created_time :link])
-        (merge {:full-name (a [:user :full_name])
-                :profile-picture (a [:user :profile_picture])
-                :username (a [:user :username])
-                :photo (a [:images :standard_resolution])
-                :type :instagram-photo})
-        (rename-keys {:created_time :created-at}))))
-
-(defn- instagram-video->datum [m]
-  (let [a (partial get-in m)]
-    (-> m
-        (select-keys [:tags :id :created_time :link])
-        (merge {:full-name (a [:user :full_name])
-                :profile-picture (a [:user :profile_picture])
-                :username (a [:user :username])
-                :video (a [:videos :standard_resolution])
-                :type :instagram-video})
-        (rename-keys {:created_time :created-at}))))
+  (append-datums trend datums))
 
 (defn- instagram-media->datum
   "Accepts and instagram media map and returns it's essential constituents."
@@ -72,6 +67,9 @@ relevent media."
   (-> (if (= "image" (:type m))
         (instagram-photo->datum m)
         (instagram-video->datum m))
+      ;; NOTE, XXX, Thu Oct 24 2013, Francis Wolke
+      ;; UNIX time is in seconds, whereas java time is in milliseconds. To compenstate,
+      ;; we multiply by 1000.
       (update-in [:created-at] #(* 1000 (read-string %)))))
 
 (defn track-trend

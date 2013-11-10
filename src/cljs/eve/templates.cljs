@@ -83,7 +83,7 @@
      [:h1 "HOME"]]
     [:div#title
      [:h1#visibe-title "VISIBE"]
-     [:img.trend-img {:src image-url
+     [:img.trend-img {:src (str "http://localhost:9000/cropped-images/" image-url)
                       :width "170px" :height "170px"}]
      [:h1#trend-title trend]]]
    [:ul#feed]])

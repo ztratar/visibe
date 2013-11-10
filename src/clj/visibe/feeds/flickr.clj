@@ -67,9 +67,3 @@ Relevent page: http://www.flickr.com/services/api/misc.urls.html"}
                         photos-essentials)
         valid-url (some valid-url? photo-urls)]
     valid-url))
-
-
-
-
-
-

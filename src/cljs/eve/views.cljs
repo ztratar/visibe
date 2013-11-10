@@ -27,10 +27,11 @@
     (swap-view! (t/home trends))
     (let [trends-list (m/sel1 :#trends)]
       (doseq [trend trends]
-        (let [trend-node (t/trend-card trend)]
-          (dommy/append! trends-list trend-node)
-          (dommy/set-style! trend-node :background (str "url(" (trend-m trend) ")"))
-          (dommy/listen! trend-node :click (fn [& _] (navigate! :trend trend))))))))
+        (let [trend-card (t/trend-card trend)
+              trend-card-background (str "url(" (:full (trend-m trend)) ")")]
+          (dommy/append! trends-list trend-card)
+          (dommy/set-style! trend-node :background trend-card-background)
+          (dommy/listen! trend-card :click (fn [& _] (navigate! :trend trend))))))))
 
 ; Trend
 ;*******************************************************************************
@@ -46,9 +47,16 @@
       (prepend! (sel1 :#feed) datum-card))))
 
 (defn trend [trend]
-  (swap-view! (t/trend trend ((:trends @state) trend)))
+  (swap-view! (t/trend trend (:thumb ((:trends @state) trend))))
   (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home)))
-  (doseq [d (:datums @state)] (add-new-datum! d)))
+  (let [trend-datums (filter #(= trend (:trend %)) (:datums @state))]
+    (if (empty? trend-datums)
+      ;; TODO, FIXME Sun Nov 10 2013, Francis Wolke Realistially, this should
+      ;; never happen (in production), but if it does, we can just display
+      ;; another trend (that has some dautms associated with it)
+      (append! (sel1 :#feed) (m/node [:h1 "Hate to dissapoint, but there isn't any info on this trend right now."]))
+      (doseq [d trend-datums]
+        (add-new-datum! d)))))
 
 (defn feed-update! [key identify old new]
   (case (:view @state)

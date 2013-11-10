@@ -26,32 +26,34 @@
 (def send (chan))
 (def receive (chan))
 
-(defn process-socket-data []
+(defn establish-ws-event-loop! []
   (go
    (while true
      (let [data (<! receive)
            msg (r/read-string (str (.-data data)))]
        (case (:type msg)
+
+         ;; NOTE, Sun Nov 10 2013, Francis Wolke
+         ;; These two are conceptually the same, shouldn't the code reflect that?
+         :seed-datums (update-in-state! [:datums] (partial into (:data msg)))
          :datums (update-in-state! [:datums] (partial into (:data msg)))
-         :new-trends (console/error "we have new trends, but are not currently dealing with them.")
+
+         :current-trends (assoc-in-state! [:trends] (:data msg))
          :print (console/log (:data msg))
          :else (console/log (:data msg)))))))
 
 (defn ws-connect! []
   (let [ws (js/WebSocket. "ws://localhost:9000/ws")
         _ (set! (.-onerror ws) #(console/error "WebSocket: " %))
-        _ (set! (.-onmessage ws) (fn [msg] (put! receive msg)))]
-    (assoc-in-state! [:websocket-connection] ws)))
+        _ (set! (.-onmessage ws) (fn [msg] (put! receive msg)))
+        _ (set! (.-onopen ws) (fn [& _] (.send ws "(current-trends)")))]
+    (assoc-in-state! [:websocket-connection] ws)
+    (establish-ws-event-loop!)))
 
 (defn wsc [f]
   (if-let [conn (:websocket-connection @state)]
     (.send conn (str f))
     (console/error "You must establish a WebSocket connection"))) 
-
-(defn update-current-trends! []
-  (go (let [response (<! (http/post "http://localhost:9000/api/current/trends"
-                                    {:headers {"content-type" "application/data"}}))]
-        (assoc-in-state! [:trends] (r/read-string (:body response)))))) 
 
 (defn route->fn-name [sym]
   (clojure.string/replace (str sym) "/" "-"))
@@ -61,9 +63,7 @@
 
 (defn bootstrap! []
   (set! (-> js/videojs (.-options) (.-flash) (.-swf)) "js/video-js/video-js.swf")
-  (update-current-trends!)
   (ws-connect!)
-  (process-socket-data)
   (add-watch state :feed feed-update!)
   (let [ch (chan)]
     (go (loop [v (:trends @state)]

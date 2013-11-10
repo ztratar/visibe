@@ -8,7 +8,6 @@
 (def state (atom {:view :home
                   :trends {} 
                   :websocket-connection nil
-                  :websocket-functions #{}
                   :last-datum nil
                   :datums []}))
 

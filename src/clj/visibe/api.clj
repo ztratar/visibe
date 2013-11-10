@@ -12,6 +12,18 @@
 ; WebSockets API
 ;*******************************************************************************
 
+(defn current-trends
+  ^{:api :websocket
+    :doc "Returns current google trends for specified region along with their associated flickr urls"}
+  []
+  (gis [:google :trends]))
+
+;; (defn init-data
+;;   ^{:api :websocket
+;;     :doc "Sends ~40 datums per trends"}
+;;   []
+;;   ())
+
 (defn ^{:api :websocket :doc "Sends generated test data instead of whatever"}
   toggle-stream!
   [channel]
@@ -52,9 +64,11 @@
 ;*******************************************************************************
 
 ;;; TODO, Sun Nov 10 2013, Francis Wolke
-;;; A community clojurescript websocket implementation exists. Use that instead.
+;;; A community websocket implementation exists. Use that instead.
+;;; http://cljwamp.us/
 
 (defn ds->ws-message
+  "[d]ata [structure] -> websocket message"
   ([ds] (ds->ws-message :print ds)) 
   ([type ds] (str {:type type :data ds})))
 
@@ -66,19 +80,21 @@
            last-sent-datums (partition 2 (interleave (get-in @state [:app :channels channel :trends]) (repeat nil)))]
       (let [channel-context (get-in @state [:app :channels channel])
             new-google-trends (gis [:google :trends])]
-        ;; Should we send new trends data?
-        (when-not (= new-google-trends google-trends)
-          (hk/send! channel (ds->ws-message :new-trends new-google-trends)))
 
-        ;; If this is the first call, supply started data
+        ;; IFF this is the first call, then send init data
         (when (= {} google-trends)
-          (intial-trend-datums (keys new-google-trends)))
+          (hk/send! channel (ds->ws-message :seed-datums
+                             (intial-trend-datums (keys new-google-trends)))))
 
         (cond (not (:on channel-context)) (do (Thread/sleep (/ 60000 60))
                                               (recur last-sent-datums
                                                      (gis [:google :trends])))
               ;; Test Mode
-              (:test-mode channel-context) (do (hk/send! channel (ds->ws-message :datums (n-sorted-datums 5)))
+              ;; XXX, FIXME Sun Nov 10 2013, Francis Wolke
+              ;; I'm simply hacking in the new data representation because I don't feel like changing the schemas at the moment.
+              ;; And they really need to be unifed anyway.
+              (:test-mode channel-context) (do (hk/send! channel (ds->ws-message :datums (map #(assoc % :trend "Justin Bieber")
+                                                                                              (n-sorted-datums 5))))
                                                (Thread/sleep (/ 60000 60))
                                                (recur last-sent-datums
                                                       (gis [:google :trends])))
@@ -114,15 +130,17 @@
   
   (when-not (get-in @state [:app :channels channel])
     (register-new-channel! channel))
+
   (let [ds (read-string data)
         fst (first ds)]
-    (ds->ws-message (cond (= fst 'add-trend-stream!)    (add-trend-stream! channel (second ds))
-                          (= fst 'remove-trend-stream!) (remove-trend-stream! channel (second ds))
-                          (= fst 'help)                 (help)
-                          (= fst 'toggle-stream!)       (toggle-stream! channel)
-                          (= fst 'toggle-test-mode!)    (do (toggle-test-mode! channel)
-                                                            (str {:test-mode (get-in @state [:app :channels channel :test-mode])}))
-                          :else "Try `help'. `doc' is not yet implemented."))))
+    (cond (= fst 'add-trend-stream!)    (ds->ws-message (add-trend-stream! channel (second ds)))
+          (= fst 'remove-trend-stream!) (ds->ws-message (remove-trend-stream! channel (second ds)))
+          (= fst 'current-trends)       (ds->ws-message :current-trends (current-trends))
+          (= fst 'help)                 (ds->ws-message (help))
+          (= fst 'toggle-stream!)       (ds->ws-message (toggle-stream! channel))
+          (= fst 'toggle-test-mode!)    (ds->ws-message (do (toggle-test-mode! channel)
+                                                            (str {:test-mode (get-in @state [:app :channels channel :test-mode])})))
+          :else "Try `help'. `doc' is not yet implemented.")))
 
 (defn websocket-handler
   [request]
@@ -146,12 +164,6 @@
 
 ; HTTP
 ;*******************************************************************************
-
-(defn current-trends
-  "Returns current google trends for specified region along with their
-associated flickr urls"
-  []
-  (get-in @state [:google :trends]))
 
 (defn regions
   "Returns trending regions"
