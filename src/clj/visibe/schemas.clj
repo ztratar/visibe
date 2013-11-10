@@ -139,4 +139,4 @@
 
 (defn n-datums
   [n]
-  (take n (set (into (n-sorted-tweets n) (n-sorted-instagrams n)))))
+  (take n (set (into (n-tweets n) (n-instagrams n)))))

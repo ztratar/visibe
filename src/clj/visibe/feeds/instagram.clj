@@ -61,7 +61,7 @@ relevent media."
   [trend datums]
   (append-datums trend datums))
 
-(defn- instagram-media->datum
+(defn- instagram-media->essentials
   "Accepts and instagram media map and returns it's essential constituents."
   [m]
   (-> (if (= "image" (:type m))
@@ -77,7 +77,7 @@ relevent media."
   [trend]
   (future (loop [media #{}]
             (when (some #{trend} (keys (gis [:google :trends])))
-              (let [new-media-q (instagram-media trend)
+              (let [new-media-q (map instagram-media->essentials (instagram-media trend))
                     new-datums (clojure.set/difference (set media) (set new-media-q))]
                 (store-instagram-media trend new-datums)
                 (Thread/sleep (/ 180000 3)) ; 1 minute

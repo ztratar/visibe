@@ -9,7 +9,7 @@
             [visibe.feeds.twitter :refer [new-bearer-token!]]
             [visibe.feeds.instagram :as instagram]
             [visibe.feeds :as feeds]
-            [visibe.api :refer [api-routes websocket-handler]]
+            [visibe.api :refer [websocket-handler]]
             [cheshire.core :refer [decode]]
             [visibe.state :refer [state gis assoc-in-state! read-config!]]
             [monger.core :as mg]
@@ -32,7 +32,6 @@
 (defroutes app-routes
   (GET "/" [] (index))
   (GET "/ws" [] websocket-handler)
-  api-routes
   ;; Defaults to PROJECT_ROOT/resouces/public 
   (route/resources "/"))             
 

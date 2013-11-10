@@ -3,7 +3,7 @@
   (:require [org.httpkit.server :as hk]
             [visibe.state :refer [state assoc-in-state! update-in-state! gis]]
             [visibe.feeds.google-trends :refer [google-mapping]]
-            [visibe.schemas :refer [n-sorted-datums n-sorted-tweets]]
+            [visibe.schemas :refer [n-datums n-tweets]]
             [visibe.feeds.storage :refer [previous-50-datums after-datum intial-trend-datums]]
             [compojure.route :as route]
             [compojure.core :refer :all]
@@ -90,7 +90,7 @@
               ;; I'm simply hacking in the new data representation because I don't feel like changing the schemas at the moment.
               ;; And they really need to be unifed anyway.
               (:test-mode channel-context) (do (hk/send! channel (ds->ws-message :datums (map #(assoc % :trend "Justin Bieber")
-                                                                                              (n-sorted-datums 5))))
+                                                                                              (n-datums 5))))
                                                (Thread/sleep (/ 60000 60))
                                                (recur last-sent-datums
                                                       (gis [:google :trends])))
@@ -103,7 +103,7 @@
                               
                           (hk/send! channel
                                     (ds->ws-message :datums (partition 2 (interleave (get-in @state [:app :channels channel :trends])
-                                                                                     (repeat (n-sorted-tweets 5))))))
+                                                                                     (repeat (n-tweets 5))))))
                           ;; one minute
                           (Thread/sleep (/ 60000 60))
                           (recur to-recur

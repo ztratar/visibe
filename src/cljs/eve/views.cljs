@@ -39,9 +39,13 @@
 (defn add-new-datum! [{type :type id :id :as datum}]
   (let [datum-card (case type
                      :instagram-video (t/instagram-video datum)
+                     "instagram-video" (t/instagram-video datum)
                      :instagram-photo (t/instagram-photo datum)
+                     "instagram-photo" (t/instagram-photo datum)
                      :vine (t/vine datum)
+                     "vine" (t/vine datum)
                      :tweet (t/tweet datum)
+                     "tweet" (t/tweet datum)
                      (t/automagic datum))]
     (if (= "" (sel1 :#feed))
       (append! (sel1 :#feed) datum-card)
