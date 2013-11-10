@@ -4,9 +4,15 @@
             [clj-http.lite.client :as client]
             [visibe.feeds.twitter :as twitter]
             [visibe.feeds.flickr :as flickr]
+            [image-resizer.crop :refer :all]
+            [image-resizer.core :refer :all]
+            [image-resizer.format :as format]
             [visibe.feeds.storage :refer [create-trend persist-google-trends-and-photos]]
-            [visibe.state :refer [assoc-in-state! gis state]]
-            [visibe.feeds.google-trends :as goog]))
+            [visibe.state :refer [assoc-in-state! state]]
+            [visibe.feeds.google-trends :as goog])
+  (:import java.net.URL
+           java.io.File
+           javax.imageio.ImageIO))
 
 ;;; NOTE, Fri Oct 18 2013, Francis Wolke
 
@@ -15,6 +21,25 @@
 ;;; the images that best represent the trends. We just present them with a
 ;;; webpage that updates with the trends, and they select the images they find
 ;;; fits best.
+
+(defn uuid [] (str (java.util.UUID/randomUUID)))
+
+(defn img-url->thumbnail-path
+  ;; TODO, Sun Nov 10 2013, Francis Wolke
+  ;; Center the cropping.
+  "Downloads the appropriate image, then creates a cropped file for it on our
+local server, returning the path to the file. The cropped file is a square,
+where it's sides are the length of the shortest side of the supplied file."
+  [url]
+  (let [img (ImageIO/read (URL. url))
+        [w h] [(.getWidth img) (.getHeight img)]]
+    (when-not (= w h)
+      (let [cropped-img (if (> w h)
+                          ((crop-fn 0 0 h h) img)  ; horizontially
+                          ((crop-fn 0 0 w w) img)) ; vertically
+            u (uuid)]
+        
+        (format/as-file cropped-img (str "resources/public/cropped-images/" u ".png"))))))
 
 (defn scrape-trends!
   "Scrapes trends, updates `state' but does not persist the data. Any datum feed

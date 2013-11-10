@@ -31,6 +31,7 @@
                  [com.flickr4java/flickr "2.5"]
                  [domina "1.0.2-SNAPSHOT"]
                  [garden "1.1.3"]
+                 [image-resizer "0.1.6"]
                  [hiccup "1.0.3"]
                  [http-kit "2.1.4"]
                  [org.clojars.runa/clj-schema "0.9.4"]
