@@ -11,9 +11,3 @@
   "Tue, 08 Oct 2013 04:08:48 +0000 => 1381205328000"
   [s]
   (to-long (f/parse (f/formatters :rfc822) s)))
-
-(defn sort-datums-by-timestamp
-  "Sorts datums by timstamp, oldest first"
-  [datums]
-  (sort-by #(date-time-str->long (:created-at %)) datums))
-

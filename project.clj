@@ -69,7 +69,7 @@
                (defn browser-repl []
                  (pb/cljs-repl :repl-env (brepl/repl-env :port 8002)))]
 
-  :plugins [[lein-cljsbuild "0.3.3"]]
+  :plugins [[lein-cljsbuild "0.3.3"] [codox "0.6.6"]]
 
   :cljsbuild {:repl-listen-port 8002
               

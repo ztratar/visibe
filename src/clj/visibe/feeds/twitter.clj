@@ -6,7 +6,7 @@
             [clj-time.coerce :refer [to-long from-long]]
             [clj-time.format :as f]
             [clj-time.core :refer [date-time]]
-            [visibe.homeless :refer [sort-datums-by-timestamp rfc822-str->long]]
+            [visibe.homeless :refer [rfc822-str->long]]
             [visibe.feeds.storage :refer [append-datums]]
             [clojure.data.codec.base64 :as b64]            
             [visibe.state :refer [state gis assoc-in-state!]]))
@@ -108,13 +108,14 @@
       (underscore->hyphen)
       (update-in [:created-at] twitter-time->long)))
 
-(defn- store-tweets
+(defn store-tweets
   [trend tweets]
-  (append-datums trend (sort-datums-by-timestamp (map tweet->essentials tweets))))
+  (append-datums trend (sort-by :created-at (map tweet->essentials tweets))))
 
 (defn track-trend
-  "Tracks a trend while it's still an active trend. Runs in future, which 
-returns `nil` when trend is no longer in `(current-trends)'"
+  "Tracks a trend while it's still an 'active' trend. Runs in future, which 
+returns `nil` when trend is no longer 'active'. 'Active' is defined as being in
+`(current-trends)'"
   [trend]
   ;; NOTE, Fri Oct 04 2013, Francis Wolke
   ;; For the time being, I don't want to deal with the full stream.

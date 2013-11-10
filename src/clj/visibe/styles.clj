@@ -107,6 +107,12 @@
        [:#header {:width "100%"
                   :height "300px"}]
 
+       [:.trend-img {:border-width "20px"
+                     :margin-bottom "50px"
+                     :border-radius "50%"
+                     :background-color "rgba(0,0,0,0.0)"
+                     :border-color timeline-emphasis}]
+
        [:#home-button {:width "146px"
                        :height "70px"
                        :border-radius "10px"

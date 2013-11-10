@@ -1,10 +1,10 @@
 (ns ^{:doc "Websocket and HTTP API."}
   visibe.api
   (:require [org.httpkit.server :as hk]
-            [visibe.state :refer [state assoc-in-state! update-in-state!]]
+            [visibe.state :refer [state assoc-in-state! update-in-state! gis]]
             [visibe.feeds.google-trends :refer [google-mapping]]
             [visibe.schemas :refer [n-sorted-datums n-sorted-tweets]]
-            [visibe.feeds.storage :refer [previous-50-datums after-datum]]
+            [visibe.feeds.storage :refer [previous-50-datums after-datum intial-trend-datums]]
             [compojure.route :as route]
             [compojure.core :refer :all]
             [compojure.handler :as handler]))
@@ -51,14 +51,8 @@
 ; WebSockets Boilerplate
 ;*******************************************************************************
 
-;;; Note, Sat Oct 12 2013, Francis Wolke
-
-;;; Make detailed notes about how this websocket scheme works so that it may be
-;;; citiqued without others having to read the code. Additionally, this will
-;;; allow me to more easily identify it's flaws.
-
-;;; TODO, Sat Oct 12 2013, Francis Wolke
-;;; Add client-side tests for API.
+;;; TODO, Sun Nov 10 2013, Francis Wolke
+;;; A community clojurescript websocket implementation exists. Use that instead.
 
 (defn ds->ws-message
   ([ds] (ds->ws-message :print ds)) 
@@ -68,29 +62,40 @@
   "Provides a live data stream on trends in ':trends' of a channel's context. Terminates with the channel."
   [channel]
   (future
-    ;; TODO, Mon Oct 14 2013, Francis Wolke
-    ;; Move `unsure' computation out into it's own function and rename.
-    (loop [last-sent-datums (partition 2 (interleave (get-in @state [:app :channels channel :trends]) (repeat nil)))]
-      (let [channel-context (get-in @state [:app :channels channel])]
+    (loop [google-trends {}
+           last-sent-datums (partition 2 (interleave (get-in @state [:app :channels channel :trends]) (repeat nil)))]
+      (let [channel-context (get-in @state [:app :channels channel])
+            new-google-trends (gis [:google :trends])]
+        ;; Should we send new trends data?
+        (when-not (= new-google-trends google-trends)
+          (hk/send! channel (ds->ws-message :new-trends new-google-trends)))
+
+        ;; If this is the first call, supply started data
+        (when (= {} google-trends)
+          (intial-trend-datums (keys new-google-trends)))
+
         (cond (not (:on channel-context)) (do (Thread/sleep (/ 60000 60))
-                                              (recur last-sent-datums))
+                                              (recur last-sent-datums
+                                                     (gis [:google :trends])))
               ;; Test Mode
               (:test-mode channel-context) (do (hk/send! channel (ds->ws-message :datums (n-sorted-datums 5)))
                                                (Thread/sleep (/ 60000 60))
-                                               (recur last-sent-datums))
+                                               (recur last-sent-datums
+                                                      (gis [:google :trends])))
               ;; Production
               :else (do (let [dts (map (fn [[tnd l-datum]] [tnd (after-datum tnd l-datum)])
                                        last-sent-datums)
                               ;; Remove trends without new data
                               dts (remove (fn [[_ d]] (nil? d)) dts)
                               to-recur (map (fn [[tnd datums]] [tnd (last datums)]) dts)]
-                          
+                              
                           (hk/send! channel
-                                    (ds->ws-message :datums (partition 2 (interleave (get-in @state [:app :channels channel :trends]) ;
+                                    (ds->ws-message :datums (partition 2 (interleave (get-in @state [:app :channels channel :trends])
                                                                                      (repeat (n-sorted-tweets 5))))))
                           ;; one minute
                           (Thread/sleep (/ 60000 60))
-                          (recur to-recur))))))))
+                          (recur to-recur
+                                 (gis [:google :trends])))))))))
 
 (defn register-new-channel!
   "Adds new channel and associated context to `state'"

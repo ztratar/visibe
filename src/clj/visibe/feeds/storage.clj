@@ -15,7 +15,8 @@
   "'%' is an escape character."
   [{username :username password :password host :host port :port database :database}]
   (let [password (if (some #{\%} password)
-                   (clojure.string/replace password "%" "%25") password)]
+                   (clojure.string/replace password "%" "%25")
+                   password)]
     (str "mongodb://" username ":" password "@" host ":" port "/" database)))
 
 (defn persist-google-trends-and-photos
@@ -56,7 +57,7 @@ newer than those already in ':datums'"
   (let [{datums :datums :as m} (c/find-one-as-map "trends" {:trend trend})]
     (c/update "trends" m (assoc m :datums (into datums new-datums)))))
 
-nil(defn previous-50-datums 
+(defn previous-50-datums 
   "Retuns 50 datums chronologically previous to the supplied datum"
   [trend datum]
   (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})
@@ -81,3 +82,8 @@ nil(defn previous-50-datums
   "Trends and their associated images"
   [trend-and-images-hashmap]
   (c/insert "google-trends" trend-and-images-hashmap))
+
+(defn intial-trend-datums
+  "Accepts a seq of trends, returns a seq of the most 20 recent datums of each type. "
+  [trends]
+  (reduce into (map (fn [trend] {trend (:datums (c/find-one-as-map "trends" {:trend trend}))}) trends)))

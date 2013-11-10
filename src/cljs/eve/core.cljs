@@ -33,6 +33,7 @@
            msg (r/read-string (str (.-data data)))]
        (case (:type msg)
          :datums (update-in-state! [:datums] (partial into (:data msg)))
+         :new-trends (console/error "we have new trends, but are not currently dealing with them.")
          :print (console/log (:data msg))
          :else (console/log (:data msg)))))))
 

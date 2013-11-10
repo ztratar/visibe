@@ -23,8 +23,11 @@
           (include-css "css/fonts.css" "css/style.css"
                        ;; "css/video-js.min.css" 
                        "css/video-js.css")]
-         [:body (include-js "js/libs/d3.v3.min.js" "js/visibe_dbg.js" "js/libs/video-js/video.js"
-                            "js/libs/moment-with-langs.js")
+         [:body (include-js "js/libs/d3.v3.min.js"
+                            "https://apis.google.com/js/plusone.js"
+                            "js/visibe_dbg.js" "js/libs/video-js/video.js"
+                            ;; "js/libs/moment-with-langs.js"
+                            )
           [:div#content]]))
 
 (defroutes app-routes

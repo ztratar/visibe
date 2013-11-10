@@ -3,8 +3,7 @@
   (:use faker.name
         faker.lorem)
   (:require [clj-schema.example :refer :all]
-            [clj-time.core :refer [date-time]]
-            [visibe.homeless :refer [sort-datums-by-timestamp]]
+            [clj-time.core :refer [date-time]] 
             [clj-time.coerce :refer [to-long from-long]]
             [clj-time.format :as f]
             [clj-schema.schema :refer :all]

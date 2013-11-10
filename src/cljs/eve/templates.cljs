@@ -84,8 +84,33 @@
     [:div#title
      [:h1#visibe-title "VISIBE"]
      [:img.trend-img {:src image-url
-                      :width "170px" :height "170px"
-                      :style {:margin-bottom "50px" :border-radius "85px"
-                              :background-color "rgba(0,0,0,0.0)"}}]
+                      :width "170px" :height "170px"}]
      [:h1#trend-title trend]]]
    [:ul#feed]])
+
+;; (deftemplate datum-share-buttons [datum-url]
+;;   [:div.datum-share-buttons
+;;    ;; Twitter
+;;    [:a.twitter-share-button {:href "https://twitter.com/share"
+;;                              :data-url datum-url
+;;                              :target "_blank"} "Tweet"]
+;;    [:script "!function(d,s,id){var    js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document,
+;;     'script', 'twitter-wjs');"]
+;;    ;; G+
+   
+;;    ;; Facebook
+;;    ])
+
+;; (append! (sel1 :#feed)
+;;          (m/node [:div {:class "g-plus"
+;;                         :data-action "share"
+;;                         :data-height 24
+;;                         :data-href "http://www.visibe.com"}]))
+
+;; (append! (sel1 :#feed)
+;;          (m/node [:script {:type "text/javascript"}
+;;                   "(function() {
+;;     var po = document.createElement('script'); po.type = 'text/po; javascript't.async = true;
+;;     po.src = 'https://apis.google.com/js/plusone.js';
+;;     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+;;   })();"]))
