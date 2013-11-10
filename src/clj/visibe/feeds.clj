@@ -4,18 +4,26 @@
             [clj-http.lite.client :as client]
             [visibe.feeds.instagram :as instagram]
             [visibe.feeds.twitter :as twitter]
+            [image-resizer.fs :as fs]
+            [image-resizer.core :refer :all]
             [visibe.feeds.flickr :as flickr]
             [image-resizer.crop :refer :all]
             [image-resizer.core :refer :all]
-            [image-resizer.format :as format]
             [visibe.feeds.storage :refer [create-trend persist-google-trends-and-photos]]
             [visibe.state :refer [assoc-in-state! state]]
             [visibe.feeds.google-trends :as goog])
   (:import java.net.URL
+           java.io.ByteArrayOutputStream
+           java.io.ByteArrayInputStream
            java.io.File
            javax.imageio.ImageIO))
 
 (defn uuid [] (str (java.util.UUID/randomUUID)))
+
+(defn write-out-as-file [buffered-file file-with-path]
+  (let [resized-file (File. (fs/new-filename file-with-path))]
+    (ImageIO/write buffered-file (fs/extension file-with-path) resized-file)
+    (.getAbsolutePath resized-file)))
 
 (defn img-url->thumbnail-path
   ;; TODO, Sun Nov 10 2013, Francis Wolke
@@ -31,7 +39,7 @@ where it's sides are the length of the shortest side of the supplied file."
                           ((crop-fn 0 0 h h) img)  ; horizontially
                           ((crop-fn 0 0 w w) img)) ; vertically
             u (uuid)]
-        (format/as-file cropped-img (str "resources/public/cropped-images/" u ".png"))
+        (write-out-as-file cropped-img (str "resources/public/cropped-images/" u ".png"))
         u))))
 
 (defn scrape-trends!
@@ -69,8 +77,7 @@ loop."
   []
   (future
     (loop [trends #{}]
-      (recur (let [new-trends (:united-states (goog/google-trends))
-                   new-trends (trends->trends-with-photo-information new-trends)]
+      (recur (let [new-trends (trends->trends-with-photo-information (:united-states (goog/google-trends)))]
                ;; persist the new hashmap of trends and their photos
                (persist-google-trends-and-photos new-trends)
                (when (not= trends new-trends)

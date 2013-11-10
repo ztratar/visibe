@@ -109,6 +109,7 @@
 
        [:.trend-img {:border-width "20px"
                      :margin-bottom "50px"
+                     :width "170px" :height "170px"
                      :border-radius "50%"
                      :background-color "rgba(0,0,0,0.0)"
                      :border-color timeline-emphasis}]

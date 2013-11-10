@@ -30,7 +30,7 @@
         (let [trend-card (t/trend-card trend)
               trend-card-background (str "url(" (:full (trend-m trend)) ")")]
           (dommy/append! trends-list trend-card)
-          (dommy/set-style! trend-node :background trend-card-background)
+          (dommy/set-style! trend-card :background trend-card-background)
           (dommy/listen! trend-card :click (fn [& _] (navigate! :trend trend))))))))
 
 ; Trend
@@ -47,7 +47,13 @@
       (prepend! (sel1 :#feed) datum-card))))
 
 (defn trend [trend]
-  (swap-view! (t/trend trend (:thumb ((:trends @state) trend))))
+  ;; Swap
+  (let [img-m ((:trends @state) trend)
+        thumbnail (:thumb img-m)
+        thumbnail (when thumbnail (str "http://localhost:9000/cropped-images/" thumbnail ".png"))]
+    (swap-view! (t/trend trend (if thumbnail thumbnail (:full img-m)))))
+
+  ;; Population and addition of logic
   (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home)))
   (let [trend-datums (filter #(= trend (:trend %)) (:datums @state))]
     (if (empty? trend-datums)
