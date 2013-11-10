@@ -18,12 +18,6 @@
   []
   (gis [:google :trends]))
 
-;; (defn init-data
-;;   ^{:api :websocket
-;;     :doc "Sends ~40 datums per trends"}
-;;   []
-;;   ())
-
 (defn ^{:api :websocket :doc "Sends generated test data instead of whatever"}
   toggle-stream!
   [channel]
@@ -147,30 +141,3 @@
   (hk/with-channel request channel
     (hk/on-close channel (fn [& _] (destroy-channel! channel)))
     (hk/on-receive channel (fn [data] (hk/send! channel (ws-api-call channel data))))))
-
-; HTTP Boilerplate
-;*******************************************************************************
-
-(defn fn-name->route [sym]
-  (clojure.string/replace (str sym) "-" "/"))
-
-(defmacro expose [sym]
-  `(~'POST ~(str "/api/" (fn-name->route sym))
-           {~'body :body}
-           (str (let [~'body (when ~'body (read-string (slurp ~'body)))]
-                  (if ~'body
-                    (apply ~sym ~'body)
-                    (~sym))))))
-
-; HTTP
-;*******************************************************************************
-
-(defn regions
-  "Returns trending regions"
-  []
-  (vals google-mapping))
-
-(defroutes api-routes
-  (expose current-trends)
-  (expose regions)
-  (expose previous-50-datums))
