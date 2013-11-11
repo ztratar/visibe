@@ -78,21 +78,20 @@
              left? true]
         (when-not (empty? d)
           (if left?
-            (add-new-datum! d :left)
-            (add-new-datum! d :right))
+            (add-new-datum! (first d) :left)
+            (add-new-datum! (first d) :right))
           (recur (rest d)
                  (not left?)))))))
 
-(defn feed-update! [key identify old new]
-  (case (:view @state)
-    :trend (let [to-add (take-while (partial not= (first (:datums old)))
-                                    (:datums new))]
-             ;; XXX, Sun Nov 10 2013, Francis Wolke
-             ;; Add-new-datum! should have the logic for nazi stepping. 
-             #_(doseq [d (reverse to-add)]
-               
-               (add-new-datum! d )))
-    (console/log "Feed update NoOp")))
+;; (defn feed-update! [key identify old new]
+;;   (case (:view @state)
+;;     :trend (let [to-add (take-while (partial not= (first (:datums old)))
+;;                                     (:datums new))]
+;;              ;; XXX, Sun Nov 10 2013, Francis Wolke
+;;              ;; Add-new-datum! should have the logic for nazi stepping. 
+;;              #_(doseq [d (reverse to-add)]
+;;                (add-new-datum! d )))
+;;     (console/log "Feed update NoOp")))
 
 ; misc
 ;*******************************************************************************
