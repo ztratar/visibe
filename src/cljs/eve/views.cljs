@@ -36,7 +36,7 @@
 ; Trend
 ;*******************************************************************************
 
-(defn add-new-datum! [{type :type id :id :as datum}]
+(defn add-new-datum! [{type :type id :id :as datum} & orientation]
   (let [datum-card (case type
                      :instagram-video (t/instagram-video datum)
                      "instagram-video" (t/instagram-video datum)
@@ -47,9 +47,12 @@
                      :tweet (t/tweet datum)
                      "tweet" (t/tweet datum)
                      (t/automagic datum))]
-    (if (= "" (sel1 :#feed))
-      (append! (sel1 :#feed) datum-card)
-      (prepend! (sel1 :#feed) datum-card))))
+    (cond (= "" (sel1 :#feed-left) (sel1 :#feed-right)) (append! (sel1 :#feed-left) datum-card)
+          (= "" (sel1 :#feed-left)) (append! (sel1 :#feed-left) datum-card)
+          (= "" (sel1 :#feed-right)) (append! (sel1 :#feed-right) datum-card)
+          (= :left orientation) (prepend! (sel1 :#feed-left) datum-card)
+          (= :right orientation) (prepend! (sel1 :#feed-right) datum-card)
+          :else (prepend! (sel1 :#feed-right) datum-card))))
 
 (defn datums-for
   "Returns datums associated with the specified trend"
@@ -71,15 +74,24 @@
       ;; never happen (in production), but if it does, we can just display
       ;; another trend (that has some dautms associated with it)
       (append! (sel1 :#feed) (m/node [:h1 "Hate to dissapoint, but there isn't any info on this trend right now."]))
-      (doseq [d trend-datums]
-        (add-new-datum! d)))))
+      (loop [d trend-datums
+             left? true]
+        (when-not (empty? d)
+          (if left?
+            (add-new-datum! d :left)
+            (add-new-datum! d :right))
+          (recur (rest d)
+                 (not left?)))))))
 
 (defn feed-update! [key identify old new]
   (case (:view @state)
     :trend (let [to-add (take-while (partial not= (first (:datums old)))
                                     (:datums new))]
-             (doseq [d (reverse to-add)]
-               (add-new-datum! d)))
+             ;; XXX, Sun Nov 10 2013, Francis Wolke
+             ;; Add-new-datum! should have the logic for nazi stepping. 
+             #_(doseq [d (reverse to-add)]
+               
+               (add-new-datum! d )))
     (console/log "Feed update NoOp")))
 
 ; misc

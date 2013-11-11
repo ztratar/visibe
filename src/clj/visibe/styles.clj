@@ -170,7 +170,7 @@
 
        [:.datum.tweet {:margin-left "50%"
                        :margin-right "50%"
-                       :position :absolute
+                       :position :relative
                        :background "rgba(0,0,0,0.0)"}]
 
        [:.tweet-block {:margin-left "85px"
@@ -196,7 +196,7 @@
 
        [:.instagram-video-card {:margin-left "50%"
                                 :margin-right "50%"
-                                :position :absolute}]
+                                :position :relative}]
 
        [:.instagram-video {:margin-left "120px"
                            :margin-top "10px"}]

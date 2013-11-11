@@ -10,17 +10,14 @@
 (deftemplate ^{:doc "Generates a template for the supplied data structure"}
   automagic
   [hashmap-of-some-sort]
-  [:div.automagic-template
-   `[:ul ~(mapv (fn [[a b]] [:li [:p (str a "  " b)]])
-                (into [] hashmap-of-some-sort))]])
+  [:div.automagic-template [:p (str hashmap-of-some-sort)]])
 
 ; Home
 ;*******************************************************************************
 
 (defn trend-card [trend]
   (m/node `[~(keyword (str "li.trend-card#" trend))
-          ;~(str "/" (.toLowerCase (clojure.string/replace trend " " "-"))
-            [:a { :href "#" }
+            [:a ;; {:href ~(str "/" (.toLowerCase (clojure.string/replace trend " " "-"))) }
               [:div.name-container
                 [:h2.trend-card-title ~trend]]
               [:span]]]))
@@ -94,17 +91,20 @@
      [:h1#visibe-title "VISIBE"]
      [:img.trend-img {:src image-url}]
      [:h1#trend-title trend]]]
-   [:ul#feed.social-feed]])
+   [:ul#feed.social-feed 
+      [:div#feed-left]
+      [:div#feed-right]
+   ]])
 
-(deftemplate datum-share-buttons [datum-url]
-  [:div.datum-share-buttons
-   ;; Twitter
-   [:a.twitter-share-button {:href "https://twitter.com/share"
-                             :data-url datum-url
-                             :target "_blank"} "Tweet"]
-   [:script "!function(d,s,id){var    js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document,
-    'script', 'twitter-wjs');"]
-   ;; G+
+;; (deftemplate datum-share-buttons [datum-url]
+;;   [:div.datum-share-buttons
+;;    ;; Twitter
+;;    [:a.twitter-share-button {:href "https://twitter.com/share"
+;;                              :data-url datum-url
+;;                              :target "_blank"} "Tweet"]
+;;    [:script "!function(d,s,id){var    js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document,
+;;     'script', 'twitter-wjs');"]
+;;    ;; G+
    
    ;; Facebook
    ])

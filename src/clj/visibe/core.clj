@@ -26,6 +26,7 @@
           [:link {:rel "stylesheet" :type "text/css" :href "font-awesome/css/font-awesome.min.css"}]]
           [:body [:script {:type "text/javascript"}
                   "less = {
+
                    env: \"development\", // or \"production\"
                    async: false,       // load imports async
                    fileAsync: false,   // load imports async when in a page under
@@ -39,13 +40,12 @@
                    rootpath: \"css/\"// a path to add on to the start of every url
                                        //resource
            };"]
-                   (include-js "js/libs/d3.v3.min.js"
-                               ;; "https://apis.google.com/js/plusone.js"
-                               "js/visibe_dbg.js" "js/libs/video-js/video.js"
-                               "js/libs/less.js"
-                               "js/libs/moment-with-langs.js")
-                   [:div#content]]
-         ))
+          (include-js "js/libs/d3.v3.min.js"
+                      ;; "https://apis.google.com/js/plusone.js"
+                      "js/visibe_dbg.js" "js/libs/video-js/video.js"
+                      "js/libs/less.js"
+                      "js/libs/moment-with-langs.js")
+          [:div#content]]))
 
 (defroutes app-routes
   (GET "/" [] (index))
