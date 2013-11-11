@@ -74,14 +74,14 @@
       ;; never happen (in production), but if it does, we can just display
       ;; another trend (that has some dautms associated with it)
       (append! (sel1 :#feed) (m/node [:h1 "Hate to dissapoint, but there isn't any info on this trend right now."]))
-      #_(loop [d trend-datums
-               left? true]
-          (when-not (empty? trend-datums)
-            (if left?
-              (add-new-datum! :#feed-left d)
-              (add-new-datum! :#feed-right d))
-            (recur (rest d)
-                   (not left?)))))))
+      (loop [d trend-datums
+             left? true]
+        (when-not (empty? trend-datums)
+          (if left?
+            (add-new-datum! d :left)
+            (add-new-datum! d :right))
+          (recur (rest d)
+                 (not left?)))))))
 
 (defn feed-update! [key identify old new]
   (case (:view @state)
