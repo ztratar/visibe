@@ -32,7 +32,7 @@
    [:div#title
     [:h1 "Visibe"]
     [:p.description "Watch situations unfold as they happen"]]
-   [:div.container
+   [:div.container.trends-container
     [:ul#trends.clearfix]]])
 
 ; Trend
