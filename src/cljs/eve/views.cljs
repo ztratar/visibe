@@ -76,7 +76,7 @@
       (append! (sel1 :#feed) (m/node [:h1 "Hate to dissapoint, but there isn't any info on this trend right now."]))
       (loop [d trend-datums
              left? true]
-        (when-not (empty? trend-datums)
+        (when-not (empty? d)
           (if left?
             (add-new-datum! d :left)
             (add-new-datum! d :right))
