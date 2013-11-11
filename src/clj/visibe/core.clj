@@ -20,12 +20,11 @@
   (html5 [:head
           [:title "Visibe - Watch situations and reactions unfold as they happen"]
           [:meta {:charset "UTF-8"}]
-          (include-css "css/fonts.css" "css/style.css"
-                       ;; "css/video-js.min.css" 
-                       "css/video-js.css")]
-         [:body (include-js "js/libs/d3.v3.min.js"
+          [:link {:rel "stylesheet/less" :type "text/css" :href "css/styles.less"}]]
+          [:body (include-js "js/libs/d3.v3.min.js"
                             "https://apis.google.com/js/plusone.js"
                             "js/visibe_dbg.js" "js/libs/video-js/video.js"
+                            "js/libs/less.js"
                             "js/libs/moment-with-langs.js")
           [:div#content]]))
 
