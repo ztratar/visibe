@@ -1,8 +1,14 @@
-{:mongo {:username "visibe_dev"
-         :password "HkgwwGgvkgE8G2gDV8yh4gymm"
-         :host "ds047438.mongolab.com"
-         :database "visibe-dev"
-         :port 47438}
+{:mongo  {:username "francis"
+  :password "francis-dev"
+  :host "ds047438.mongolab.com"
+  :database "visibe-dev"
+  :port 47438}
+
+ ;; {:username "visibe_dev"
+ ;;  :password "HkgwwGgvkgE8G2gDV8yh4gymm"
+ ;;  :host "ds047438.mongolab.com"
+ ;;  :database "visibe-dev"
+ ;;  :port 47438}
 
  :instagram {:client-id "a20483e98c844e89982efffc3e9c6f46"
              :client-secret "609000d79809488daa7abe2b1729f99f"
@@ -15,6 +21,6 @@
            :access-token-secret	"p8g1sWYZ5UybMdwDlA7TbjNmeqytZ5zLwsYUFsGB0"
            :consumer-key"1oftkcxbHkQjxkV8KC5cZQ"
            :consumer-secret "kPsebH8dwvRrgLwKc9wvdGGGKILC5t9XqVBKO46YB8"}
- 
+
  :app {:port 9000
        :nrepl-port 9001}}

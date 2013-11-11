@@ -55,8 +55,8 @@
     (.send conn (str f))
     (console/error "You must establish a WebSocket connection"))) 
 
-(defn route->fn-name [sym]
-  (clojure.string/replace (str sym) "/" "-"))
+(defn datum-count []
+  (count (:datums @state)))
 
 ; Bootstrap
 ;*******************************************************************************
@@ -64,7 +64,7 @@
 (defn bootstrap! []
   (set! (-> js/videojs (.-options) (.-flash) (.-swf)) "js/video-js/video-js.swf")
   (ws-connect!)
-  (add-watch state :feed feed-update!)
+  ;; (add-watch state :feed feed-update!)
   (let [ch (chan)]
     (go (loop [v (:trends @state)]
           (>! ch v)

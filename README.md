@@ -8,6 +8,8 @@ lein test # assumes you have a mongo instance running on localhost with default 
 
 # TODO
 
+- Use the browser history API 
+- Only fetch images from flickr that are of a certain size
 - We're not catching exceptions anywhere in this program, which is NOT OKAY
 - Remove implicit time sorting nonsense
 - Source maps

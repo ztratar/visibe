@@ -10,22 +10,17 @@
 (deftemplate ^{:doc "Generates a template for the supplied data structure"}
   automagic
   [hashmap-of-some-sort]
-  [:div.automagic-template
-   `[:ul ~(mapv (fn [[a b]] [:li [:p (str a "  " b)]])
-                (into [] hashmap-of-some-sort))]])
+  [:div.automagic-template [:p (str hashmap-of-some-sort)]])
 
 ; Home
 ;*******************************************************************************
 
 (defn trend-card [trend]
   (m/node `[~(keyword (str "li.trend-card#" trend))
-            [:a { :href ~(str "/" (.toLowerCase (clojure.string/replace trend " " "-"))) }
+            [:a ;; {:href ~(str "/" (.toLowerCase (clojure.string/replace trend " " "-"))) }
               [:div.name-container
-                [:h2.trend-card-title ~trend]
-              ]
-              [:span]
-            ]
-           ]))
+                [:h2.trend-card-title ~trend]]
+              [:span]]]))
 
 (deftemplate home [trends]
   [:div#content
@@ -99,7 +94,18 @@
      [:h1#visibe-title "VISIBE"]
      [:img.trend-img {:src image-url}]
      [:h1#trend-title trend]]]
-   [:ul#feed]])
+   [:div#feed-container {:style {:width "100%"
+                                 :margin "0px"
+                                 :position "absolute"
+                                 :height "100%"}}
+    [:div#feed-left {:style {:width "600px"
+                             :float :left
+                             :position :relative
+                             :height "100%"}}]
+    [:div#feed-right {:style {:width "600px"
+                              :float :right
+                              :position :relative
+                              :height "100%"}}]]])
 
 ;; (deftemplate datum-share-buttons [datum-url]
 ;;   [:div.datum-share-buttons
