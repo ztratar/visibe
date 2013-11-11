@@ -30,7 +30,7 @@
         (let [trend-card (t/trend-card trend)
               trend-card-background (str "url(" (:full (trend-m trend)) ")")]
           (dommy/append! trends-list trend-card)
-          (dommy/set-style! trend-card :background trend-card-background)
+          (dommy/set-style! (sel1 trend-card :span) :background trend-card-background)
           (dommy/listen! trend-card :click (fn [& _] (navigate! :trend trend))))))))
 
 ; Trend

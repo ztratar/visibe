@@ -87,7 +87,8 @@ loop."
                    (doseq [t new-diff-trends]
                      (create-trend t)
                      (twitter/track-trend t)
-                     (instagram/track-trend t)))
+                     (instagram/track-trend t)
+                     ))
                  
                  (do (Thread/sleep 300000) ; 5 min
                      new-trends)))))))

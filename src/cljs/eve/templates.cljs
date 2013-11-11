@@ -19,14 +19,21 @@
 
 (defn trend-card [trend]
   (m/node `[~(keyword (str "li.trend-card#" trend))
-            [:h1.trend-card-title ~trend]]))
+            [:a { :href ~(str "/" (.toLowerCase (clojure.string/replace trend " " "-"))) }
+              [:div.name-container
+                [:h2.trend-card-title ~trend]
+              ]
+              [:span]
+            ]
+           ]))
 
 (deftemplate home [trends]
   [:div#content
    [:div#title
     [:h1 "Visibe"]
-    [:h2 "Watch social trends unfold in real-time"]]
-   [:ul#trends]])
+    [:p.description "Watch situations unfold as they happen"]]
+   [:div.container
+    [:ul#trends.clearfix]]])
 
 ; Trend
 ;*******************************************************************************
