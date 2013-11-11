@@ -31,7 +31,7 @@
               trend-card-background (str "url(" (:full (trend-m trend)) ")")]
           (dommy/append! trends-list trend-card)
           (dommy/set-style! (sel1 trend-card :span) :background trend-card-background)
-          (dommy/listen! trend-card :click (fn [& _] (navigate! :trend trend))))))))
+          (dommy/listen! (sel1 trend-card :a) :click (fn [& _] (navigate! :trend trend))))))))
 
 ; Trend
 ;*******************************************************************************

@@ -1,9 +1,6 @@
 @import "bootstrap.css";
 @import "fonts.css";
-
 @import "mixins";
-
-@import "style.css";
 @import "video-js.css";
 
 
@@ -22,6 +19,10 @@ body {
 		padding: 0;
 	}
 
+	h1, h2, h3, h4, h5 {
+		color: white;
+	}
+
 	#title {
 		margin: 55px 0 50px 0;
 
@@ -36,6 +37,39 @@ body {
 			font-size: 28px;
 			width: 310px;
 			margin: 0 auto;
+		}
+		#trend-title {
+			font-size: 38px;
+			text-transform: none;
+			margin-top: 10px;
+		}
+	}
+
+	#home-button {
+		position: fixed;
+		.box-shadow(0 0px 2px 2px #286d99);
+		text-transform: uppercase;
+		background: #183243;
+		color: #6c99b7;
+		padding: 15px;
+		border-radius: 5px;
+		left: 45px;
+		top: 45px;
+		font-size: 24px;
+		font-family: 'Gotham-Bold';
+		padding: 13px 18px 10px 58px;
+		text-decoration: none;
+		.transition(all ease-out 0.07s);
+
+		&:hover {
+			background: #142c3c;	
+			color: #75a1bf;
+		}
+
+		i {
+			position: absolute;
+			top: 15px;
+			left: 20px;
 		}
 	}
 
@@ -74,7 +108,10 @@ body {
 				border-bottom: 4px solid darken(#2B5F85, 3%);
 
 				span {
-					opacity: 0.2;
+					opacity: 0.25;
+					filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale"); /* Firefox 10+, Firefox on Android */
+					filter: white; /* IE6-9 */
+					-webkit-filter: grayscale(80%); /* Chrome 19+, Safari 6+, Safari 6+ iOS */
 				}
 			}
 
@@ -114,4 +151,130 @@ body {
 			}
 		}
 	}	
+
+	.trend-img {
+		border-radius: 140px;
+		width: 120px;
+		height: 120px;
+		border: 7px solid #5b90b4;
+		margin: 0 0 20px 0;
+	}
+
+	.social-feed {
+		li.social-activity {
+			float: left;
+			width: 450px;
+			position: relative;
+			padding: 0 0 0 140px;
+			margin: 0 0 25px 0;
+			list-style: none;
+
+			&.left-align {
+				padding: 0 140px 0 0;
+
+				&:after {
+					right: 22px;
+					left: auto;
+				}
+
+				&:before {
+					right: 0;
+					left: auto;
+				}
+
+				a.user-img {
+					right: 70px;
+					left: auto;
+				}
+
+				.content {
+					text-align: right;
+				}
+			}
+
+			&:after {
+				content: '';
+				position: absolute;
+				width: 22px;
+				height: 22px;
+				border-radius: 50px;
+				left: 22px;
+				top: 12px;
+				background: #4d83a8;
+			}
+
+			&:before {
+				content: '';
+				position: absolute;
+				top: 19px;
+				left: 0;
+				height: 8px;
+				width: 26px;
+				background: #4d83a8;
+			}
+
+			a.user-img {
+				width: 50px;
+				height: 50px;
+				border-radius: 50px;
+				position: absolute;
+				left: 70px;
+				top: 0;
+				
+				img {
+					background: white;
+					outline: none;
+					width: 50px;
+					height: 50px;
+					border-radius: 50px;
+				}
+			}	
+
+			.content {
+				text-align: left;
+
+				a.user-name {
+					display: block;
+					font-size: 18px;
+					color: white;
+					text-decoration: none;
+					font-family: 'Gotham-Bold';
+					margin: 9px 0 0 0;
+				}	
+
+				.byline {
+					display: block;
+					opacity: .5;
+					font-family: 'Gotham-Book';
+					font-style: italic;
+					margin: 0 0 20px;
+
+					a {
+						color: white;
+						font-family: 'Gotham-Book';
+					}
+				}
+				
+				.body-content {
+					font-family: 'Skolar';
+					font-size: 24px;
+				}
+
+				.photo {
+					img {
+						width: 260px;
+						border-radius: 10px;
+					}
+				}
+
+				.video {
+					video {
+						width: 260px;
+						height: 180px;
+						border-radius: 10px;
+					}
+				}
+			}
+		}
+	}
 }

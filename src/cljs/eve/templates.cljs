@@ -19,13 +19,11 @@
 
 (defn trend-card [trend]
   (m/node `[~(keyword (str "li.trend-card#" trend))
-            [:a { :href ~(str "/" (.toLowerCase (clojure.string/replace trend " " "-"))) }
+          ;~(str "/" (.toLowerCase (clojure.string/replace trend " " "-"))
+            [:a { :href "#" }
               [:div.name-container
-                [:h2.trend-card-title ~trend]
-              ]
-              [:span]
-            ]
-           ]))
+                [:h2.trend-card-title ~trend]]
+              [:span]]]))
 
 (deftemplate home [trends]
   [:div#content
@@ -42,49 +40,47 @@
                      name :name screen-name :screen-name
                      profile-image-url-https :profile-image-url-https}]
 
-  [:div.datum.tweet
-   [:div.profile-pic [:img {:src profile-image-url-https}]
-    [:div.tweet-block
-     [:ul
-      [:li [:h3.tweet-name name]]
-      [:li [:h4.datum-metadata "On" [:i "Twitter"] " 3 minutes  ago"]]
-      [:br]
-      [:li [:h2.tweet-text text]]]]]])
+  [:li.social-activity.tweet
+    [:a.user-img {:href "#"} [:img {:src profile-image-url-https}]]
+    [:div.content
+      [:a.user-name {:href "#"} name]
+      [:span.byline "On " [:a {:href "#"} "Twitter"] " 3 minutes ago"]
+      [:div.body-content text]
+    ]])
 
 (deftemplate instagram-photo [{tags :tags created-at :created-at type :type
                                username :username profile-picture :profile-picture
                                full-name :full-name link :link
                                {height :height url :url width :width} :photo}]
-
-  [:div.instagram-photo-card
-   [:img.profile-pic {:src profile-picture}]
-   [:ul.instagram-datum
-    [:li [:h3.datum-name full-name]]
-    [:li [:h4.datum-metadata "On " [:i "Instagram"] " 3 minutes ago"]]
-    [:li.tweet-text "Photo whatever"]]
-   [:div.instagram-photo
-    [:img {:src url}]]]) 
+  [:li.social-activity.instagram
+    [:a.user-img {:href "#"} [:img {:src profile-image}]]
+    [:div.content
+      [:a.user-name {:href "#"} full-name]
+      [:span.byline "On " [:a {:href "#"} "Instagram"] " 3 minutes ago"]
+      [:div.body-content text]
+      [:div.photo [:img {:src url}]]
+    ]])
 
 (deftemplate instagram-video [{tags :tags id :id created-at :created-at
                                type :type username :username
                                profile-picture :profile-picture
                                full-name :full-name link :link
                                {height :height url :url width :width} :video}]
-
-  [:div.instagram-video-card
-   [:img.profile-pic {:src profile-picture}]
-   [:ul.instagram-datum
-    [:li [:h3.datum-name full-name]]
-    [:li [:h4.datum-metadata "On " [:i "Instagram"] " 3 minutes ago"]]
-    [:li.tweet-text "The first time that I had nutella"]]
-   ;; TODO, Wed Nov 06 2013, Francis Wolke
-   ;; Is the custom ID even neccecary?
-   `[~(keyword (str "video.instagram-video" id))
-     {:width "550px" :height "550px"
-      :class "video-js vjs-default-skin vjs-big-play-centered"
-      :controls "true"
-      :preload "auto"}
-     [:source {:src ~url :type "video/mp4"}]]])
+  [:li.social-activity.instagram
+    [:a.user-img {:href "#"} [:img {:src profile-image}]]
+    [:div.content
+      [:a.user-name {:href "#"} full-name]
+      [:span.byline "On " [:a {:href "#"} "Instagram"] " 3 minutes ago"]
+      [:div.body-content text]
+      [:div.video
+       `[~(keyword (str "video.instagram-video" id))
+         {:width "550px" :height "550px"
+          :class "video-js vjs-default-skin vjs-big-play-centered"
+          :controls "true"
+          :preload "auto"}
+         [:source {:src ~url :type "video/mp4"}]]
+     ]
+    ]])
 
 (deftemplate vine [datum]
   [:div.datum-card [:p "implement me!"]])
@@ -93,37 +89,22 @@
   [:div#content
    [:#stream]
    [:#header
-    [:div#home-button
-     [:h1 "HOME"]]
+    [:a#home-button {:href "#"} [:i.fa.fa-th-large] "home"]
     [:div#title
      [:h1#visibe-title "VISIBE"]
      [:img.trend-img {:src image-url}]
      [:h1#trend-title trend]]]
-   [:ul#feed]])
+   [:ul#feed.social-feed]])
 
-;; (deftemplate datum-share-buttons [datum-url]
-;;   [:div.datum-share-buttons
-;;    ;; Twitter
-;;    [:a.twitter-share-button {:href "https://twitter.com/share"
-;;                              :data-url datum-url
-;;                              :target "_blank"} "Tweet"]
-;;    [:script "!function(d,s,id){var    js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document,
-;;     'script', 'twitter-wjs');"]
-;;    ;; G+
+(deftemplate datum-share-buttons [datum-url]
+  [:div.datum-share-buttons
+   ;; Twitter
+   [:a.twitter-share-button {:href "https://twitter.com/share"
+                             :data-url datum-url
+                             :target "_blank"} "Tweet"]
+   [:script "!function(d,s,id){var    js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document,
+    'script', 'twitter-wjs');"]
+   ;; G+
    
-;;    ;; Facebook
-;;    ])
-
-;; (append! (sel1 :#feed)
-;;          (m/node [:div {:class "g-plus"
-;;                         :data-action "share"
-;;                         :data-height 24
-;;                         :data-href "http://www.visibe.com"}]))
-
-;; (append! (sel1 :#feed)
-;;          (m/node [:script {:type "text/javascript"}
-;;                   "(function() {
-;;     var po = document.createElement('script'); po.type = 'text/po; javascript't.async = true;
-;;     po.src = 'https://apis.google.com/js/plusone.js';
-;;     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
-;;   })();"]))
+   ;; Facebook
+   ])

@@ -23,7 +23,7 @@
           [:title "Visibe - Watch situations and reactions unfold as they happen"]
           [:meta {:charset "UTF-8"}]
           [:link {:rel "stylesheet/less" :type "text/css" :href "css/styles.less"}]
-         ]
+          [:link {:rel "stylesheet" :type "text/css" :href "font-awesome/css/font-awesome.min.css"}]]
           [:body [:script {:type "text/javascript"}
                   "less = {
                    env: \"development\", // or \"production\"
