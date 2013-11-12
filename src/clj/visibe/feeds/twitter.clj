@@ -104,10 +104,6 @@
 ;;       (update-in [:created-at] twitter-time->long)
 ;;       (assoc :type :tweet)))
 
-(defn store-tweets
-  [trend tweets]
-  (append-datums trend (sort-by :created-at (map tweet->essentials tweets))))
-
 (defn track-trend
   "Tracks a trend while it's still an 'active' trend. Runs in future, which 
 returns `nil` when trend is no longer 'active'. 'Active' is defined as being in
@@ -120,7 +116,7 @@ returns `nil` when trend is no longer 'active'. 'Active' is defined as being in
   ;; this peiod of time. (/ (* 15 60) 450) => 2 sec
   (future
     (let [tweet-data (search-tweets trend)]
-      (store-tweets trend (:statuses tweet-data))
+      (append-datums trend  (:statuses tweet-data))
       (loop [tweet-data tweet-data]
         (let [new-query (:refresh_url (:search_metadata tweet-data))]
           (when (some #{trend} (keys (gis [:google :trends])))
