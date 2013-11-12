@@ -32,7 +32,6 @@
      (let [data (<! receive)
            msg (r/read-string (str (.-data data)))]
        (case (:type msg)
-
          ;; NOTE, Sun Nov 10 2013, Francis Wolke
          ;; These two are conceptually the same, shouldn't the code reflect that?
          :seed-datums (update-in-state! [:datums] (partial into (:data msg)))
@@ -64,7 +63,6 @@
 (defn bootstrap! []
   (set! (-> js/videojs (.-options) (.-flash) (.-swf)) "js/video-js/video-js.swf")
   (ws-connect!)
-  ;; (add-watch state :feed feed-update!)
   (let [ch (chan)]
     (go (loop [v (:trends @state)]
           (>! ch v)

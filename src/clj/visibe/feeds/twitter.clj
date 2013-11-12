@@ -90,24 +90,19 @@
   []
   (:trends (:google @state)))
 
-(defn underscore->hyphen [m]
-  (letfn [(individual-kwd [kwd]
-            (keyword (clojure.string/replace  (str (name kwd)) "_" "-")))]
-    (zipmap (map individual-kwd (keys m)) (vals m))))
+;; (defn tweet->essentials
+;;   ;; FIXME, NOTE Fri Oct 04 2013, Francis Wolke
+;;   ;; `:text` path may not always have full urls.
 
-(defn tweet->essentials
-  ;; FIXME, NOTE Fri Oct 04 2013, Francis Wolke
-  ;; `:text` path may not always have full urls.
+;;   ;; Should we even be throwing away any data?
 
-  ;; Should we even be throwing away any data?
-
-  ;; Should we fetch profile pictures on the server side?
-  [tweet]
-  (-> (merge (select-keys tweet [:text :created_at])
-             (select-keys (:user tweet) [:name :screen_name :profile_image_url_https]))
-      (underscore->hyphen)
-      (update-in [:created-at] twitter-time->long)
-      (assoc :type :tweet)))
+;;   ;; Should we fetch profile pictures on the server side?
+;;   [tweet]
+;;   (-> (merge (select-keys tweet [:text :created_at])
+;;              (select-keys (:user tweet) [:name :screen_name :profile_image_url_https]))
+;;       (underscore->hyphen)
+;;       (update-in [:created-at] twitter-time->long)
+;;       (assoc :type :tweet)))
 
 (defn store-tweets
   [trend tweets]
@@ -124,10 +119,9 @@ returns `nil` when trend is no longer 'active'. 'Active' is defined as being in
   ;; Twitter's rate limit window is 15 minutes. We are allowed 450 requests over
   ;; this peiod of time. (/ (* 15 60) 450) => 2 sec
   (future
-    (let [tweet-data (search-tweets trend)
-          _ (store-tweets trend (:statuses tweet-data))]
+    (let [tweet-data (search-tweets trend)]
+      (store-tweets trend (:statuses tweet-data))
       (loop [tweet-data tweet-data]
-        
         (let [new-query (:refresh_url (:search_metadata tweet-data))]
           (when (some #{trend} (keys (gis [:google :trends])))
             (do (store-tweets trend tweet-data)

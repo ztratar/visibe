@@ -88,7 +88,7 @@
               ;; Test Mode
               ;; XXX, FIXME Sun Nov 10 2013, Francis Wolke
               ;; I'm simply hacking in the new data representation because I don't feel like changing the schemas at the moment.
-              ;; And they really need to be unifed anyway.
+              ;; They really need to be unifed anyway.
               (:test-mode channel-context) (do (hk/send! channel (ds->ws-message :datums (map #(assoc % :trend "Justin Bieber")
                                                                                               (n-datums 5))))
                                                (Thread/sleep (/ 60000 60))
@@ -120,10 +120,6 @@
   (update-in-state! [:app :channels] dissoc channel))
 
 (defn ws-api-call [channel data]
-  ;; TODO, Sun Oct 13 2013, Francis Wolke
-  ;; Don't pass back all the data about `state' atom when we're in production
-  ;; Check arglists.
-  
   (when-not (get-in @state [:app :channels channel])
     (register-new-channel! channel))
 

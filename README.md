@@ -9,7 +9,7 @@ lein test # assumes you have a mongo instance running on localhost with default 
 # TODO
 
 - duplicates are being pulled in, detect the. We are currently getting buckets. Simply putting them into a set won't work becuase they could have different time stamps
-- A trend from last week is not = to a trend this week
+- A trend from last week is not = to a trend this week (use datomic?)
 - Use the browser history API 
 - Only fetch images from flickr that are of a certain size
 - We're not catching exceptions anywhere in this program, which is NOT OKAY

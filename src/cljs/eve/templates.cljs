@@ -1,6 +1,7 @@
 (ns ^{:doc "Raw dommy templates"}
   eve.templates
   (:require [dommy.core :as dommy]
+            [eve.utils :refer [->slug]]
             [dommy.utils :as utils])
   (:require-macros [dommy.macros :as m :refer [deftemplate]]))
 
@@ -13,11 +14,11 @@
   [:div.automagic-template [:p (str hashmap-of-some-sort)]])
 
 ; Home
-;*******************************************************************************
+;******************************************************************************* 
 
 (defn trend-card [trend]
   (m/node `[~(keyword (str "li.trend-card#" trend))
-            [:a ;; {:href ~(str "/" (.toLowerCase (clojure.string/replace trend " " "-"))) }
+            [:a {:href ~(str "/" (->slug trend))}
               [:div.name-container
                 [:h2.trend-card-title ~trend]]
               [:span]]]))
@@ -36,14 +37,13 @@
 (deftemplate tweet [{text :text user :user created-at :created_time
                      name :name screen-name :screen-name
                      profile-image-url-https :profile-image-url-https}]
-
+ 
   [:li.social-activity.tweet
     [:a.user-img {:href "#"} [:img {:src profile-image-url-https}]]
     [:div.content
       [:a.user-name {:href "#"} name]
       [:span.byline "On " [:a {:href "#"} "Twitter"] " 3 minutes ago"]
-      [:div.body-content text]
-    ]])
+      [:div.body-content text]]])
 
 (deftemplate instagram-photo [{tags :tags created-at :created-at type :type
                                username :username profile-picture :profile-picture

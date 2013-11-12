@@ -61,24 +61,14 @@ relevent media."
   [trend datums]
   (append-datums trend datums))
 
-(defn- instagram-media->essentials
-  "Accepts and instagram media map and returns it's essential constituents."
-  [m]
-  (-> (if (= "image" (:type m))
-        (instagram-photo->datum m)
-        (instagram-video->datum m))
-      ;; NOTE, XXX, Thu Oct 24 2013, Francis Wolke
-      ;; UNIX time is in seconds, whereas java time is in milliseconds. To compenstate,
-      ;; we multiply by 1000.
-      (update-in [:created-at] #(* 1000 (read-string %)))))
-
 (defn track-trend
   "Tracks a trend while it's still an active trend, persisting data related to it."
   [trend]
   (future (loop [media #{}]
             (when (some #{trend} (keys (gis [:google :trends])))
-              (let [new-media-q (map instagram-media->essentials (instagram-media trend))
-                    new-datums (clojure.set/difference (set media) (set new-media-q))]
+              (let [ ;; UNIX time is in seconds, whereas java time is in milliseconds.
+                    new-media (update-in (instagram-media trend) [:created_time] #(* 1000 (read-string %)))
+                    new-datums (clojure.set/difference (set media) (set new-media))]
                 (store-instagram-media trend new-datums)
                 (Thread/sleep (/ 180000 3)) ; 1 minute
-                (recur new-media-q))))))
+                (recur new-media))))))

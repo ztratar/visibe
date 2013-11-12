@@ -12,9 +12,6 @@
                   :datums []}))
 
 (defn gis
-  ;; TODO, Thu Oct 24 2013, Francis Wolke
-  ;; When passed a vector, uses it as a path in the `state' map
-  ;; When passed a keyword, searches the state map for a matching key.
   "[g]et [i]n [s]tate"
   [path]
   (get-in @state path))

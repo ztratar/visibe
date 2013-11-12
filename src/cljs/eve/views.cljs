@@ -2,23 +2,75 @@
   eve.views
   (:require [dommy.core :refer [listen! append! prepend! html] :as dommy]
             [dommy.utils :as utils]
+            [eve.utils :refer [->slug]]
             [eve.templates :as t]
             [cljs.core.match :as match]
             [shodan.console :as console]
-            ;; [query.core :as q]
             [secretary.core :as secretary]
             [cljs.core.async :as async :refer [<! >! chan put! timeout close!]]
-            [eve.state :refer [state assoc-in-state! gis]])
+            [eve.state :refer [state assoc-in-state! gis]]
+            [goog.events :as gevents]
+            [goog.History :as ghistory]
+            [goog.history.EventType :as history-event]
+            [goog.history.Html5History :as history5])
   (:require-macros [secretary.macros :refer [defroute]]
                    [cljs.core.match.macros :refer [match]]
                    [cljs.core.async.macros :refer [go alt!]]
-                   [dommy.macros :as m :refer [sel1]]))
+                   [dommy.macros :as m :refer [sel1 sel]]))
 
 (declare swap-view!)
 (declare navigate!)
+(declare history)
+
+; HTML5 History
+;*******************************************************************************
+
+(defn navigate-callback
+  ([callback-fn]
+   (navigate-callback history callback-fn))
+  ([hist callback-fn]
+   (gevents/listen hist history-event/NAVIGATE
+                  (fn [e]
+                    (callback-fn {:token (keyword (.-token e))
+                                  :type (.-type e)
+                                  :navigation? (.-isNavigation e)})))))
+
+(defn init-history
+  []
+  (let [history (if (history5/isSupported)
+                  (goog.history.Html5History.)
+                  (goog.History.))]
+    (.setEnabled history true)
+    (gevents/unlisten (.-window_ history)
+                      (.-POPSTATE gevents/EventType) ; This is a patch-hack to ignore double events
+                      (.-onHistoryEvent_ history), false, history)
+    history))
+
+(defn history-logic [{type :type token :token navigation? :navigation? :as m}]
+  (let [token (name token)]
+    (cond (or (= "#" token) (= "" token)) (navigate! :home)
+          (some #{token} (map ->slug (keys (:trends @state)))) (navigate! :trend (name token))
+          :else (console/error "attempted to `navigate!' to " (str token)))))
+
+(def history (init-history))
+
+(defn get-token
+  ([] (get-token history))
+  ([hist] (.getToken hist)))
+
+(defn set-token!
+  ([tok] (set-token! history tok))
+  ([hist tok] (.setToken hist tok)))
+
+(defn replace-token! [hist tok] (.replaceToken hist tok))
+
+(navigate-callback history history-logic)
 
 ; Home
 ;*******************************************************************************
+
+(defn url->relative-path [s]
+  (clojure.string/replace s "http://localhost:9000/" ""))
 
 (defn home [trends]
   (let [trend-m trends
@@ -33,16 +85,18 @@
               trend-card-background (str "url(" (:full (trend-m trend)) ")")]
           (dommy/append! trends-list trend-card)
           (dommy/set-style! (sel1 trend-card :span) :background trend-card-background)
-          (dommy/listen! (sel1 trend-card :a) :click (fn [& _] (navigate! :trend trend))))))))
+          (dommy/listen! (sel1 trend-card :a)
+                         :click (fn [e]
+                                  (.preventDefault e)
+                                  (let [new-path (url->relative-path (.-href (sel1 trend-card :a)))]
+                                    (set-token! new-path)
+                                    (navigate! :trend new-path)))))))))
 
-; TODO
+; trend
 ;*******************************************************************************
 
-;;; Trend, Mon Nov 11 2013, Francis Wolke
-;;; We actually have to calculate the height of the dom to know where to append
-;;; the next datum.
-
-(defn feed-height [feed]
+(defn feed-height
+  [feed]
   (let [e (.-childNodes (sel1 feed))
         r (range (.-length e))
         f (fn [g] (cond (.contains (.-classList g) "instagram") 2
@@ -52,9 +106,7 @@
       0
       (reduce + (map (comp f (partial aget e)) r)))))
 
-(defn left-or-right?
-  "Sums up the heights of nodes in :#feed-right and :#feed-left."
-  []
+(defn left-or-right? []
   (letfn []
     (let [l (feed-height :#feed-left)
           r (feed-height :#feed-right)]
@@ -80,7 +132,8 @@
 
 (defn trend [trend]
   ;; Swap views
-  (let [img-m ((:trends @state) trend)
+  (let [trends (:trends @state)
+        img-m (trends (some (fn [e] (when (= (->slug e) trend) e)) (keys trends)))
         thumbnail (:thumb img-m)
         thumbnail (when thumbnail (str "http://localhost:9000/cropped-images/" thumbnail ".png"))]
     (swap-view! (t/trend trend (if thumbnail thumbnail (:full img-m)))))
@@ -91,18 +144,7 @@
     (if (empty? trend-datums)
       (append! (sel1 :#feed) (m/node [:h1 "Preloader."]))
       (doseq [d trend-datums]
-        (add-new-datum! d))
-      )))
-
-;; (defn feed-update! [key identify old new]
-;;   (case (:view @state)
-;;     :trend (let [to-add (take-while (partial not= (first (:datums old)))
-;;                                     (:datums new))]
-;;              ;; XXX, Sun Nov 10 2013, Francis Wolke
-;;              ;; Add-new-datum! should have the logic for nazi stepping. 
-;;              #_(doseq [d (reverse to-add)]
-;;                (add-new-datum! d )))
-;;     (console/log "Feed update NoOp")))
+        (add-new-datum! d)))))
 
 ; misc
 ;*******************************************************************************
