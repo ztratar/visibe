@@ -103,8 +103,8 @@
 
   ;; Should we fetch profile pictures on the server side?
   [tweet]
-  (-> (merge (select-keys tweet [:text :profile_image_url_https :created_at])
-             (select-keys (:user tweet) [:name :screen_name]))
+  (-> (merge (select-keys tweet [:text :created_at])
+             (select-keys (:user tweet) [:name :screen_name :profile_image_url_https]))
       (underscore->hyphen)
       (update-in [:created-at] twitter-time->long)
       (assoc :type :tweet)))
