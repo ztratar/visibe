@@ -133,18 +133,19 @@
 (defn trend [trend]
   ;; Swap views
   (let [trends (:trends @state)
-        img-m (trends (some (fn [e] (when (= (->slug e) trend) e)) (keys trends)))
+        trend-string (some (fn [e] (when (= (->slug e) trend) e)) (keys trends))
+        img-m (get trends trend-string)
         thumbnail (:thumb img-m)
         thumbnail (when thumbnail (str "http://localhost:9000/cropped-images/" thumbnail ".png"))]
-    (swap-view! (t/trend trend (if thumbnail thumbnail (:full img-m)))))
-
-  ;; Population and addition of logic
-  (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home)))
-  (let [trend-datums (datums-for trend)]
-    (if (empty? trend-datums)
-      (append! (sel1 :#feed) (m/node [:h1 "Preloader."]))
-      (doseq [d trend-datums]
-        (add-new-datum! d)))))
+    (swap-view! (t/trend trend (if thumbnail thumbnail (:full img-m))))
+    
+    ;; Population and addition of logic
+    (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home)))
+    (let [trend-datums (datums-for trend-string)]
+      (if (empty? trend-datums)
+        (append! (sel1 :#feed) (m/node [:h1 "Preloader."]))
+        (doseq [d trend-datums]
+          (add-new-datum! d))))))
 
 ; misc
 ;*******************************************************************************
