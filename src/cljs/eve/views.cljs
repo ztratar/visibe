@@ -3,14 +3,16 @@
   (:require [dommy.core :refer [listen! append! prepend! html] :as dommy]
             [dommy.utils :as utils]
             [eve.templates :as t]
+            [cljs.core.match :as match]
             [shodan.console :as console]
+            ;; [query.core :as q]
+            [secretary.core :as secretary]
             [cljs.core.async :as async :refer [<! >! chan put! timeout close!]]
             [eve.state :refer [state assoc-in-state! gis]])
-  (:require-macros [cljs.core.async.macros :refer [go alt!]]
+  (:require-macros [secretary.macros :refer [defroute]]
+                   [cljs.core.match.macros :refer [match]]
+                   [cljs.core.async.macros :refer [go alt!]]
                    [dommy.macros :as m :refer [sel1]]))
-
-;;; FIXME, Sat Oct 19 2013, Francis Wolke
-;;; trends -> topics
 
 (declare swap-view!)
 (declare navigate!)
@@ -33,26 +35,27 @@
           (dommy/set-style! (sel1 trend-card :span) :background trend-card-background)
           (dommy/listen! (sel1 trend-card :a) :click (fn [& _] (navigate! :trend trend))))))))
 
-; Trend
+; TODO
 ;*******************************************************************************
 
-(defn add-new-datum! [{type :type id :id :as datum} & orientation]
-  (let [datum-card (case type
-                     :instagram-video (t/instagram-video datum)
-                     "instagram-video" (t/instagram-video datum)
-                     :instagram-photo (t/instagram-photo datum)
-                     "instagram-photo" (t/instagram-photo datum)
-                     :vine (t/vine datum)
-                     "vine" (t/vine datum)
-                     :tweet (t/tweet datum)
-                     "tweet" (t/tweet datum)
-                     (t/automagic datum))]
-    (cond (= "" (sel1 :#feed-left) (sel1 :#feed-right)) (append! (sel1 :#feed-left) datum-card)
-          (= "" (sel1 :#feed-left)) (append! (sel1 :#feed-left) datum-card)
-          (= "" (sel1 :#feed-right)) (append! (sel1 :#feed-right) datum-card)
-          (= :left orientation) (prepend! (sel1 :#feed-left) datum-card)
-          (= :right orientation) (prepend! (sel1 :#feed-right) datum-card)
-          :else (prepend! (sel1 :#feed-right) datum-card))))
+;;; Trend, Mon Nov 11 2013, Francis Wolke
+;;; We actually have to calculate the height of the dom to know where to append
+;;; the next datum.
+
+(defn add-new-datum! [{type :type id :id :as datum}]
+  (letfn [(elm-height [elm] (aget (js/window.getComputedStyle (sel1 elm)) "height"))]
+    (let [datum-card (case (keyword type)
+                       :instagram-video (t/instagram-video datum)
+                       :instagram-photo (t/instagram-photo datum)
+                       :vine (t/vine datum)
+                       :tweet (t/tweet datum)
+                       (t/automagic datum))
+          height-l (elm-height :#feed-left)
+          height-r (elm-height :#feed-right)
+          _ (console/log (str "[height-l height-r]: " [height-l height-r]))]
+      (cond (= 0 height-l height-r) (append! (sel1 :#feed-left) datum-card)
+            (> height-l height-r)   (append! (sel1 :#feed-right) datum-card)
+            :else                   (append! (sel1 :#feed-left) datum-card))))) 
 
 (defn datums-for
   "Returns datums associated with the specified trend"
@@ -70,18 +73,10 @@
   (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home)))
   (let [trend-datums (datums-for trend)]
     (if (empty? trend-datums)
-      ;; TODO, FIXME Sun Nov 10 2013, Francis Wolke Realistially, this should
-      ;; never happen (in production), but if it does, we can just display
-      ;; another trend (that has some dautms associated with it)
-      (append! (sel1 :#feed) (m/node [:h1 "Hate to dissapoint, but there isn't any info on this trend right now."]))
-      (loop [d trend-datums
-             left? true]
-        (when-not (empty? d)
-          (if left?
-            (add-new-datum! (first d) :left)
-            (add-new-datum! (first d) :right))
-          (recur (rest d)
-                 (not left?)))))))
+      (append! (sel1 :#feed) (m/node [:h1 "Preloader."]))
+      (doseq [d trend-datums]
+        (add-new-datum! d))
+      )))
 
 ;; (defn feed-update! [key identify old new]
 ;;   (case (:view @state)

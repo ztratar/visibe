@@ -47,24 +47,23 @@
 
 (deftemplate instagram-photo [{tags :tags created-at :created-at type :type
                                username :username profile-picture :profile-picture
-                               full-name :full-name link :link
+                               text :text full-name :full-name link :link
                                {height :height url :url width :width} :photo}]
   [:li.social-activity.instagram
-    [:a.user-img {:href "#"} [:img {:src profile-image}]]
-    [:div.content
-      [:a.user-name {:href "#"} full-name]
-      [:span.byline "On " [:a {:href "#"} "Instagram"] " 3 minutes ago"]
-      [:div.body-content text]
-      [:div.photo [:img {:src url}]]
-    ]])
+   [:a.user-img {:href "#"} [:img {:src profile-picture}]]
+   [:div.content
+    [:a.user-name {:href "#"} full-name]
+    [:span.byline "On " [:a {:href "#"} "Instagram"] " 3 minutes ago"]
+    [:div.body-content text]
+    [:div.photo [:img {:src url}]]]])
 
 (deftemplate instagram-video [{tags :tags id :id created-at :created-at
                                type :type username :username
                                profile-picture :profile-picture
                                full-name :full-name link :link
-                               {height :height url :url width :width} :video}]
+                               text :text {height :height url :url width :width} :video}]
   [:li.social-activity.instagram
-    [:a.user-img {:href "#"} [:img {:src profile-image}]]
+    [:a.user-img {:href "#"} [:img {:src profile-picture}]]
     [:div.content
       [:a.user-name {:href "#"} full-name]
       [:span.byline "On " [:a {:href "#"} "Instagram"] " 3 minutes ago"]
@@ -93,8 +92,7 @@
      [:h1#trend-title trend]]]
    [:ul#feed.social-feed 
       [:div#feed-left]
-      [:div#feed-right]
-   ]])
+      [:div#feed-right]]])
 
 ;; (deftemplate datum-share-buttons [datum-url]
 ;;   [:div.datum-share-buttons
@@ -103,8 +101,4 @@
 ;;                              :data-url datum-url
 ;;                              :target "_blank"} "Tweet"]
 ;;    [:script "!function(d,s,id){var    js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document,
-;;     'script', 'twitter-wjs');"]
-;;    ;; G+
-   
-   ;; Facebook
-   ])
+;;     'script', 'twitter-wjs');"]])
