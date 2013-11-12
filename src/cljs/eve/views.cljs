@@ -42,20 +42,36 @@
 ;;; We actually have to calculate the height of the dom to know where to append
 ;;; the next datum.
 
+(defn feed-height [feed]
+  (let [e (.-childNodes (sel1 feed))
+        r (range (.-length e))
+        f (fn [g] (cond (.contains (.-classList g) "instagram") 2
+                        (.contains (.-classList  g) "tweet") 1
+                        :else (console/error "This social activity did not have one #{tweet, instagram-photo, instagram-video} as a class:" g)))]
+    (if (empty? r)
+      0
+      (reduce + (map (comp f (partial aget e)) r)))))
+
+(defn left-or-right?
+  "Sums up the heights of nodes in :#feed-right and :#feed-left."
+  []
+  (letfn []
+    (let [l (feed-height :#feed-left)
+          r (feed-height :#feed-right)]
+      (cond (= l r) :left
+            (< l r) :left
+            :else :right))))
+
 (defn add-new-datum! [{type :type id :id :as datum}]
-  (letfn [(elm-height [elm] (aget (js/window.getComputedStyle (sel1 elm)) "height"))]
-    (let [datum-card (case (keyword type)
-                       :instagram-video (t/instagram-video datum)
-                       :instagram-photo (t/instagram-photo datum)
-                       :vine (t/vine datum)
-                       :tweet (t/tweet datum)
-                       (t/automagic datum))
-          height-l (elm-height :#feed-left)
-          height-r (elm-height :#feed-right)
-          _ (console/log (str "[height-l height-r]: " [height-l height-r]))]
-      (cond (= 0 height-l height-r) (append! (sel1 :#feed-left) datum-card)
-            (> height-l height-r)   (append! (sel1 :#feed-right) datum-card)
-            :else                   (append! (sel1 :#feed-left) datum-card))))) 
+  (let [datum-card (case (keyword type)
+                     :instagram-video (t/instagram-video datum)
+                     :instagram-photo (t/instagram-photo datum)
+                     :vine (t/vine datum)
+                     :tweet (t/tweet datum)
+                     (t/automagic datum))]
+    (if (= :left (left-or-right?))
+      (append! (sel1 :#feed-left) datum-card)
+      (append! (sel1 :#feed-right) datum-card)))) 
 
 (defn datums-for
   "Returns datums associated with the specified trend"
