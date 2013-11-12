@@ -120,6 +120,6 @@ returns `nil` when trend is no longer 'active'. 'Active' is defined as being in
       (loop [tweet-data tweet-data]
         (let [new-query (:refresh_url (:search_metadata tweet-data))]
           (when (some #{trend} (keys (gis [:google :trends])))
-            (do (store-tweets trend tweet-data)
+            (do (append-datums trend  (:statuses tweet-data))
                 (Thread/sleep 180000)   ; 3 min
                 (recur (twitter-q new-query)))))))))
