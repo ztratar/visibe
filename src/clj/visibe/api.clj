@@ -3,8 +3,9 @@
   (:require [org.httpkit.server :as hk]
             [visibe.state :refer [state assoc-in-state! update-in-state! gis]]
             [visibe.feeds.google-trends :refer [google-mapping]]
-            [visibe.schemas :refer [n-datums n-tweets]]
-            [visibe.feeds.storage :refer [previous-50-datums after-datum intial-trend-datums]]
+            [visibe.feeds.storage :refer [previous-50-datums after-datum intial-datums]]
+            [visibe.feeds.twitter :refer [tweet->essentials]]
+            [visibe.feeds.instagram :refer [instagram-photo->essentials instagram-video->essentials]]
             [compojure.route :as route]
             [compojure.core :refer :all]
             [compojure.handler :as handler]))
@@ -12,34 +13,27 @@
 ; WebSockets API
 ;*******************************************************************************
 
-(defn current-trends
-  ^{:api :websocket
-    :doc "Returns current google trends for specified region along with their associated flickr urls"}
+(defn current-trends ^{:api :websocket
+                       :doc "Returns current google trends for specified region along with their associated flickr urls"}
   []
   (gis [:google :trends]))
 
-(defn ^{:api :websocket :doc "Sends generated test data instead of whatever"}
+(defn ^{:api :websocket :doc "If `:off' we don't send test data or production data"}
   toggle-stream!
   [channel]
   (update-in-state! [:app :channels channel :on] #(not %))
   {:on (get-in @state [:app :channels channel :on])})
 
-(defn ^{:api :websocket :doc "If in test mode streaming will send test data"}
-  toggle-test-mode!
-  [channel]
-  (update-in-state! [:app :channels channel :test-mode] #(not %))
-  {:test-mode (get-in @state [:app :channels channel :test-mode])})
-
-(defn ^{:api :websocket :doc "Adds a new trend stream to a channel"}
-  add-trend-stream!
-  [channel trend]
-  (update-in-state! [:app :channels channel :trends] (fn [& args] (set (apply conj args))) trend)
+(defn ^{:api :websocket :doc "Subscribes you to a particular trend stream, you will receive datums after DATUM"}
+  subscribe!
+  [channel datum]
+  (update-in-state! [:app :channels channel :trends] (fn [& args] (set (apply conj args))) datum)
   {:trends (get-in @state [:app :channels channel :trends])})
 
-(defn ^{:api :websocket :doc "Removes trend stream from a channel"}
-  remove-trend-stream!
+(defn ^{:api :websocket :doc "You will no longer be sent datums related to this trend."}
+  unsubscribe!
   [channel trend]
-  (update-in-state! [:app :channels channel :trends] (fn [st] (set (remove #{trend} st))))
+  (update-in-state! [:app :channels channel :trends] (fn [st] (set (remove #(= trend (:trend %)) st))))
   {:trends (get-in @state [:app :channels channel :trends])})
 
 ;;; TODO, Sun Nov 10 2013, Francis Wolke
@@ -48,13 +42,11 @@
   []
   (apply str (cons "The funtions you have avalible to you are NOTE THAT THIS IS NOT UP TO DATE:\n"
                    (interleave (repeat "\n")
-                               ["toggle-stream!"
-                                "toggle-test-mode!"
-                                "add-trend-stream!"
-                                "remove-trend-stream!"
+                               ["subscribe!"
+                                "unsubscribe!"
+                                "current-trends"
                                 "help"
                                 "\nI regret to inform you that we do not have `doc' implemented yet."]))))
-
 
 ; WebSockets Boilerplate
 ;*******************************************************************************
@@ -68,52 +60,53 @@
   ([ds] (ds->ws-message :print ds)) 
   ([type ds] (str {:type type :data ds})))
 
+(defn clean-datum [datum]
+  (cond (= (:datum-type datum) :instagram-photo) (instagram-photo->essentials datum)
+        (= (:datum-type datum) :instagram-video) (instagram-video->essentials datum)
+        (and (= "image" (:type datum)) (:created_time datum)) (instagram-photo->essentials datum)
+        (:created_time datum) (instagram-video->essentials datum)
+
+        (= :datum-type :tweet) (tweet->essentials datum)
+        (:created_at datum) (tweet->essentials datum)
+        :else datum))
+
 (defn establish-stream-loop!
   "Provides a live data stream on trends in ':trends' of a channel's context. Terminates with the channel."
   [channel]
   (future
-    (loop [google-trends {}
-           last-sent-datums (partition 2 (interleave (get-in @state [:app :channels channel :trends]) (repeat nil)))]
+    (loop [google-trends {}]
+
       (let [channel-context (get-in @state [:app :channels channel])
             new-google-trends (gis [:google :trends])]
 
-        ;; IFF this is the first call, then send init data
+        ;; Send initial data
         (when (= {} google-trends)
-          (hk/send! channel (ds->ws-message :seed-datums
-                             (intial-trend-datums (keys new-google-trends)))))
+          (hk/send! channel (ds->ws-message :seed-datums (map clean-datum (intial-datums (keys new-google-trends))))))
 
-        (cond (not (:on channel-context)) (do (Thread/sleep (/ 60000 60))
-                                              (recur last-sent-datums
-                                                     (gis [:google :trends])))
-              ;; Test Mode
-              ;; XXX, FIXME Sun Nov 10 2013, Francis Wolke
-              ;; I'm simply hacking in the new data representation because I don't feel like changing the schemas at the moment.
-              ;; They really need to be unifed anyway.
-              (:test-mode channel-context) (do (hk/send! channel (ds->ws-message :datums (map #(assoc % :trend "Justin Bieber")
-                                                                                              (n-datums 5))))
-                                               (Thread/sleep (/ 60000 60))
-                                               (recur last-sent-datums
-                                                      (gis [:google :trends])))
-              ;; Production
-              :else (do (let [dts (map (fn [[tnd l-datum]] [tnd (after-datum tnd l-datum)])
-                                       last-sent-datums)
-                              ;; Remove trends without new data
-                              dts (remove (fn [[_ d]] (nil? d)) dts)
-                              to-recur (map (fn [[tnd datums]] [tnd (last datums)]) dts)]
-                              
-                          (hk/send! channel
-                                    (ds->ws-message :datums (partition 2 (interleave (get-in @state [:app :channels channel :trends])
-                                                                                     (repeat (n-tweets 5))))))
-                          ;; one minute
-                          (Thread/sleep (/ 60000 60))
-                          (recur to-recur
-                                 (gis [:google :trends])))))))))
+        (if (not (:on channel-context))
+
+          ;; Stream is off
+          (do (Thread/sleep (/ 60000 60))
+              (recur new-google-trends))
+
+          ;; Stream is on
+          (do (let [subscriptions (:trends channel-context)
+                    new-datums (map after-datum subscriptions)]
+                
+                ;; Update our subscriptions
+                (assoc-in-state! [channel :trends] (map first new-datums))
+                ;; Send the data
+                (doseq [datum (reduce into new-datums)]
+                  (hk/send! channel (ds->ws-message :datum (clean-datum datum))))
+                
+                (Thread/sleep (/ 60000 60)) ; one minute
+                (recur new-google-trends))))))))
 
 (defn register-new-channel!
   "Adds new channel and associated context to `state'"
   [channel]
-  ;; `and' is used to guarantee transaction succeeds before esablishing a channel's loop.
-  (and (assoc-in-state! [:app :channels channel] {:trends #{} :test-mode false :on false})
+  ;; `and' is used to guarantee transaction finishes before esablishing a channel's loop.
+  (and (assoc-in-state! [:app :channels channel] {:trends #{} :on false})
        (establish-stream-loop! channel)))
 
 (defn destroy-channel! [channel]
@@ -125,13 +118,11 @@
 
   (let [ds (read-string data)
         fst (first ds)]
-    (cond (= fst 'add-trend-stream!)    (ds->ws-message (add-trend-stream! channel (second ds)))
-          (= fst 'remove-trend-stream!) (ds->ws-message (remove-trend-stream! channel (second ds)))
-          (= fst 'current-trends)       (ds->ws-message :current-trends (current-trends))
-          (= fst 'help)                 (ds->ws-message (help))
-          (= fst 'toggle-stream!)       (ds->ws-message (toggle-stream! channel))
-          (= fst 'toggle-test-mode!)    (ds->ws-message (do (toggle-test-mode! channel)
-                                                            (str {:test-mode (get-in @state [:app :channels channel :test-mode])})))
+    (cond (= fst 'subscribe!)     (ds->ws-message (subscribe! channel (second ds)))
+          (= fst 'unsubscribe!)   (ds->ws-message (unsubscribe! channel (second ds)))
+          (= fst 'current-trends) (ds->ws-message :current-trends (current-trends))
+          (= fst 'help)           (ds->ws-message (help))
+          (= fst 'toggle-stream!) (ds->ws-message (toggle-stream! channel))
           :else "Try `help'. `doc' is not yet implemented.")))
 
 (defn websocket-handler

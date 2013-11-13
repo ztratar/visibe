@@ -9,7 +9,7 @@
                   :trends {} 
                   :websocket-connection nil
                   :last-datum nil
-                  :datums []}))
+                  :datums #{}}))
 
 (defn gis
   "[g]et [i]n [s]tate"

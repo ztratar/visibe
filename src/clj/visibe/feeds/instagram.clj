@@ -12,10 +12,10 @@
             [clojure.set :refer [rename-keys]])
   (:import instagram.callbacks.protocols.SyncSingleCallback))
 
-(defn- instagram-photo->datum [m]
+(defn instagram-photo->essentials [m]
   (let [a (partial get-in m)]
     (-> m
-        (select-keys [:tags :id :created_time :link])
+        (select-keys [:tags :id :created_time :link :trend])
         (merge {:full-name (a [:user :full_name])
                 :profile-picture (a [:user :profile_picture])
                 :username (a [:user :username])
@@ -23,10 +23,10 @@
         (rename-keys {:created_time :created-at})
         (assoc :type :instagram-photo))))
 
-(defn- instagram-video->datum [m]
+(defn instagram-video->essentials [m]
   (let [a (partial get-in m)]
     (-> m
-        (select-keys [:tags :id :created_time :link])
+        (select-keys [:tags :id :created_time :link :trend])
         (merge {:full-name (a [:user :full_name])
                 :profile-picture (a [:user :profile_picture])
                 :username (a [:user :username])
@@ -59,7 +59,11 @@ relevent media."
 (defn store-instagram-media
   "Instagram returns their datums with the newest first"
   [trend datums]
-  (append-datums trend datums))
+  (append-datums trend (map #(rename-keys (if (= "image" (:type %))
+                                            (assoc % :datum-type :instagram-photo)
+                                            (assoc % :datum-type :instagram-video))
+                                          {:created_time :created-at})
+                            datums)))
 
 (defn track-trend
   "Tracks a trend while it's still an active trend, persisting data related to it."

@@ -31,6 +31,7 @@
    (while true
      (let [data (<! receive)
            msg (r/read-string (str (.-data data)))]
+       (console/log "websocket message" (str msg))
        (case (:type msg)
          ;; NOTE, Sun Nov 10 2013, Francis Wolke
          ;; These two are conceptually the same, shouldn't the code reflect that?
@@ -39,7 +40,7 @@
 
          :current-trends (assoc-in-state! [:trends] (:data msg))
          :print (console/log (:data msg))
-         :else (console/log (:data msg)))))))
+         :else (console/log "ws data" (str (:data msg))))))))
 
 (defn ws-connect! []
   (let [ws (js/WebSocket. "ws://localhost:9000/ws")

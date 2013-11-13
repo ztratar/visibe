@@ -1,6 +1,7 @@
 (ns ^{:doc "For collection of twitter data."}
   visibe.feeds.twitter
   (:require [clojure.data.json :as json]
+            [clojure.set :refer [rename-keys]]
             [clj-http.lite.client :as client]
             [clojure.string :as s]
             [clj-time.coerce :refer [to-long from-long]]
@@ -85,29 +86,15 @@
       (:body)
       (json/read-json)))
 
-(defn current-trends
-  "Convenience function"
-  []
-  (:trends (:google @state)))
-
-;; (defn tweet->essentials
-;;   ;; FIXME, NOTE Fri Oct 04 2013, Francis Wolke
-;;   ;; `:text` path may not always have full urls.
-
-;;   ;; Should we even be throwing away any data?
-
-;;   ;; Should we fetch profile pictures on the server side?
-;;   [tweet]
-;;   (-> (merge (select-keys tweet [:text :created_at])
-;;              (select-keys (:user tweet) [:name :screen_name :profile_image_url_https]))
-;;       (underscore->hyphen)
-;;       (update-in [:created-at] twitter-time->long)
-;;       (assoc :type :tweet)))
+(defn store-tweets [trend tweets]
+  (->> (:statuses tweets)
+       (map #(rename-keys (assoc % :datum-type :tweet) {:created_at :created-at}))
+       (append-datums trend)))
 
 (defn track-trend
   "Tracks a trend while it's still an 'active' trend. Runs in future, which 
 returns `nil` when trend is no longer 'active'. 'Active' is defined as being in
-`(current-trends)'"
+`current-trends'"
   [trend]
   ;; NOTE, Fri Oct 04 2013, Francis Wolke
   ;; For the time being, I don't want to deal with the full stream.
@@ -116,10 +103,18 @@ returns `nil` when trend is no longer 'active'. 'Active' is defined as being in
   ;; this peiod of time. (/ (* 15 60) 450) => 2 sec
   (future
     (let [tweet-data (search-tweets trend)]
-      (append-datums trend  (:statuses tweet-data))
+      (store-tweets trend tweet-data)
       (loop [tweet-data tweet-data]
         (let [new-query (:refresh_url (:search_metadata tweet-data))]
           (when (some #{trend} (keys (gis [:google :trends])))
-            (do (append-datums trend  (:statuses tweet-data))
+            (do (store-tweets trend tweet-data)
                 (Thread/sleep 180000)   ; 3 min
                 (recur (twitter-q new-query)))))))))
+
+(defn tweet->essentials
+  ;; FIXME, NOTE Fri Oct 04 2013, Francis Wolke
+  ;; `:text` path may not always have full urls.
+  [tweet]
+  (-> (merge (select-keys tweet [:text :created-at :trend])
+             (select-keys (:user tweet) [:name :screen_name :profile_image_url_https]))
+      (assoc :datum-type :tweet)))

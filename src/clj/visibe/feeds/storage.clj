@@ -66,13 +66,19 @@ newer than those already in ':datums'"
       (drop (- (count older) 50) older)
       older)))
 
+(defn sort-datums-by-timestamp
+  "Returns datums with the newest first"
+  [datums]
+  (sort-by :created-at (map #(update-in % [:created-at] (fn [time] (if (number? time) time (Integer/parseInt time)))) datums)))
+
 (defn after-datum
   "Returns any datums that come chronologically after the supplied datom"
-  [trend supplied-datum]
-  (if (nil? supplied-datum)
-    (:datums (c/find-one-as-map "trends" {:trend trend}))
-    (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]
-      (rest (drop-while (partial not= supplied-datum) datums)))))
+  ([supplied-datum] (after-datum (:trend supplied-datum) supplied-datum))
+  ([trend supplied-datum]
+     (if (nil? supplied-datum)
+       (:datums (c/find-one-as-map "trends" {:trend trend}))
+       (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]
+         (rest (drop-while (partial not= supplied-datum) (sort-datums-by-timestamp datums)))))))
 
 (defn most-recent-google-trend
   []
@@ -83,8 +89,14 @@ newer than those already in ':datums'"
   [trend-and-images-hashmap]
   (c/insert "google-trends" trend-and-images-hashmap))
 
-(defn intial-trend-datums
+(defn intial-datums
   "Accepts a seq of trends, returns a seq of the most 20 recent datums of each type. "
   [trends]
   (reduce into (map (fn [trend] (map #(assoc % :trend trend)
-                                     (take 30 (:datums (c/find-one-as-map "trends" {:trend trend}))))) trends)))
+                                     (take 10 (:datums (c/find-one-as-map "trends" {:trend trend}))))) trends)))
+
+;; (def datums-to-update (reduce into (map :datums (c/find-maps "trends"))))
+;; ;;; Why are there not instagrams that need to be updated?
+;; (def instagrams-to-update (filter :created_time datums-to-update))
+;; (def tweets-to-update (filter :created_at datums-to-update))
+

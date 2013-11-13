@@ -34,16 +34,16 @@
 ; Trend
 ;*******************************************************************************
 
-(deftemplate tweet [{text :text user :user created-at :created_time
+(deftemplate tweet [{text :text created-at :created-at
                      name :name screen-name :screen-name
                      profile-image-url-https :profile-image-url-https}]
  
   [:li.social-activity.tweet
-    [:a.user-img {:href "#"} [:img {:src profile-image-url-https}]]
-    [:div.content
-      [:a.user-name {:href "#"} name]
-      [:span.byline "On " [:a {:href "#"} "Twitter"] " 3 minutes ago"]
-      [:div.body-content text]]])
+   [:a.user-img {:href "#"} [:img {:src profile-image-url-https}]]
+   [:div.content
+    [:a.user-name {:href "#"} name]
+    [:span.byline "On " [:a {:href "#"} "Twitter"] " 3 minutes ago"]
+    [:div.body-content text]]])
 
 (deftemplate instagram-photo [{tags :tags created-at :created-at type :type
                                username :username profile-picture :profile-picture
