@@ -80,20 +80,4 @@
                          :compiler {:output-to "resources/public/js/out/goog/eve.js"
                                     :output-dir "resources/public/js/out"
                                     :optimizations :none
-                                    :source-map true}}]}
-  ;; {:repl-listen-port 8002
-   
-  ;;  :builds {:prod {:source-paths ["src/cljs"]
-  ;;                  :compiler {:output-to "resources/public/js/visibe.js"}
-  ;;                  :optimizations :advanced}
-
-  ;;           :pre-prod {:source-paths ["src/cljs"]
-  ;;                      :compiler {:output-to "resources/public/js/visibe_pre.js"}
-  ;;                      :optimizations :simple}
-
-  ;;           :dev {:pretty-print true
-  ;;                 :source-paths ["src/cljs"]
-  ;;                 :externs ["lib/d3.v3.js"]
-  ;;                 :compiler {:output-to "resources/public/js/visibe_dbg.js"}
-  ;;                 :optimizations :whitespace}}}
-  )
+                                    :source-map true}}]})

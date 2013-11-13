@@ -126,10 +126,3 @@
   (hk/with-channel request channel
     (hk/on-close channel (fn [& _] (destroy-channel! channel)))
     (hk/on-receive channel (fn [data] (hk/send! channel (ws-api-call channel data))))))
-
-;;;
-
-
-;; (def play-data (intial-datums (keys (gis [:google :trends]))))
-
-;; (:datum-type (first play-data))

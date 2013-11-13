@@ -1,5 +1,5 @@
 (ns ^{:doc "..."}
-    eve.utils)
+  eve.utils)
 
 (defn ->slug [s]
   (.toLowerCase (clojure.string/replace s " " "-")))

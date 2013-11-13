@@ -15,7 +15,7 @@
 (defn instagram-photo->essentials [m]
   (let [a (partial get-in m)]
     (-> m
-        (select-keys [:tags :id :created_time :link :trend])
+        (select-keys [:tags :id :created_time :link :trend :datum-type])
         (merge {:full-name (a [:user :full_name])
                 :profile-picture (a [:user :profile_picture])
                 :username (a [:user :username])
@@ -26,7 +26,7 @@
 (defn instagram-video->essentials [m]
   (let [a (partial get-in m)]
     (-> m
-        (select-keys [:tags :id :created_time :link :trend])
+        (select-keys [:tags :id :created_time :link :trend :datum-type])
         (merge {:full-name (a [:user :full_name])
                 :profile-picture (a [:user :profile_picture])
                 :username (a [:user :username])
@@ -57,23 +57,23 @@ relevent media."
                                    :params {:tag_name (trend->tag trend)}))))
 
 (defn store-instagram-media
-  "Instagram returns their datums with the newest first"
   [trend datums]
-  (update-in (append-datums trend (map #(rename-keys (if (= "image" (:type %))
-                                                       (assoc % :datum-type :instagram-photo)
-                                                       (assoc % :datum-type :instagram-video))
-                                                     {:created_time :created-at})
-                                       datums))
-             [:created-at] (fn [t] (if (string? t) (Integer/parseInt t) t))))
+  (letfn [(clean [datum]
+            (-> (if (= "image" (:type datum))
+                  (assoc datum :datum-type :instagram-photo)
+                  (assoc datum :datum-type :instagram-video))
+                (rename-keys {:created_time :created-at})
+                ;; Java time is in millis, UNIX time (as returned by instagram) is in seconds
+                (update-in [:created-at] (fn [t] (* 1000) (if (string? t) (Integer/parseInt t) t)))))]
+    (append-datums trend (map clean datums))))
 
 (defn track-trend
   "Tracks a trend while it's still an active trend, persisting data related to it."
   [trend]
   (future (loop [media #{}]
             (when (some #{trend} (keys (gis [:google :trends])))
-              (let [ ;; UNIX time is in seconds, whereas java time is in milliseconds.
-                    new-media (update-in (instagram-media trend) [:created_time] #(* 1000 (read-string %)))
-                    new-datums (clojure.set/difference (set media) (set new-media))]
+              (let [new-media  (instagram-media trend)
+                    new-datums (clojure.set/difference (set new-media) media)]
                 (store-instagram-media trend new-datums)
                 (Thread/sleep (/ 180000 3)) ; 1 minute
-                (recur new-media))))))
+                (recur new-datums))))))

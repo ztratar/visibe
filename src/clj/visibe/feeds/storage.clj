@@ -101,7 +101,26 @@ newer than those already in ':datums'"
   (reduce into (map (fn [trend] (map #(assoc % :trend trend)
                                      (take 10 (:datums (c/find-one-as-map "trends" {:trend trend}))))) trends)))
 
-;; (def datums-to-update (reduce into (map :datums (c/find-maps "trends"))))
-;; ;;; Why are there not instagrams that need to be updated?
-;; (def instagrams-to-update (filter :created_time datums-to-update))
-;; (def tweets-to-update (filter :created_at datums-to-update))
+;;; Issues
+
+;;; We are not currently sorting are queries in mongo.
+;;; Are we even getting any instagram data?
+
+;; I want to test trends to see if their `datums' sub collection handles anything like
+
+;; (def my-data (c/find-maps "trends" {:trend "Google Drive"}))
+
+;; (count (:datums (first my-data)))
+
+;; {:_id #<ObjectId 5283581eb0c6666547d7fe3c>, :datums {:1 {:name "test tweet", :datum-type "tweet", :tweet "stuff"}}, :trend "Food"}
+
+;; (count (:datums my-data))
+
+;; (c/insert "test" {:trend "Food" :datums {[]}})
+;; (c/update "test" {:trend "Food" :datums [["foo" "bar" "baz"]]}
+;;           :upsert true)
+
+;; (c/find-maps "test" {:trend "Food"} [:datums])
+
+;; (reduce into (map #(into #{} (map :datum-type (:datums %)))
+;;                   (c/find-maps "trends")))
