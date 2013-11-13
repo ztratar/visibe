@@ -27,7 +27,7 @@
 (defn ^{:api :websocket :doc "Subscribes you to a particular trend stream, you will receive datums after DATUM"}
   subscribe!
   [channel datum]
-  (update-in-state! [:app :channels channel :trends] (fn [& args] (set (apply conj args))) datum)
+  (update-in-state! [:app :channels channel :trends] (fn [trends] (set (conj trends datum))))
   {:trends (get-in @state [:app :channels channel :trends])})
 
 (defn ^{:api :websocket :doc "You will no longer be sent datums related to this trend."}
