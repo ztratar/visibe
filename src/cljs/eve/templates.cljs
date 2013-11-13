@@ -36,10 +36,10 @@
 
 (deftemplate tweet [{text :text created-at :created-at
                      name :name screen-name :screen-name
-                     profile-image-url-https :profile-image-url-https}]
+                     profile-image-url :profile_image_url_https}]
  
   [:li.social-activity.tweet
-   [:a.user-img {:href "#"} [:img {:src profile-image-url-https}]]
+   [:a.user-img {:href "#"} [:img {:src profile-image-url}]]
    [:div.content
     [:a.user-name {:href "#"} name]
     [:span.byline "On " [:a {:href "#"} "Twitter"] " 3 minutes ago"]
