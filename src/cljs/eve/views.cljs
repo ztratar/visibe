@@ -115,7 +115,7 @@
             :else :right))))
 
 (defn add-new-datum! [{type :type datum-type :datum-type id :id :as datum}]
-  (let [datum-card (case datum-type
+  (let [datum-card (case (keyword datum-type)
                      :instagram-video (t/instagram-video datum)
                      :instagram-photo (t/instagram-photo datum)
                      :vine (t/vine datum)

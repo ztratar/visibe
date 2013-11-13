@@ -61,13 +61,9 @@
   ([type ds] (str {:type type :data ds})))
 
 (defn clean-datum [datum]
-  (cond (= (:datum-type datum) :instagram-photo) (instagram-photo->essentials datum)
-        (= (:datum-type datum) :instagram-video) (instagram-video->essentials datum)
-        (and (= "image" (:type datum)) (:created_time datum)) (instagram-photo->essentials datum)
-        (:created_time datum) (instagram-video->essentials datum)
-
-        (= :datum-type :tweet) (tweet->essentials datum)
-        (:created_at datum) (tweet->essentials datum)
+  (cond (= (:datum-type datum) "instagram-photo") (instagram-photo->essentials datum)
+        (= (:datum-type datum) "instagram-video") (instagram-video->essentials datum)
+        (= (:datum-type datum) "tweet") (tweet->essentials datum)
         :else datum))
 
 (defn establish-stream-loop!
@@ -130,3 +126,10 @@
   (hk/with-channel request channel
     (hk/on-close channel (fn [& _] (destroy-channel! channel)))
     (hk/on-receive channel (fn [data] (hk/send! channel (ws-api-call channel data))))))
+
+;;;
+
+
+;; (def play-data (intial-datums (keys (gis [:google :trends]))))
+
+;; (:datum-type (first play-data))

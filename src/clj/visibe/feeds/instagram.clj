@@ -59,11 +59,12 @@ relevent media."
 (defn store-instagram-media
   "Instagram returns their datums with the newest first"
   [trend datums]
-  (append-datums trend (map #(rename-keys (if (= "image" (:type %))
-                                            (assoc % :datum-type :instagram-photo)
-                                            (assoc % :datum-type :instagram-video))
-                                          {:created_time :created-at})
-                            datums)))
+  (update-in (append-datums trend (map #(rename-keys (if (= "image" (:type %))
+                                                       (assoc % :datum-type :instagram-photo)
+                                                       (assoc % :datum-type :instagram-video))
+                                                     {:created_time :created-at})
+                                       datums))
+             [:created-at] (fn [t] (if (string? t) (Integer/parseInt t) t))))
 
 (defn track-trend
   "Tracks a trend while it's still an active trend, persisting data related to it."

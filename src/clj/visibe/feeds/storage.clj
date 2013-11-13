@@ -19,6 +19,9 @@
                    password)]
     (str "mongodb://" username ":" password "@" host ":" port "/" database)))
 
+; Other
+;*******************************************************************************
+
 (defn persist-google-trends-and-photos
   "Does what you would think, and saves the time that the transaction occured as
 ':created-at' so that we can reference this data at a later date"
@@ -72,11 +75,14 @@ newer than those already in ':datums'"
   (sort-by :created-at (map #(update-in % [:created-at] (fn [time] (if (number? time) time (Integer/parseInt time)))) datums)))
 
 (defn after-datum
+  ;; TODO, Wed Nov 13 2013, Francis Wolke
+  ;; Convert all dates to numbers.
+  ;; http://clojuremongodb.info/articles/querying.html
   "Returns any datums that come chronologically after the supplied datom"
   ([supplied-datum] (after-datum (:trend supplied-datum) supplied-datum))
   ([trend supplied-datum]
      (if (nil? supplied-datum)
-       (:datums (c/find-one-as-map "trends" {:trend trend}))
+       (:datums (c/find-one-as-map (str "trends") {:trend trend}))
        (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]
          (rest (drop-while (partial not= supplied-datum) (sort-datums-by-timestamp datums)))))))
 
@@ -99,4 +105,3 @@ newer than those already in ':datums'"
 ;; ;;; Why are there not instagrams that need to be updated?
 ;; (def instagrams-to-update (filter :created_time datums-to-update))
 ;; (def tweets-to-update (filter :created_at datums-to-update))
-

@@ -87,9 +87,11 @@
       (json/read-json)))
 
 (defn store-tweets [trend tweets]
-  (->> (:statuses tweets)
-       (map #(rename-keys (assoc % :datum-type :tweet) {:created_at :created-at}))
-       (append-datums trend)))
+  (update-in
+   (->> (:statuses tweets)
+        (map #(rename-keys (assoc % :datum-type :tweet) {:created_at :created-at}))
+        (append-datums trend))
+   [:created-at] (fn [t] (if (string? t) (Integer/parseInt t) t))))
 
 (defn track-trend
   "Tracks a trend while it's still an 'active' trend. Runs in future, which 
@@ -108,7 +110,7 @@ returns `nil` when trend is no longer 'active'. 'Active' is defined as being in
         (let [new-query (:refresh_url (:search_metadata tweet-data))]
           (when (some #{trend} (keys (gis [:google :trends])))
             (do (store-tweets trend tweet-data)
-                (Thread/sleep 180000)   ; 3 min
+                (Thread/sleep (/ 180000 3)) ;  min
                 (recur (twitter-q new-query)))))))))
 
 (defn tweet->essentials
