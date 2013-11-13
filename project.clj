@@ -71,20 +71,29 @@
                (defn browser-repl []
                  (pb/cljs-repl :repl-env (brepl/repl-env :port 8002)))]
 
-  :plugins [[lein-cljsbuild "1.0.0-alpha2"] [codox "0.6.6"]]
+  :plugins [[lein-cljsbuild "1.0.0-alpha2"]
+            [codox "0.6.6"]]
 
-  :cljsbuild {:repl-listen-port 8002
-              
-              :builds {:prod {:source-paths ["src/cljs"]
-                              :compiler {:output-to "resources/public/js/visibe.js"}
-                              :optimizations :advanced}
+  :cljsbuild  {:repl-listen-port 8002
+               :builds [{:id "dev"
+                         :source-paths ["src/cljs"]
+                         :compiler {:output-to "resources/public/js/out/goog/eve.js"
+                                    :output-dir "resources/public/js/out"
+                                    :optimizations :none
+                                    :source-map true}}]}
+  ;; {:repl-listen-port 8002
+   
+  ;;  :builds {:prod {:source-paths ["src/cljs"]
+  ;;                  :compiler {:output-to "resources/public/js/visibe.js"}
+  ;;                  :optimizations :advanced}
 
-                       :pre-prod {:source-paths ["src/cljs"]
-                                  :compiler {:output-to "resources/public/js/visibe_pre.js"}
-                                  :optimizations :simple}
+  ;;           :pre-prod {:source-paths ["src/cljs"]
+  ;;                      :compiler {:output-to "resources/public/js/visibe_pre.js"}
+  ;;                      :optimizations :simple}
 
-                       :dev {:pretty-print true
-                             :source-paths ["src/cljs"]
-                             :externs ["lib/d3.v3.js"]
-                             :compiler {:output-to "resources/public/js/visibe_dbg.js"}
-                             :optimizations :whitespace}}})
+  ;;           :dev {:pretty-print true
+  ;;                 :source-paths ["src/cljs"]
+  ;;                 :externs ["lib/d3.v3.js"]
+  ;;                 :compiler {:output-to "resources/public/js/visibe_dbg.js"}
+  ;;                 :optimizations :whitespace}}}
+  )

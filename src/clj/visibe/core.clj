@@ -24,7 +24,8 @@
           [:meta {:charset "UTF-8"}]
           [:link {:rel "stylesheet/less" :type "text/css" :href "css/styles.less"}]
           [:link {:rel "stylesheet" :type "text/css" :href "font-awesome/css/font-awesome.min.css"}]]
-          [:body [:script {:type "text/javascript"}
+          [:body
+            [:script {:type "text/javascript"}
                   "less = {
 
                    env: \"development\", // or \"production\"
@@ -40,11 +41,12 @@
                    rootpath: \"css/\"// a path to add on to the start of every url
                                        //resource
            };"]
-          (include-js "js/libs/d3.v3.min.js"
-                      ;; "https://apis.google.com/js/plusone.js"
-                      "js/visibe_dbg.js" "js/libs/video-js/video.js"
-                      "js/libs/less.js"
-                      "js/libs/moment-with-langs.js")
+           (include-js "js/out/goog/base.js"
+                       "js/libs/less.js"
+                       "js/libs/moment-with-langs.js"
+                       "js/libs/video-js/video.js"
+                       "js/out/goog/eve.js")
+           [:script {:type "text/javascript"} "goog.require(\"eve.core\");"]
           [:div#content]]))
 
 (defroutes app-routes

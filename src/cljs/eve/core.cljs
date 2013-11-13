@@ -4,7 +4,7 @@
             [cljs-http.client :as http]
             [cljs.reader :as r]
             [shodan.console :as console]
-            [eve.views :as v :refer [feed-update!]]
+            [eve.views :refer [feed-update! navigate!]]
             [dommy.utils :as utils]
             [dommy.core :as dommy]
             [eve.state :refer [state assoc-in-state! update-in-state!]]
@@ -73,7 +73,7 @@
           (let [v (<! ch)]
             (if (empty? v)
               (recur)
-              (do (v/navigate! :home)
+              (do (navigate! :home)
                   (close! ch))))))))
 
 (def on-load (set! (.-onload js/window) bootstrap!))

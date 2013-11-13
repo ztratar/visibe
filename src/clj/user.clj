@@ -71,6 +71,9 @@
   ;; TODO, Fri Nov 01 2013, Francis Wolke
   ;; Dosn't obey spec. Also, breaks down when I attempted to use it on the `state'. This is because it dosn't
   ;; play nicely with objects as keys (?)
+  ;; this could, given some work, be useful for things like data migrations. Just specify the data structure that you want, from what exists
+  ;; and use logic programming to figure out how to get there. Possibly.
+  
   "[s]mart [s]elect. 
 Given a start map and `seq' of goal-keys, generates a function to convert one to the other (start to goal). EG:
 ... call ...
