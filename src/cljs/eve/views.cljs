@@ -114,13 +114,17 @@
             (< l r) :left
             :else :right))))
 
-(defn add-new-datum! [{type :type id :id :as datum}]
-  (let [datum-card (case (keyword type)
+(defn add-new-datum! [{type :type datum-type :datum-type id :id :as datum}]
+  (let [datum-card (case datum-type
                      :instagram-video (t/instagram-video datum)
                      :instagram-photo (t/instagram-photo datum)
                      :vine (t/vine datum)
                      :tweet (t/tweet datum)
-                     (t/automagic datum))]
+                     (case type
+                       "instagram-photo" (t/instagram-video datum)
+                       "instagram-video" (t/instagram-photo datum)
+                       "tweet" (t/tweet datum)
+                       (t/automagic datum)))]
     (if (= :left (left-or-right?))
       (append! (sel1 :#feed-left) datum-card)
       (append! (sel1 :#feed-right) datum-card)))) 
