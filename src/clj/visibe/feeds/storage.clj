@@ -7,9 +7,13 @@
             [clj-time.core :refer [date-time]]
             [clj-time.coerce :refer [to-long from-long]]
             [clj-time.format :as f]
+            [monger.query :as q]
             [monger.operators :refer :all]
             [monger.collection :as c])
   (:import org.bson.types.ObjectId))
+
+;;; TODO, Wed Nov 13 2013, Francis Wolke
+;;; Add incidies
 
 (defn conn-uri
   "'%' is an escape character."
@@ -19,108 +23,45 @@
                    password)]
     (str "mongodb://" username ":" password "@" host ":" port "/" database)))
 
-; Other
-;*******************************************************************************
-
 (defn persist-google-trends-and-photos
-  "Does what you would think, and saves the time that the transaction occured as
+  "Saves the time that the transaction occured as
 ':created-at' so that we can reference this data at a later date"
   [trends-and-photos-hashmap]
   (->> trends-and-photos-hashmap
        (merge {:created-at (to-long (format-local-time (local-now) :date-time))})
        (c/insert "google-trends")))
 
-(defn create-trend
-  "Create trend if it does not exist"
-  [trend]
-  (when-not (c/find-one-as-map "trends" {:trend trend})
-    (c/insert "trends"
-              {:trend trend
-               :datums []
-               ;; XXX, Tue Oct 08 2013, Francis Wolke
-                 
-               ;; I don't want to do this, but mongodb dosn't have a way of
-               ;; timestamping transactions. Look at other datastores?
-               ;; Also, I do belive that this is the wrong time
-               ;; format. Though, for the next day or two it won't matter.
-               :created-at (to-long (format-local-time (local-now) :date-time))})))
-
 (defn append-datums
-  "Adds new datums to the tail of the trend's datum seq. Datums must be sorted
-by timestamp prior to appending.
-
-XXX, Tue Oct 08 2013, Francis Wolke
-
-This function ASSUMES that you will ONLY be appending datums that are
-newer than those already in ':datums'"
-  [trend new-datums]
-  ;; TODO, Tue Oct 08 2013, Francis Wolke
-  ;; This is horrible, I find it really hard to belive that there isn't an
-  ;; append function (native to mongodb). Revisit.
-  (let [{datums :datums :as m} (c/find-one-as-map "trends" {:trend trend})]
-    (c/update "trends" m (assoc m :datums (into datums new-datums)))))
-
-(defn previous-50-datums 
-  "Retuns 50 datums chronologically previous to the supplied datum"
-  [trend datum]
-  (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})
-        older (take-while (partial not= datum) datums)]
-    (if (> (count older) 50)
-      (drop (- (count older) 50) older)
-      older)))
-
-(defn sort-datums-by-timestamp
-  "Returns datums with the newest first"
-  [datums]
-  (sort-by :created-at (map #(update-in % [:created-at] (fn [time] (if (number? time) time (Integer/parseInt time)))) datums)))
-
-(defn after-datum
+  "Adds datums to a trend, creates the trend if it didn't already exist"
   ;; TODO, Wed Nov 13 2013, Francis Wolke
-  ;; Convert all dates to numbers.
-  ;; http://clojuremongodb.info/articles/querying.html
-  "Returns any datums that come chronologically after the supplied datom"
-  ([supplied-datum] (after-datum (:trend supplied-datum) supplied-datum))
-  ([trend supplied-datum]
-     (if (nil? supplied-datum)
-       (:datums (c/find-one-as-map (str "trends") {:trend trend}))
-       (let [{datums :datums} (c/find-one-as-map "trends" {:trend trend})]
-         (rest (drop-while (partial not= supplied-datum) (sort-datums-by-timestamp datums)))))))
+  ;; Handle batch insert errors
+  ;; http://www.mongodb.org/display/DOCS/Inserting#Inserting-Bulkinserts
+  [trend datums]
+  (c/insert-batch trend datums))
 
-(defn most-recent-google-trend
-  []
-  (dissoc (c/find-one-as-map "google-trends") :_id))
+(defn datums-since
+  "Returns datums younger than TIME for given trend"
+  [trend time]
+  (->> (q/with-collection trend
+         (q/find {:created-at (array-map $gt time)})
+         (q/sort (array-map :created-at -1)))
+       (map #(dissoc % :_id))))
 
-(defn add-new-trends
-  "Trends and their associated images"
-  [trend-and-images-hashmap]
-  (c/insert "google-trends" trend-and-images-hashmap))
+(defn previous-15
+  "Returns 15 datums older than the supplied datum for a given trend"
+  ;; FIXME, Wed Nov 13 2013, Francis Wolke
+  ;; We will discard valid data here, is two datums happen to have the same timestamp
+  [trend datum]
+  (->> (q/with-collection trend
+         (q/find {:created-at (array-map $lt (:created-at datum))})
+         (q/sort (array-map :created-at -1))
+         (q/limit 15))
+       (map #(dissoc % :_id))))
 
-(defn intial-datums
-  "Accepts a seq of trends, returns a seq of the most 20 recent datums of each type. "
-  [trends]
-  (reduce into (map (fn [trend] (map #(assoc % :trend trend)
-                                     (take 10 (:datums (c/find-one-as-map "trends" {:trend trend}))))) trends)))
-
-;;; Issues
-
-;;; We are not currently sorting are queries in mongo.
-;;; Are we even getting any instagram data?
-
-;; I want to test trends to see if their `datums' sub collection handles anything like
-
-;; (def my-data (c/find-maps "trends" {:trend "Google Drive"}))
-
-;; (count (:datums (first my-data)))
-
-;; {:_id #<ObjectId 5283581eb0c6666547d7fe3c>, :datums {:1 {:name "test tweet", :datum-type "tweet", :tweet "stuff"}}, :trend "Food"}
-
-;; (count (:datums my-data))
-
-;; (c/insert "test" {:trend "Food" :datums {[]}})
-;; (c/update "test" {:trend "Food" :datums [["foo" "bar" "baz"]]}
-;;           :upsert true)
-
-;; (c/find-maps "test" {:trend "Food"} [:datums])
-
-;; (reduce into (map #(into #{} (map :datum-type (:datums %)))
-;;                   (c/find-maps "trends")))
+(defn seed-datums
+  "Returns 15 most recent datums on a trend"
+  [trend]
+  (->> (q/with-collection trend
+         (q/sort (array-map :created-at -1))
+         (q/limit 15))
+       (map #(dissoc % :_id))))
