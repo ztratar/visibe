@@ -33,14 +33,10 @@
            msg (r/read-string (str (.-data data)))]
        (console/log "websocket message" (str msg))
        (case (:type msg)
-         ;; NOTE, Sun Nov 10 2013, Francis Wolke
-         ;; These two are conceptually the same, shouldn't the code reflect that?
-         :seed-datums (update-in-state! [:datums] (partial into (:data msg)))
-         :datums (update-in-state! [:datums] (partial into (:data msg)))
-
+         :datums         (update-in-state! [:datums] (comp set (partial into (:data msg))))
          :current-trends (assoc-in-state! [:trends] (:data msg))
-         :print (console/log (:data msg))
-         :else (console/log "ws data" (str (:data msg))))))))
+         :print          (console/log (str (:data msg)))
+         (console/log "ws data" (str (:data msg))))))))
 
 (defn ws-connect! []
   (let [ws (js/WebSocket. "ws://localhost:9000/ws")

@@ -3,7 +3,7 @@
   (:use visibe.homeless)
   (:require [monger.core :as mg]
             [monger.query :as q]
-            [clojure.set :only [rename-keys]]
+            [clojure.set :refer [rename-keys]]
             [clj-time.local :refer [local-now format-local-time]]
             [clj-time.core :refer [date-time]]
             [clj-time.coerce :refer [to-long from-long]]

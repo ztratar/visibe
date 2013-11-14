@@ -15,24 +15,20 @@
 (defn instagram-photo->essentials [m]
   (let [a (partial get-in m)]
     (-> m
-        (select-keys [:tags :id :created_time :link :trend :datum-type])
+        (select-keys [:tags :id :created-at :link :trend :datum-type])
         (merge {:full-name (a [:user :full_name])
                 :profile-picture (a [:user :profile_picture])
                 :username (a [:user :username])
-                :photo (a [:images :standard_resolution])})
-        (rename-keys {:created_time :created-at})
-        (assoc :type :instagram-photo))))
+                :photo (a [:images :standard_resolution])}))))
 
 (defn instagram-video->essentials [m]
   (let [a (partial get-in m)]
     (-> m
-        (select-keys [:tags :id :created_time :link :trend :datum-type])
+        (select-keys [:tags :id :created-at :link :trend :datum-type])
         (merge {:full-name (a [:user :full_name])
                 :profile-picture (a [:user :profile_picture])
                 :username (a [:user :username])
-                :video (a [:videos :standard_resolution])})
-        (rename-keys {:created_time :created-at})
-        (assoc :type :instagram-video))))
+                :video (a [:videos :standard_resolution])}))))
 
 (defn generate-oauth-creds! []
   (assoc-in-state! [:instagram :creds]

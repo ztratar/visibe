@@ -76,9 +76,11 @@ loop."
   ;; REPL.
   []
   (future
-    ;; TODO, Thu Nov 14 2013, Francis Wolke
-    ;; Make a database call to load up the most recent trends for the init value.
-    (loop [trends (youngest-trends)]
+    ;; FIXME, Thu Nov 14 2013, Francis We
+    ;; We can't use `youngest-trends' to get the old trend data because you'll end up attempting to use some
+    ;; thumbnails that have not been generated on your machine. Until cropping is done client side, we have to
+    ;; generate trends on JVM startup.
+    (loop [trends {}]
       (recur (let [new-trends (trends->trends-with-photo-information (:united-states (goog/google-trends)))]
                ;; persist the new hashmap of trends and their photos
                (persist-google-trends-and-photos new-trends)

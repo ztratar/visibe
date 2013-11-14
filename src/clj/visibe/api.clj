@@ -49,7 +49,7 @@
   unsubscribe!
   [channel trend-to-remove]
   (update-in-state! [:app :channels channel :subscriptions]
-                    (fn [subscriptions] (remove (fn [[t _]] (= trend-to-remove t)) subscriptions)))
+                    (fn [subscriptions] (vec (remove (fn [[t _]] (= trend-to-remove t)) subscriptions))))
   {:subscriptions (gis [:app :channels channel :subscriptions])})
 
 ; WebSockets Boilerplate
@@ -78,7 +78,7 @@
 
         ;; Send seed data?
         (when (= {} trends)          
-          (hk/send! channel (ds->ws-message :seed-datums (map clean-datum (reduce into (map storage/seed-datums new-trends))))))
+          (hk/send! channel (ds->ws-message :datums (map clean-datum (reduce into (map storage/seed-datums new-trends))))))
         
         (when-not (nil? channel-context)
           (if (:on channel-context)
