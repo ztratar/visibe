@@ -16,6 +16,8 @@
 ;;; TODO, Wed Nov 13 2013, Francis Wolke
 ;;; Add incidies
 
+;; (c/ensure-index "google-trends" (array-map :created-at -1) {:unique true})
+
 (defn conn-uri
   "'%' is an escape character."
   [{username :username password :password host :host port :port database :database}]
@@ -49,7 +51,11 @@
   ;; Handle batch insert errors
   ;; http://www.mongodb.org/display/DOCS/Inserting#Inserting-Bulkinserts
   [trend datums]
-  (c/insert-batch trend datums))
+  (and (c/insert-batch trend datums)
+       ;; Use and to ensure that the write has returned
+       (c/ensure-index trend (array-map :created-at -1)
+                       ;; {:unique true}
+                       )))
 
 (defn datums-since
   "Returns datums younger than TIME for given trend"
@@ -63,9 +69,9 @@
   "Returns 15 datums older than the supplied datum for a given trend"
   ;; FIXME, Wed Nov 13 2013, Francis Wolke
   ;; We will discard valid data here, is two datums happen to have the same timestamp
-  [trend datum]
+  [{trend :trend created-at :created-at}]
   (->> (q/with-collection trend
-         (q/find {:created-at (array-map $lt (:created-at datum))})
+         (q/find {:created-at (array-map $lt created-at)})
          (q/sort (array-map :created-at -1))
          (q/limit 15))
        (map #(dissoc % :_id))))
@@ -76,4 +82,10 @@
   (->> (q/with-collection trend
          (q/sort (array-map :created-at -1))
          (q/limit 15))
+       (map #(dissoc % :_id))))
+
+(defn most-recent-datum [trend]
+  (->> (q/with-collection trend
+         (q/sort (array-map :created-at -1))
+         (q/limit 1))
        (map #(dissoc % :_id))))

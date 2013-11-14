@@ -1,5 +1,6 @@
 (ns ^{:doc "For collection of twitter data."}
   visibe.feeds.twitter
+  (:use user)
   (:require [clojure.data.json :as json]
             [clojure.set :refer [rename-keys]]
             [clj-http.lite.client :as client]
@@ -7,7 +8,7 @@
             [clj-time.coerce :refer [to-long from-long]]
             [clj-time.format :as f]
             [clj-time.core :refer [date-time]]
-            [visibe.homeless :refer [rfc822-str->long]]
+            [visibe.homeless :refer [rfc822-str->long date-time-str->long]]
             [visibe.feeds.storage :refer [append-datums]]
             [clojure.data.codec.base64 :as b64]            
             [visibe.state :refer [state gis assoc-in-state!]]))
@@ -87,11 +88,11 @@
       (json/read-json)))
 
 (defn store-tweets [trend tweets]
-  (->> (:statuses tweets)
-       (map #(assoc (update-in (rename-keys (assoc % :datum-type :tweet) {:created_at :created-at})
-                               [:created-at] (fn [t] (if (string? t) (Integer/parseInt t) t)))
-               :trend trend))
-       (append-datums trend)))
+  (let [tweets (:statuses tweets)
+        tweets (map #(assoc % :trend trend :datum-type :tweet) tweets)
+        tweets (map #(rename-keys % {:created_at :created-at}) tweets)
+        tweets (map #(update-in % [:created-at] twitter-time->long) tweets)]
+    (append-datums trend tweets)))
 
 (defn track-trend
   "Tracks a trend while it's still an 'active' trend. Runs in future, which 
@@ -106,11 +107,13 @@ returns `nil` when trend is no longer 'active'. 'Active' is defined as being in
   (future
     (let [tweet-data (search-tweets trend)]
       (store-tweets trend tweet-data)
+      ;; TODO, Thu Nov 14 2013, Francis Wolke
+      ;; This initialization can be moved into the loop
       (loop [tweet-data tweet-data]
         (let [new-query (:refresh_url (:search_metadata tweet-data))]
           (when (some #{trend} (keys (gis [:google :trends])))
             (do (store-tweets trend tweet-data)
-                (Thread/sleep (/ 180000 3)) ;  min
+                (Thread/sleep (/ 180000 3)) ; 1 min
                 (recur (twitter-q new-query)))))))))
 
 (defn tweet->essentials
