@@ -9,7 +9,7 @@
             [visibe.feeds.flickr :as flickr]
             [image-resizer.crop :refer :all]
             [image-resizer.core :refer :all]
-            [visibe.feeds.storage :refer [create-trend persist-google-trends-and-photos]]
+            [visibe.feeds.storage :refer [persist-google-trends-and-photos youngest-trends]]
             [visibe.state :refer [assoc-in-state! state]]
             [visibe.feeds.google-trends :as goog])
   (:import java.net.URL
@@ -76,7 +76,9 @@ loop."
   ;; REPL.
   []
   (future
-    (loop [trends #{}]
+    ;; TODO, Thu Nov 14 2013, Francis Wolke
+    ;; Make a database call to load up the most recent trends for the init value.
+    (loop [trends (youngest-trends)]
       (recur (let [new-trends (trends->trends-with-photo-information (:united-states (goog/google-trends)))]
                ;; persist the new hashmap of trends and their photos
                (persist-google-trends-and-photos new-trends)
@@ -85,10 +87,8 @@ loop."
                  ;; Track trends on other social media sites
                  (let [new-diff-trends (set/difference (keys new-trends) (keys trends))]
                    (doseq [t new-diff-trends]
-                     (create-trend t)
                      (twitter/track-trend t)
-                     (instagram/track-trend t)
-                     ))
+                     (instagram/track-trend t)))
                  
                  (do (Thread/sleep 300000) ; 5 min
                      new-trends)))))))

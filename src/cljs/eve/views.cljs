@@ -27,13 +27,13 @@
 
 (defn navigate-callback
   ([callback-fn]
-   (navigate-callback history callback-fn))
+     (navigate-callback history callback-fn))
   ([hist callback-fn]
-   (gevents/listen hist history-event/NAVIGATE
-                  (fn [e]
-                    (callback-fn {:token (keyword (.-token e))
-                                  :type (.-type e)
-                                  :navigation? (.-isNavigation e)})))))
+     (gevents/listen hist history-event/NAVIGATE
+                     (fn [e]
+                       (callback-fn {:token (keyword (.-token e))
+                                     :type (.-type e)
+                                     :navigation? (.-isNavigation e)})))))
 
 (defn init-history
   []

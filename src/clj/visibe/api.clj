@@ -78,7 +78,7 @@
 
         ;; Send seed data?
         (when (= {} trends)          
-          (hk/send! channel (ds->ws-message :seed-datums (reduce into (map storage/seed-datums new-trends)))))
+          (hk/send! channel (ds->ws-message :seed-datums (map clean-datum (reduce into (map storage/seed-datums new-trends))))))
         
         (when-not (nil? channel-context)
           (if (:on channel-context)

@@ -87,11 +87,11 @@
       (json/read-json)))
 
 (defn store-tweets [trend tweets]
-  (update-in
-   (->> (:statuses tweets)
-        (map #(rename-keys (assoc % :datum-type :tweet) {:created_at :created-at}))
-        (append-datums trend))
-   [:created-at] (fn [t] (if (string? t) (Integer/parseInt t) t))))
+  (->> (:statuses tweets)
+       (map #(assoc (update-in (rename-keys (assoc % :datum-type :tweet) {:created_at :created-at})
+                               [:created-at] (fn [t] (if (string? t) (Integer/parseInt t) t)))
+               :trend trend))
+       (append-datums trend)))
 
 (defn track-trend
   "Tracks a trend while it's still an 'active' trend. Runs in future, which 
@@ -117,6 +117,5 @@ returns `nil` when trend is no longer 'active'. 'Active' is defined as being in
   ;; FIXME, NOTE Fri Oct 04 2013, Francis Wolke
   ;; `:text` path may not always have full urls.
   [tweet]
-  (-> (merge (select-keys tweet [:text :created-at :trend])
-             (select-keys (:user tweet) [:name :screen_name :profile_image_url_https]))
-      (assoc :datum-type :tweet)))
+  (-> (merge (select-keys tweet [:text :created-at :trend :datum-type])
+             (select-keys (:user tweet) [:name :screen_name :profile_image_url_https]))))

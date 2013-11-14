@@ -3,6 +3,7 @@
   (:use visibe.homeless)
   (:require [monger.core :as mg]
             [monger.query :as q]
+            [clojure.set :only [rename-keys]]
             [clj-time.local :refer [local-now format-local-time]]
             [clj-time.core :refer [date-time]]
             [clj-time.coerce :refer [to-long from-long]]
@@ -30,6 +31,17 @@
   (->> trends-and-photos-hashmap
        (merge {:created-at (to-long (format-local-time (local-now) :date-time))})
        (c/insert "google-trends")))
+
+(defn youngest-trends
+  ;; TODO, Thu Nov 14 2013, Francis Wolke
+  ;; The concept of trends, and the corresponding photos needs a name
+  "Returns the youngest trends and corresponding photos"
+  []
+  (let [data (first (q/with-collection "google-trends"
+                      (q/sort (array-map :created-at -1))
+                      (q/limit 1)))
+        data (dissoc data :_id)]
+    (rename-keys data (zipmap (keys data) (map name (keys data))))))
 
 (defn append-datums
   "Adds datums to a trend, creates the trend if it didn't already exist"

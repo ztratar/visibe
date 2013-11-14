@@ -64,7 +64,8 @@ relevent media."
                   (assoc datum :datum-type :instagram-video))
                 (rename-keys {:created_time :created-at})
                 ;; Java time is in millis, UNIX time (as returned by instagram) is in seconds
-                (update-in [:created-at] (fn [t] (* 1000) (if (string? t) (Integer/parseInt t) t)))))]
+                (update-in [:created-at] (fn [t] (* 1000) (if (string? t) (Integer/parseInt t) t)))
+                (assoc :trend trend)))]
     (append-datums trend (map clean datums))))
 
 (defn track-trend
