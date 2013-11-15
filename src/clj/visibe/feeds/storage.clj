@@ -13,10 +13,37 @@
             [monger.collection :as c])
   (:import org.bson.types.ObjectId))
 
-;;; TODO, Wed Nov 13 2013, Francis Wolke
-;;; Add incidies
+(defn instagram-photo->essentials [m]
+  (let [a (partial get-in m)]
+    (-> m
+        (select-keys [:tags :id :created-at :link :trend :datum-type])
+        (merge {:full-name (a [:user :full_name])
+                :profile-picture (a [:user :profile_picture])
+                :username (a [:user :username])
+                :photo (a [:images :standard_resolution])}))))
 
-;; (c/ensure-index "google-trends" (array-map :created-at -1) {:unique true})
+(defn instagram-video->essentials [m]
+  (let [a (partial get-in m)]
+    (-> m
+        (select-keys [:tags :id :created-at :link :trend :datum-type])
+        (merge {:full-name (a [:user :full_name])
+                :profile-picture (a [:user :profile_picture])
+                :username (a [:user :username])
+                :video (a [:videos :standard_resolution])}))))
+
+(defn tweet->essentials
+  ;; FIXME, NOTE Fri Oct 04 2013, Francis Wolke
+  ;; `:text` path may not always have full urls.
+  [tweet]
+  (-> (merge (select-keys tweet [:text :created-at :trend :datum-type])
+             (select-keys (:user tweet) [:name :screen_name :profile_image_url_https]))))
+
+(defn clean-datum [datum]
+  (case (keyword (:datum-type datum))
+    :instagram-photo (instagram-photo->essentials datum)
+    :instagram-video (instagram-video->essentials datum)
+    :tweet           (tweet->essentials datum)
+    datum))
 
 (defn conn-uri
   "'%' is an escape character."
@@ -57,13 +84,15 @@
                        ;; {:unique true}
                        )))
 
+;;; Datum Queries
+
 (defn datums-since
   "Returns datums younger than TIME for given trend"
   [trend time]
   (->> (q/with-collection trend
          (q/find {:created-at (array-map $gt time)})
          (q/sort (array-map :created-at -1)))
-       (map #(dissoc % :_id))))
+       (map #(clean-datum (dissoc % :_id)))))
 
 (defn previous-15
   "Returns 15 datums older than the supplied datum for a given trend"
@@ -74,7 +103,7 @@
          (q/find {:created-at (array-map $lt created-at)})
          (q/sort (array-map :created-at -1))
          (q/limit 15))
-       (map #(dissoc % :_id))))
+       (map #(clean-datum (dissoc % :_id)))))
 
 (defn seed-datums
   "Returns 15 most recent datums on a trend"
@@ -82,10 +111,10 @@
   (->> (q/with-collection trend
          (q/sort (array-map :created-at -1))
          (q/limit 15))
-       (map #(dissoc % :_id))))
+       (map #(clean-datum (dissoc % :_id)))))
 
 (defn most-recent-datum [trend]
-  (->> (q/with-collection trend
-         (q/sort (array-map :created-at -1))
-         (q/limit 1))
-       (map #(dissoc % :_id))))
+  (first (->> (q/with-collection trend
+                (q/sort (array-map :created-at -1))
+                (q/limit 1))
+              (map #(clean-datum (dissoc % :_id))))))

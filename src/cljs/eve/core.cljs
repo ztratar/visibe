@@ -31,7 +31,6 @@
    (while true
      (let [data (<! receive)
            msg (r/read-string (str (.-data data)))]
-       (console/log "websocket message" (str msg))
        (case (:type msg)
          :datums         (update-in-state! [:datums] (comp set (partial into (:data msg))))
          :current-trends (assoc-in-state! [:trends] (:data msg))

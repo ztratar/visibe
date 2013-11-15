@@ -3,6 +3,7 @@
   (:use user)
   (:require [clojure.data.json :as json]
             [clojure.set :refer [rename-keys]]
+            [org.httpkit.server :as hk]
             [clj-http.lite.client :as client]
             [clojure.string :as s]
             [clj-time.coerce :refer [to-long from-long]]
@@ -87,12 +88,43 @@
       (:body)
       (json/read-json)))
 
-(defn store-tweets [trend tweets]
+(defn ds->ws-message
+  "[d]ata [s]tructure -> websocket message"
+  ([ds] (ds->ws-message :print ds)) 
+  ([type ds] (str {:type type :data ds})))
+
+(defn prep-tweets-for-storage
+  [trend tweets]
   (let [tweets (:statuses tweets)
         tweets (map #(assoc % :trend trend :datum-type :tweet) tweets)
         tweets (map #(rename-keys % {:created_at :created-at}) tweets)
         tweets (map #(update-in % [:created-at] twitter-time->long) tweets)]
-    (append-datums trend tweets)))
+    tweets))
+
+(defn store-tweets [trend tweets]
+  (append-datums trend (prep-tweets-for-storage trend tweets)))
+
+(defn tweet->essentials
+  ;; FIXME, NOTE Fri Oct 04 2013, Francis Wolke
+  ;; `:text` path may not always have full urls.
+  [tweet]
+  (-> (merge (select-keys tweet [:text :created-at :trend :datum-type])
+             (select-keys (:user tweet) [:name :screen_name :profile_image_url_https]))))
+
+(defn subscribed-clients [trend]
+  (map first (filter (fn [[channel context]] (and (:on context) (some #{trend} (:subscriptions context)))) (seq (gis [:app :channels])))))
+
+(defn push-tweets-to-subscribed-clients! [trend tweets]
+  (let [clients (seq (gis [:app :channels]))
+        subscribed-clients (when-not (empty? clients) (subscribed-clients trend))]
+
+    (when-not (empty? subscribed-clients) 
+      (let [clean-tweets (map #(assoc (tweet->essentials %) :trend trend :datum-type :tweet) tweets)]
+        (doseq [client subscribed-clients]
+          (hk/send! client (ds->ws-message :datums clean-tweets)))))))
+
+;;; TODO, Thu Nov 14 2013, Francis Wolke
+;;; only stop tracking a trend iff it's not current, or subscribed to by any clients.
 
 (defn track-trend
   "Tracks a trend while it's still an 'active' trend. Runs in future, which 
@@ -112,13 +144,7 @@ returns `nil` when trend is no longer 'active'. 'Active' is defined as being in
       (loop [tweet-data tweet-data]
         (let [new-query (:refresh_url (:search_metadata tweet-data))]
           (when (some #{trend} (keys (gis [:google :trends])))
-            (do (store-tweets trend tweet-data)
+            (do (future (push-tweets-to-subscribed-clients! trend (:statuses tweet-data)))
+                (store-tweets trend tweet-data)
                 (Thread/sleep (/ 180000 3)) ; 1 min
                 (recur (twitter-q new-query)))))))))
-
-(defn tweet->essentials
-  ;; FIXME, NOTE Fri Oct 04 2013, Francis Wolke
-  ;; `:text` path may not always have full urls.
-  [tweet]
-  (-> (merge (select-keys tweet [:text :created-at :trend :datum-type])
-             (select-keys (:user tweet) [:name :screen_name :profile_image_url_https]))))

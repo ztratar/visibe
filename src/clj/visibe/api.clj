@@ -4,13 +4,12 @@
             [visibe.state :refer [state assoc-in-state! update-in-state! gis]]
             [visibe.feeds.google-trends :refer [google-mapping]]
             [visibe.feeds.storage :as storage]
-            [visibe.feeds.twitter :refer [tweet->essentials]]
-            [visibe.feeds.instagram :refer [instagram-photo->essentials instagram-video->essentials]]
             [compojure.route :as route]
             [compojure.core :refer :all]
             [compojure.handler :as handler]))
 
 ;;; TODO, Wed Nov 13 2013, Francis Wolke
+
 ;;; Dynamic `help' and `doc'
 ;;; A community websocket implementation exists. Use that instead. http://cljwamp.us/
 
@@ -26,12 +25,6 @@
   channel-context [channel]
   (gis [:app :channels channel]))
 
-;; (defn ^{:api :websocket :doc "..."}
-;;   previous-15
-;;   [channel {created-at :created-at trend :trend}]
-;;   (hk/send! channel (ds->ws-message))
-;;   {:subscriptions (gis [:app :channels channel :subscriptions])})
-
 (defn ^{:api :websocket :doc "If `:off' we don't send test data or production data"}
   toggle-stream!
   [channel]
@@ -40,16 +33,16 @@
 
 (defn ^{:api :websocket :doc "Subscribes you to a particular trend stream, you will receive datums after DATUM"}
   subscribe!
-  [channel {created-at :created-at trend :trend}]
+  [channel trend]
   (update-in-state! [:app :channels channel :subscriptions]
-                    (fn [subscriptions] (conj subscriptions [trend created-at])))
+                    (fn [subscriptions] (conj subscriptions trend)))
   {:subscriptions (gis [:app :channels channel :subscriptions])})
 
 (defn ^{:api :websocket :doc "You will no longer be sent datums related to this trend."}
   unsubscribe!
-  [channel trend-to-remove]
+  [channel trend]
   (update-in-state! [:app :channels channel :subscriptions]
-                    (fn [subscriptions] (vec (remove (fn [[t _]] (= trend-to-remove t)) subscriptions))))
+                    (fn [subscriptions] (set (remove #{trend} subscriptions))))
   {:subscriptions (gis [:app :channels channel :subscriptions])})
 
 ; WebSockets Boilerplate
@@ -59,47 +52,6 @@
   "[d]ata [s]tructure -> websocket message"
   ([ds] (ds->ws-message :print ds)) 
   ([type ds] (str {:type type :data ds})))
-
-(defn clean-datum [datum]
-  (cond (= (:datum-type datum) "instagram-photo") (instagram-photo->essentials datum)
-        (= (:datum-type datum) "instagram-video") (instagram-video->essentials datum)
-        (= (:datum-type datum) "tweet") (tweet->essentials datum)
-        :else datum))
-
-(defn- sleep "sleeps for one minute" [] (Thread/sleep (/ 60000 60)))
-
-(defn establish-stream-loop!
-  "Provides a live data stream on trends in ':trends' of a channel's context. Terminates with the channel."
-  [channel]
-  (future
-    (loop [trends {}]
-      (let [channel-context (gis [:app :channels channel])
-            new-trends (keys (gis [:google :trends]))]
-
-        ;; Send seed data?
-        (when (= {} trends)          
-          (hk/send! channel (ds->ws-message :datums (map clean-datum (reduce into (map storage/seed-datums new-trends))))))
-        
-        (when-not (nil? channel-context)
-          (if (:on channel-context)
-            (let [subscriptions (:subscriptions channel-context)
-                  ;; hold onto the trend information so that it may be used later to update subscriptions
-                  new-datums-and-subs-info (map (fn [[trend created-at]] [trend (storage/datums-since trend created-at)]) subscriptions)
-                  datums-packaged-to-send (map clean-datum (reduce into (map second new-datums-and-subs-info)))]
-              
-              ;; XXX, NOTE Wed Nov 13 2013, Francis Wolke
-              ;; If a client `unsubscribes!' from a trend inbetween the time it takes to read out and update the subscriptions, we will end up
-              ;; leaving them subscribed to that trend.
-
-              (future (let [updated-subscriptions (map (fn [[trend datums]] [trend (:created-at (first datums))]) new-datums-and-subs-info)]
-                        (assoc-in-state! [:app :channels channel :subscriptions] updated-subscriptions)))
-
-              (hk/send! channel (ds->ws-message :datums datums-packaged-to-send))
-              
-              (sleep)
-              (recur new-trends))
-
-            (do (sleep) (recur new-trends))))))))
 
 (defn help ^{:api :websocket :doc "Returns information about the API for consumtion by human, or near human intelligences"}
   []
@@ -116,8 +68,8 @@
   "Adds new channel and associated context to `state'"
   [channel]
   ;; `and' is used to guarantee transaction finishes before esablishing a channel's loop.
-  (and (assoc-in-state! [:app :channels channel] {:subscriptions [] :on false})
-       (establish-stream-loop! channel)))
+  (and (assoc-in-state! [:app :channels channel] {:subscriptions #{} :on true})
+       (hk/send! channel (ds->ws-message :datums (reduce into (map storage/seed-datums (keys (gis [:google :trends]))))))))
 
 (defn destroy-channel! [channel]
   (update-in-state! [:app :channels] dissoc channel))
@@ -133,7 +85,7 @@
           (= fst 'channel-context) (ds->ws-message (channel-context channel))
           (= fst 'current-trends)  (ds->ws-message :current-trends (current-trends))
           (= fst 'toggle-stream!)  (ds->ws-message (toggle-stream! channel))
-          (= fst 'previous-15)     (ds->ws-message "Needs to be wired up")
+          (= fst 'previous-15)     (ds->ws-message :datums (storage/previous-15 (second ds)))
           (= fst 'help)            (ds->ws-message (help))
           :else "Try `help'. `doc' is not yet implemented.")))
 
