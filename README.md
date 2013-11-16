@@ -6,6 +6,7 @@ lein run help
 
 # TODO
 
+- Add a number of tweets per second dial in channel the context
 - duplicates are being pulled in, detect the. We are currently getting buckets. Simply putting them into a set won't work becuase they could have different time stamps
 - A trend from last week is not = to a trend this week
 - Only fetch images from flickr that are of a certain size

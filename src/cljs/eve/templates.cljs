@@ -5,16 +5,13 @@
             [dommy.utils :as utils])
   (:require-macros [dommy.macros :as m :refer [deftemplate]]))
 
-; Misc
-;*******************************************************************************
-
 (deftemplate ^{:doc "Generates a template for the supplied data structure"}
   automagic
   [hashmap-of-some-sort]
   [:div.automagic-template [:p (str hashmap-of-some-sort)]])
 
-; Home
-;******************************************************************************* 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Home
 
 (defn trend-card [trend]
   (m/node `[~(keyword (str "li.trend-card#" trend))
@@ -31,8 +28,8 @@
    [:div.container.trends-container
     [:ul#trends.clearfix]]])
 
-; Trend
-;*******************************************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Trend
 
 (deftemplate tweet [{text :text created-at :created-at
                      name :name screen-name :screen-name
@@ -74,9 +71,7 @@
           :class "video-js vjs-default-skin vjs-big-play-centered"
           :controls "true"
           :preload "auto"}
-         [:source {:src ~url :type "video/mp4"}]]
-     ]
-    ]])
+         [:source {:src ~url :type "video/mp4"}]]]]])
 
 (deftemplate vine [datum]
   [:div.datum-card [:p "implement me!"]])
@@ -93,12 +88,3 @@
    [:ul#feed.social-feed 
       [:div#feed-left]
       [:div#feed-right]]])
-
-;; (deftemplate datum-share-buttons [datum-url]
-;;   [:div.datum-share-buttons
-;;    ;; Twitter
-;;    [:a.twitter-share-button {:href "https://twitter.com/share"
-;;                              :data-url datum-url
-;;                              :target "_blank"} "Tweet"]
-;;    [:script "!function(d,s,id){var    js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document,
-;;     'script', 'twitter-wjs');"]])
