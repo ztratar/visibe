@@ -171,7 +171,7 @@
     
     ;; Population and addition of logic
     (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home)))
-    (let [trend-datums (take 15 (sort-by :created-at (datums-for trend-string)))]
+    (let [trend-datums (take 15 (reverse (sort-by :created-at (datums-for trend-string))))]
       (if (empty? trend-datums)
         (append! (sel1 :#feed) (m/node [:h1 "Preloader."]))
         (doseq [d trend-datums]
@@ -186,7 +186,7 @@
     (console/log "`new-datum-watch' was called")
     (when (and (= :trend (:view new)))
       (let [to-append (difference (set new-datums) (set old-datums))]
-        (doseq [datum (sort-by :created-at to-append)]
+        (doseq [datum (reverse (sort-by :created-at to-append))]
           (add-new-datum! datum))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

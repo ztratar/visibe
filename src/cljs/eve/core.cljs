@@ -4,7 +4,7 @@
             [cljs-http.client :as http]
             [cljs.reader :as r]
             [shodan.console :as console]
-            [eve.views :refer [feed-update! navigate! new-datum-watch!]]
+            [eve.views :refer [feed-update! navigate! new-datum-watch! set-token!]]
             [dommy.utils :as utils]
             [dommy.core :as dommy]
             [eve.state :refer [state assoc-in-state! update-in-state!]]
@@ -68,6 +68,8 @@
               (recur)
               (do (navigate! :home)
                   (close! ch)))))))
-  (add-watch state :feed new-datum-watch!))
+  (add-watch state :feed new-datum-watch!)
+  (set-token! ""))
+
 
 (def on-load (set! (.-onload js/window) bootstrap!))
