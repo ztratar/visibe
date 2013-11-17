@@ -5,7 +5,7 @@
             [visibe.feeds.instagram :as instagram]
             [visibe.feeds.twitter :as twitter]
             [visibe.feeds.flickr :as flickr]
-            [visibe.feeds.storage :refer [persist-google-trends-and-photos]]
+            [visibe.feeds.storage :refer [persist-google-trends-and-photos youngest-trends]]
             [visibe.state :refer [assoc-in-state! state]]
             [visibe.feeds.google-trends :as goog])
   (:import java.net.URL
@@ -41,7 +41,8 @@ loop."
   []
   (future
     (loop [trends {}]
-      (recur (let [new-trends (into {} (mapv (fn [t] [t (flickr/trend->photo-url t)]) (:united-states (goog/google-trends))))]
+      (recur (let [new-trends ;; (into {} (mapv (fn [t] [t (flickr/trend->photo-url t)]) (:united-states (goog/google-trends))))
+                   (youngest-trends)]
                ;; persist the new hashmap of trends and their photos
                (persist-google-trends-and-photos new-trends)
                (when (not= trends new-trends)
