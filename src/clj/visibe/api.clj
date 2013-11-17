@@ -67,9 +67,8 @@
 (defn register-new-channel!
   "Adds new channel and associated context to `state'"
   [channel]
-  ;; `and' is used to guarantee transaction finishes before esablishing a channel's loop.
-  (and (assoc-in-state! [:app :channels channel] {:subscriptions #{} :on true})
-       (hk/send! channel (ds->ws-message :datums (reduce into (map storage/seed-datums (keys (gis [:google :trends]))))))))
+  (hk/send! channel (ds->ws-message :datums (reduce into (map storage/seed-datums (keys (gis [:google :trends]))))))
+  (assoc-in-state! [:app :channels channel] {:subscriptions #{} :on true}))
 
 (defn destroy-channel! [channel]
   (update-in-state! [:app :channels] dissoc channel))
