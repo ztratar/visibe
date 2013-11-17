@@ -7,7 +7,7 @@
             [eve.templates :as t]
             [cljs.core.match :as match]
             [shodan.console :as console]
-            [eve.core :refer [wsc]]
+            [eve.ws :refer [wsc]]
             [secretary.core :as secretary]
             [cljs.core.async :as async :refer [<! >! chan put! timeout close!]]
             [eve.state :refer [state assoc-in-state! gis]]
@@ -111,6 +111,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; trend
 
+(defn bottom-of-page? [])
+
 (defn feed-height
   [feed]
   (let [e (.-childNodes (sel1 feed))
@@ -183,7 +185,6 @@
   (let [current-trend (slug->trend (get-token))
         old-datums (filter #(= current-trend (:trend %)) (:datums old))
         new-datums (filter #(= current-trend (:trend %)) (:datums new))]
-    (console/log "`new-datum-watch' was called")
     (when (and (= :trend (:view new)))
       (let [to-append (difference (set new-datums) (set old-datums))]
         (doseq [datum (reverse (sort-by :created-at to-append))]
