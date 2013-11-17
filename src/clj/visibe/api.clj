@@ -67,7 +67,10 @@
 (defn register-new-channel!
   "Adds new channel and associated context to `state'"
   [channel]
-  (hk/send! channel (ds->ws-message :datums (reduce into (map storage/seed-datums (keys (gis [:google :trends]))))))
+  ;; TODO, FIXME Sun Nov 17 2013, Francis Wolke
+  ;; We are sending the `current-trends' twice.
+  (future (doseq [trend (keys (gis [:google :trends]))]
+            (hk/send! channel (ds->ws-message :datums (storage/seed-datums trend)))))
   (assoc-in-state! [:app :channels channel] {:subscriptions #{} :on true}))
 
 (defn destroy-channel! [channel]
@@ -75,6 +78,7 @@
 
 (defn ws-api-call [channel data]
   (when-not (get-in @state [:app :channels channel])
+    (future (hk/send! channel (ds->ws-message :current-trends (current-trends))))
     (register-new-channel! channel))
 
   (let [ds (read-string data)
