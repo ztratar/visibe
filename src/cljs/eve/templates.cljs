@@ -88,4 +88,6 @@
    [:div#feed.social-feed 
       [:div.line]
       [:div#feed-left]
-      [:div#feed-right]]])
+      [:div#feed-right]
+      [:div.loader [:img {:src "/img/ajax-loader.gif"}]]
+    ]])

@@ -49,6 +49,7 @@ body {
 
 	#home-button {
 		position: fixed;
+		z-index: 400;
 		.box-shadow(0 0px 2px 2px #286d99);
 		text-transform: uppercase;
 		background: #183243;
@@ -190,8 +191,8 @@ body {
 		.clearfix;
 
 		width: 900px;
-		margin: 0 auto;
-		padding: 0;
+		margin: 0 auto 100px;
+		padding: 0 0 70px;
 		position: relative;
 		
 		#feed-left {
@@ -216,12 +217,25 @@ body {
 			background: #4d83a8;
 		}
 
+		div.loader {
+			position: absolute;
+			background: #4d83a8;
+			padding: 10px;
+			width: 52px;
+			height: 52px;
+			border-radius: 100px;
+			overflow: hidden;
+			bottom: -50px;
+			left: 50%;
+			margin-left: -26px;
+		}
+
 		li.social-activity {
 			float: left;
 			width: 450px;
 			position: relative;
 			padding: 0 0 0 140px;
-			margin: 0 0 25px 0;
+			margin: 0 0 60px 0;
 			list-style: none;
 
 			&:after {
