@@ -85,6 +85,7 @@
      [:h1#visibe-title "VISIBE"]
      [:img.trend-img {:src image-url}]
      [:h1#trend-title trend]]]
-   [:ul#feed.social-feed 
+   [:div#feed.social-feed 
+      [:div.line]
       [:div#feed-left]
       [:div#feed-right]]])
