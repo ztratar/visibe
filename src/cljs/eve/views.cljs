@@ -2,6 +2,7 @@
   eve.views
   (:require [dommy.core :refer [listen! append! prepend! html] :as dommy]
             [dommy.utils :as utils]
+            [clojure.set :refer [difference]]
             [eve.utils :refer [->slug]]
             [eve.templates :as t]
             [cljs.core.match :as match]
@@ -29,8 +30,8 @@
 (defn slug->trend [slug]
   (some (fn [e] (when (= (->slug e) slug) e)) (keys (:trends @state))))
 
-; HTML5 History
-;*******************************************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; HTML5 History
 
 (defn navigate-callback
   ([callback-fn]
@@ -75,8 +76,8 @@
 ;;; This should instead be placed into `bootstrap!'
 (navigate-callback history history-logic)
 
-; Home
-;*******************************************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Home
 
 (defn home [trends]
   (let [trend-m trends
@@ -107,8 +108,8 @@
                                     (set-token! new-path)
                                     (navigate! :trend new-path)))))))))
 
-; trend
-;*******************************************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; trend
 
 (defn feed-height
   [feed]
@@ -122,27 +123,37 @@
       (reduce + (map (comp f (partial aget e)) r)))))
 
 (defn left-or-right? []
-  (letfn []
-    (let [l (feed-height :#feed-left)
-          r (feed-height :#feed-right)]
-      (cond (= l r) :left
-            (< l r) :left
-            :else :right))))
+  (let [l (feed-height :#feed-left)
+        r (feed-height :#feed-right)]
+    (cond (= l r) :left
+          (< l r) :left
+          :else :right)))
 
-(defn add-new-datum! [{type :type datum-type :datum-type id :id :as datum}]
-  (let [datum-card (case (keyword datum-type)
-                     :instagram-video (t/instagram-video datum)
-                     :instagram-photo (t/instagram-photo datum)
-                     :vine (t/vine datum)
-                     :tweet (t/tweet datum)
-                     (case type
-                       "instagram-photo" (t/instagram-video datum)
-                       "instagram-video" (t/instagram-photo datum)
-                       "tweet" (t/tweet datum)
-                       (t/automagic datum)))]
+(defn determine-card
+  "Given a datum, hands back it's card"
+  [{type :type datum-type :datum-type id :id :as datum}]
+  (case (keyword datum-type)
+    :instagram-video (t/instagram-video datum)
+    :instagram-photo (t/instagram-photo datum)
+    :vine (t/vine datum)
+    :tweet (t/tweet datum)
+    (case type
+      "instagram-photo" (t/instagram-video datum)
+      "instagram-video" (t/instagram-photo datum)
+      "tweet" (t/tweet datum)
+      (t/automagic datum))))
+
+(defn add-new-datum! [datum]
+  (let [datum-card (determine-card datum)]
+    (if (= :left (left-or-right?))
+      (prepend! (sel1 :#feed-left) datum-card)
+      (prepend! (sel1 :#feed-right) datum-card))))
+
+(defn add-old-datum! [{type :type datum-type :datum-type id :id :as datum}]
+  (let [datum-card (determine-card datum)]
     (if (= :left (left-or-right?))
       (append! (sel1 :#feed-left) datum-card)
-      (append! (sel1 :#feed-right) datum-card)))) 
+      (append! (sel1 :#feed-right) datum-card))))
 
 (defn datums-for
   "Returns datums associated with the specified trend"
@@ -160,14 +171,26 @@
     
     ;; Population and addition of logic
     (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home)))
-    (let [trend-datums (datums-for trend-string)]
+    (let [trend-datums (take 15 (sort-by :created-at (datums-for trend-string)))]
       (if (empty? trend-datums)
         (append! (sel1 :#feed) (m/node [:h1 "Preloader."]))
         (doseq [d trend-datums]
           (add-new-datum! d))))))
 
-; misc
-;*******************************************************************************
+(defn new-datum-watch!
+  "Updates the feed with new datums whenever we recive them"
+  [key identity old new]
+  (let [current-trend (slug->trend (get-token))
+        old-datums (filter #(= current-trend (:trend %)) (:datums old))
+        new-datums (filter #(= current-trend (:trend %)) (:datums new))]
+    (console/log "`new-datum-watch' was called")
+    (when (and (= :trend (:view new)))
+      (let [to-append (difference (set new-datums) (set old-datums))]
+        (doseq [datum (sort-by :created-at to-append)]
+          (add-new-datum! datum))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; misc
 
 (defn swap-view! [node]
   ;; TODO, Mon Oct 14 2013, Francis Wolke

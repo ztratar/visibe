@@ -90,10 +90,12 @@ relevent media."
           (hk/send! client (ds->ws-message :datums clean-instagrams)))))))
 
 (defn track-trend
-  "Tracks a trend while it's still an active trend, persisting data related to it and pushing data to subscribed clients."
+  "Tracks a trend while it's an active trend, or susbscribed to by a client
+   persisting data related to it and pushing data to subscribed clients."
   [trend]
   (future (loop [media #{}]
-            (when (some #{trend} (keys (gis [:google :trends])))
+            (when (or (some #{trend} (keys (gis [:google :trends])))
+                      (not (empty? (subscribed-clients trend))))
               (let [new-media  (instagram-media trend)
                     new-datums (clojure.set/difference (set new-media) media)]
                 (future (push-instagrams-to-subscribed-clients! trend new-datums))

@@ -4,7 +4,7 @@
             [cljs-http.client :as http]
             [cljs.reader :as r]
             [shodan.console :as console]
-            [eve.views :refer [feed-update! navigate!]]
+            [eve.views :refer [feed-update! navigate! new-datum-watch!]]
             [dommy.utils :as utils]
             [dommy.core :as dommy]
             [eve.state :refer [state assoc-in-state! update-in-state!]]
@@ -47,11 +47,12 @@
     (.send conn (str f))
     (console/error "You must establish a WebSocket connection"))) 
 
-(defn datum-count []
-  (count (:datums @state)))
+(defn datum-count
+  ([] (count (:datums @state)))
+  ([trend] (count (filter #(= trend (:trend %)) (:datums @state)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Bootstrap
+;;; Initialization
 
 (defn bootstrap! []
   (set! (-> js/videojs (.-options) (.-flash) (.-swf)) "js/video-js/video-js.swf")
@@ -66,6 +67,7 @@
             (if (empty? v)
               (recur)
               (do (navigate! :home)
-                  (close! ch))))))))
+                  (close! ch)))))))
+  (add-watch state :feed new-datum-watch!))
 
 (def on-load (set! (.-onload js/window) bootstrap!))

@@ -14,6 +14,7 @@
                  [com.cemerick/piggieback "0.1.2" :exclusions [org.clojure/data.json]]
                  [com.cemerick/pomegranate "0.2.0"]
                  [com.draines/postal "1.11.0"]
+                 [com.andrewmcveigh/cljs-time "0.1.1"]
                  [io.aviso/pretty "0.1.1"]
                  [net.drib/strokes "0.5.1"]
                  [faker "0.2.2"]
