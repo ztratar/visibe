@@ -167,7 +167,9 @@
       (if (empty? trend-datums)
         (append! (sel1 :.social-feed) (m/node [:h1 "Preloader."]))
         (do (doseq [d trend-datums]
-              (add-new-datum! d)))))))
+              (add-new-datum! d))
+            (assoc-in-state! [:last-datum] (last trend-datums))
+            (wsc `(~'previous-15 ~(last trend-datums))))))))
 
 (defn new-datum-watch!
   "Updates the feed with new datums whenever we recive them"
@@ -192,13 +194,15 @@
              (not (sel1 :#no-more-data)))
 
     (let [last-datum (:last-datum @state)
-          to-append (reverse (sort-by :created-at (take 15 (filter #(< (:created-at %) (:created-at last-datum)) (:datums @state)))))
+          sorted-datums (sort-by :created-at (filter #(< (:created-at %) (:created-at last-datum)) (:datums @state)))
+          to-append (take 15 (reverse sorted-datums))
           _ (console/log "to-apppend: " to-append)]
       (if (empty? to-append)
         (append! (sel1 :#social-feed) (m/node [:h1#no-more-data "No historical datums"]))
         (do (doseq [datum to-append]
               (add-old-datum! datum))
-            (assoc-in-state! [:last-datum] (last to-append)))))))
+            (assoc-in-state! [:last-datum] (last to-append))
+            (wsc `(~'previous-15 ~(first sorted-datums))))))))
 
 (defn swap-view! [node]
   ;; TODO, Mon Oct 14 2013, Francis Wolke
