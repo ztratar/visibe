@@ -2,10 +2,10 @@
   eve.core
   (:require [clojure.browser.repl :as repl]
             [cljs-http.client :as http]
-
             [eve.ws :refer [ws-connect!]]
             [shodan.console :as console]
-            [eve.views :refer [feed-update! navigate! new-datum-watch! set-token! bottom-of-page?]]
+            [eve.views :refer [navigate! new-datum-watch! bottom-of-page?
+                               append-old-datums-on-scroll]]
             [dommy.utils :as utils]
             [dommy.core :as dommy]
             [eve.state :refer [state assoc-in-state! update-in-state!]]
@@ -32,11 +32,7 @@
               (do (navigate! :home)
                   (close! ch)))))))
   (add-watch state :feed new-datum-watch!)
-  (set-token! "")
   (set! (-> js/videojs (.-options) (.-flash) (.-swf)) "js/video-js/video-js.swf"))
 
-
 (def on-load (set! (.-onload js/window) bootstrap!))
-;; (def on-scroll (set! js/window.onscroll (fn [& _] (when (and (= :trend (:view @state)) (bottom-of-page?))
-;;                                                     (js/alert "append 15 historical datums")))))
-
+(def on-scroll (set! js/window.onscroll append-old-datums-on-scroll))

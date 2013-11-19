@@ -10,3 +10,6 @@
 
 (defn ->slug [s]
   (.toLowerCase (clojure.string/replace s " " "-")))
+
+(defn slug->trend [slug]
+  (ffirst (filter (fn [[n _]] (= slug (->slug n))) (into [] (:trends @state)))))

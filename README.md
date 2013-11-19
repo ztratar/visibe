@@ -4,6 +4,12 @@
 lein run help
 ```
 
+# Bugs
+
+We will, on occasion, see a preloader AND some datums
+
+The storage layer appears to be handing back bad datums
+
 # TODO
 
 - Add a number of tweets per second dial in channel the context

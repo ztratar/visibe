@@ -1,17 +1,18 @@
 (ns ^{:doc "View logic. Ties together templates, population logic and listeners."}
   eve.views
-  (:require [dommy.core :refer [listen! append! prepend! html] :as dommy]
-            [dommy.utils :as utils]
-            [clojure.set :refer [difference]]
-            [eve.utils :refer [->slug]]
-            [eve.templates :as t]
+  (:require [cljs.core.async :as async :refer [<! >! chan put! timeout close!]]
             [cljs.core.match :as match]
-            [shodan.console :as console]
-            [eve.ws :refer [wsc]]
-            [secretary.core :as secretary]
-            [cljs.core.async :as async :refer [<! >! chan put! timeout close!]]
+            [clojure.set :refer [difference]]
+            [dommy.utils :as utils]
             [eve.state :refer [state assoc-in-state! gis]]
+            [eve.templates :as t]
+            [eve.utils :refer [->slug slug->trend]]
+            [eve.ws :refer [wsc]]
+            [goog.dom :as gdom]
             [goog.events :as gevents]
+            [secretary.core :as secretary]
+            [shodan.console :as console]
+            [dommy.core :refer [listen! append! prepend! html] :as dommy]
             [goog.History :as ghistory]
             [goog.history.EventType :as history-event]
             [goog.history.Html5History :as history5])
@@ -20,29 +21,22 @@
                    [cljs.core.async.macros :refer [go alt!]]
                    [dommy.macros :as m :refer [sel1 sel]]))
 
-(declare swap-view!)
-(declare navigate!)
 (declare history)
+(declare navigate!)
+(declare swap-view!)
+
+(def dom-helper (goog.dom.DomHelper.))
 
 (defn url->relative-path [s]
-  (clojure.string/replace s "http://localhost:9000/" ""))          
-
-(defn slug->trend [slug]
-  (some (fn [e] (when (= (->slug e) slug) e)) (keys (:trends @state))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; HTML5 History
+  (clojure.string/replace s "http://localhost:9000/" ""))
 
 (defn navigate-callback
-  ([callback-fn]
-     (navigate-callback history callback-fn))
-  ([hist callback-fn]
-     (gevents/listen hist history-event/NAVIGATE
-                     (fn [e]
-                       (callback-fn {:token (keyword (.-token e))
-                                     :type (.-type e)
-                                     :navigation? (.-isNavigation e)})))))
-
+  ([callback-fn] (navigate-callback history callback-fn))
+  ([hist callback-fn] (gevents/listen hist history-event/NAVIGATE
+                                      (fn [e]
+                                        (callback-fn {:token (keyword (.-token e))
+                                                      :type (.-type e)
+                                                      :navigation? (.-isNavigation e)})))))
 (defn init-history
   []
   (let [history (if (history5/isSupported)
@@ -72,28 +66,27 @@
 
 (defn replace-token! [hist tok] (.replaceToken hist tok))
 
-;;; TODO, Fri Nov 15 2013, Francis Wolke
-;;; This should instead be placed into `bootstrap!'
+;;; XXX, Sun Nov 17 2013, Francis Wolke
+;;; this needs to be part of the `bootstrap!` process
 (navigate-callback history history-logic)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Home
 
 (defn home [trends]
+  (swap-view! (t/home trends))
   (let [trend-m trends
         trends (loop [acc #{}]
                  (if (= (* 3 (quot (count trends) 3)) (count acc))
                    acc
-                   (recur (conj acc (rand-nth (keys trend-m))))))
+                   (recur (remove #{"created-at"} (conj acc (rand-nth (keys trend-m)))))))
         token (get-token)]
 
     ;; Unsubscribe from whatever trend we just left. This does not work when you are attempting to
     ;; do this from the history API.
     (let [trend (slug->trend token)]
-      ;; (console/log "trying to unsubscribe from" trend)
       (wsc `(~'unsubscribe! ~trend)))
     
-    (swap-view! (t/home trends))
     ;; Population
     (let [trends-list (m/sel1 :#trends)]
       (doseq [trend trends]
@@ -109,9 +102,7 @@
                                     (navigate! :trend new-path)))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; trend
-
-(defn bottom-of-page? [])
+;;; Trend
 
 (defn feed-height
   [feed]
@@ -167,17 +158,16 @@
   (let [trends (:trends @state)
         trend-string (some (fn [e] (when (= (->slug e) trend) e)) (keys trends))]
 
-    ;; (console/log "subscribing to" trend-string)
     (wsc `(~'subscribe! ~trend-string))
     (swap-view! (t/trend trend (trends trend-string)))
-    
+
     ;; Population and addition of logic
     (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home)))
     (let [trend-datums (take 15 (reverse (sort-by :created-at (datums-for trend-string))))]
       (if (empty? trend-datums)
-        (append! (sel1 :#feed) (m/node [:h1 "Preloader."]))
-        (doseq [d trend-datums]
-          (add-new-datum! d))))))
+        (append! (sel1 :.social-feed) (m/node [:h1 "Preloader."]))
+        (do (doseq [d trend-datums]
+              (add-new-datum! d)))))))
 
 (defn new-datum-watch!
   "Updates the feed with new datums whenever we recive them"
@@ -186,12 +176,29 @@
         old-datums (filter #(= current-trend (:trend %)) (:datums old))
         new-datums (filter #(= current-trend (:trend %)) (:datums new))]
     (when (and (= :trend (:view new)))
-      (let [to-append (difference (set new-datums) (set old-datums))]
-        (doseq [datum (reverse (sort-by :created-at to-append))]
+      (let [to-append (reverse (sort-by :created-at (difference (set new-datums) (set old-datums))))]
+        (doseq [datum to-append]
           (add-new-datum! datum))))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; misc
+(defn bottom-of-page? []
+  (let [document-height (.getDocumentHeight dom-helper)
+        document-scroll (aget (.getDocumentScroll dom-helper) "y")
+        viewport-height (aget (.getViewportSize dom-helper) "height")]
+    (= (- document-height document-scroll) viewport-height)))
+                                                
+(defn append-old-datums-on-scroll []
+  (when (and (= :trend (:view @state))
+             (bottom-of-page?)
+             (not (sel1 :#no-more-data)))
+
+    (let [last-datum (:last-datum @state)
+          to-append (reverse (sort-by :created-at (take 15 (filter #(< (:created-at %) (:created-at last-datum)) (:datums @state)))))
+          _ (console/log "to-apppend: " to-append)]
+      (if (empty? to-append)
+        (append! (sel1 :#social-feed) (m/node [:h1#no-more-data "No historical datums"]))
+        (do (doseq [datum to-append]
+              (add-old-datum! datum))
+            (assoc-in-state! [:last-datum] (last to-append)))))))
 
 (defn swap-view! [node]
   ;; TODO, Mon Oct 14 2013, Francis Wolke
