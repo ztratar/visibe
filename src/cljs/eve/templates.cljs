@@ -20,7 +20,7 @@
                 [:h2.trend-card-title ~trend]]
               [:span]]]))
 
-(deftemplate home [trends]
+(deftemplate home []
   [:div#content
    [:div#title
     [:h1 "Visibe"]
@@ -86,8 +86,8 @@
      [:img.trend-img {:src image-url}]
      [:h1#trend-title trend]]]
    [:div#feed.social-feed 
-      [:div.line]
-      [:div#feed-left]
-      [:div#feed-right]
-      [:div.loader [:img {:src "/img/ajax-loader.gif"}]]
+    [:div.line]
+    [:div#feed-left]
+    [:div#feed-right]
+    [:div.loader [:img {:src "/img/ajax-loader.gif"}]]
     ]])

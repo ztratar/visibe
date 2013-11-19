@@ -73,13 +73,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Home
 
-(defn home [trends]
-  (swap-view! (t/home trends))
-  (let [trend-m trends
+(defn home [trend-m]
+  (swap-view! (t/home))
+  (let [trends (remove #{"created-at"} (keys trend-m))
         trends (loop [acc #{}]
                  (if (= (* 3 (quot (count trends) 3)) (count acc))
                    acc
-                   (recur (remove #{"created-at"} (conj acc (rand-nth (keys trend-m)))))))
+                   (recur (conj acc (rand-nth trends)))))
         token (get-token)]
 
     ;; Unsubscribe from whatever trend we just left. This does not work when you are attempting to
@@ -187,16 +187,18 @@
         document-scroll (aget (.getDocumentScroll dom-helper) "y")
         viewport-height (aget (.getViewportSize dom-helper) "height")]
     (= (- document-height document-scroll) viewport-height)))
-                                                
-(defn append-old-datums-on-scroll []
+
+(defn append-old-datums-on-scroll
+  "Algorithm that determines when to place historical datums"
+  []
   (when (and (= :trend (:view @state))
              (bottom-of-page?)
              (not (sel1 :#no-more-data)))
 
     (let [last-datum (:last-datum @state)
           sorted-datums (sort-by :created-at (filter #(< (:created-at %) (:created-at last-datum)) (:datums @state)))
-          to-append (take 15 (reverse sorted-datums))
-          _ (console/log "to-apppend: " to-append)]
+          to-append (take 15 (reverse sorted-datums))]
+
       (if (empty? to-append)
         (append! (sel1 :#social-feed) (m/node [:h1#no-more-data "No historical datums"]))
         (do (doseq [datum to-append]
