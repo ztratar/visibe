@@ -40,15 +40,16 @@ loop."
   ;; REPL.
   []
   (future
+    (assoc-in-state! [:google :trends] (youngest-trends))
     (loop [trends {}]
-      (recur (let [new-trends ;; (into {} (mapv (fn [t] [t (flickr/trend->photo-url t)]) (:united-states (goog/google-trends))))
-                   (youngest-trends)]
+      (recur (let [new-trends (youngest-trends)]
                ;; persist the new hashmap of trends and their photos
                (persist-google-trends-and-photos new-trends)
+               
                (when (not= trends new-trends)
-                 (assoc-in-state! [:google :trends] new-trends) ; Google trends and associated flickr images
                  ;; Track trends on other social media sites
                  (let [new-diff-trends (set/difference (keys new-trends) (keys trends))]
+                   (assoc-in-state! [:google :trends] new-diff-trends) ; Google trends and associated flickr images
                    (doseq [t new-diff-trends]
                      (twitter/track-trend t)
                      (instagram/track-trend t)))

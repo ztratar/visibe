@@ -98,11 +98,11 @@
        (map #(clean-datum (dissoc % :_id)))))
 
 (defn seed-datums
-  "Returns 15 most recent datums on a trend"
+  "20 most recent datums on a trend"
   [trend]
   (->> (q/with-collection trend
          (q/sort (array-map :created-at -1))
-         (q/limit 15))
+         (q/limit 20))
        (map #(clean-datum (dissoc % :_id)))))
 
 (defn most-recent-datum [trend]
