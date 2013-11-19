@@ -41,13 +41,12 @@ Relevent page: http://www.flickr.com/services/api/misc.urls.html"}
   (or (>= 300 (.getWidth img))
       (>= 180 (.getHeight img))))
 
-(defn valid-url?
+(defn valid-img?
   "Checks for byte equality against 'PROJECT_ROOT/resources/public/flickr-image-not-found.jpg'"
-  [url]
-  (let [img (ImageIO/read (URL. url))]
-    (when-not (or (buffered-images-equal? img (ImageIO/read (File. "./resources/public/flickr-image-not-found.jpg")))
-                  (too-small? img))
-      url)))
+  [[url img]]
+  (when-not (or (buffered-images-equal? img (ImageIO/read (File. "./resources/public/flickr-image-not-found.jpg")))
+                (too-small? img))
+    url))
 
 (defn trend->photo-url
   "Returns 10 URLs for associated with a trend"
@@ -65,5 +64,7 @@ Relevent page: http://www.flickr.com/services/api/misc.urls.html"}
         photo-urls (map (fn [{farm-id :farm server-id :server id :id secret :secret}]
                           (str "http://farm" farm-id ".staticflickr.com/" server-id "/" id "_" secret ".jpg"))
                         photos-essentials)
-        valid-url (some valid-url? photo-urls)]
-    valid-url))
+        imgs-and-urls (map (fn [url] [url (ImageIO/read (URL. url))]) photo-urls)
+        valid-and-sorted (sort-by (fn [[_ img]] (+ (.getWidth img) (.getHeight img)))
+                                  (filter valid-img? imgs-and-urls))]
+    (ffirst valid-and-sorted)))
