@@ -4,7 +4,7 @@
             [clj-http.lite.client :as client]
             [visibe.feeds.instagram :as instagram]
             [visibe.feeds.twitter :as twitter]
-            [visibe.feeds.flickr :as flickr]
+            [visibe.feeds.flickr :refer [trend->photo-url]]
             [visibe.feeds.storage :refer [persist-google-trends-and-photos youngest-trends]]
             [visibe.state :refer [assoc-in-state! state]]
             [visibe.feeds.google-trends :as goog])
@@ -40,9 +40,9 @@ loop."
   ;; REPL.
   []
   (future
-    (assoc-in-state! [:google :trends] (youngest-trends))
+    (assoc-in-state! [:google :trends] (youngest-trends)) 
     (loop [trends {}]
-      (recur (let [new-trends (youngest-trends)]
+      (recur (let [new-trends (map trend->photo-url (:united-states (goog/google-trends)))]
                ;; persist the new hashmap of trends and their photos
                (persist-google-trends-and-photos new-trends)
                
