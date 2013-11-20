@@ -2,8 +2,23 @@
   eve.templates
   (:require [dommy.core :as dommy]
             [eve.utils :refer [->slug]]
+            [cljs-time.coerce :as coerce]
+            [cljs-time.core :as c]
             [dommy.utils :as utils])
   (:require-macros [dommy.macros :as m :refer [deftemplate]]))
+
+(defn x-time-ago [created-at]
+  (let [created-at   (coerce/from-long created-at)
+        now          (c/now)
+        now-hour     (c/hour now) 
+        now-minute   (c/minute now)
+        datum-hour   (c/hour created-at)
+        datum-minute (c/minute created-at)
+        hour-difference    (- now-hour datum-hour)
+        min-difference     (- now-hour datum-hour)]
+    (if (= 0 hour-difference)
+      (str " " min-difference " minutes ago")
+      (str " " hour-difference " hours ago"))))
 
 (deftemplate ^{:doc "Generates a template for the supplied data structure"}
   automagic
@@ -16,9 +31,9 @@
 (defn trend-card [trend]
   (m/node `[~(keyword (str "li.trend-card#" trend))
             [:a {:href ~(str "/" (->slug trend))}
-              [:div.name-container
-                [:h2.trend-card-title ~trend]]
-              [:span]]]))
+             [:div.name-container
+              [:h2.trend-card-title ~trend]]
+             [:span]]]))
 
 (deftemplate home []
   [:div#content
@@ -39,7 +54,7 @@
    [:a.user-img {:href "#"} [:img {:src profile-image-url}]]
    [:div.content
     [:a.user-name {:href "#"} name]
-    [:span.byline "On " [:a {:href "#"} "Twitter"] " 3 minutes ago"]
+    [:span.byline "On " [:a {:href "#"} "Twitter"] (x-time-ago created-at)]
     [:div.body-content text]]])
 
 (deftemplate instagram-photo [{tags :tags created-at :created-at type :type
@@ -50,7 +65,7 @@
    [:a.user-img {:href "#"} [:img {:src profile-picture}]]
    [:div.content
     [:a.user-name {:href "#"} full-name]
-    [:span.byline "On " [:a {:href "#"} "Instagram"] " 3 minutes ago"]
+    [:span.byline "On " [:a {:href "#"} "Instagram"] (x-time-ago created-at)]
     [:div.body-content text]
     [:div.photo [:img {:src url}]]]])
 
@@ -60,18 +75,18 @@
                                full-name :full-name link :link
                                text :text {height :height url :url width :width} :video}]
   [:li.social-activity.instagram
-    [:a.user-img {:href "#"} [:img {:src profile-picture}]]
-    [:div.content
-      [:a.user-name {:href "#"} full-name]
-      [:span.byline "On " [:a {:href "#"} "Instagram"] " 3 minutes ago"]
-      [:div.body-content text]
-      [:div.video
-       `[~(keyword (str "video.instagram-video" id))
-         {:width "550px" :height "550px"
-          :class "video-js vjs-default-skin vjs-big-play-centered"
-          :controls "true"
-          :preload "auto"}
-         [:source {:src ~url :type "video/mp4"}]]]]])
+   [:a.user-img {:href "#"} [:img {:src profile-picture}]]
+   [:div.content
+    [:a.user-name {:href "#"} full-name]
+    [:span.byline "On " [:a {:href "#"} "Instagram"] (x-time-ago created-at)]
+    [:div.body-content text]
+    [:div.video
+     `[~(keyword (str "video.instagram-video" id))
+       {:width "550px" :height "550px"
+        :class "video-js vjs-default-skin vjs-big-play-centered"
+        :controls "true"
+        :preload "auto"}
+       [:source {:src ~url :type "video/mp4"}]]]]])
 
 (deftemplate vine [datum]
   [:div.datum-card [:p "implement me!"]])

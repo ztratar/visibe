@@ -45,6 +45,7 @@
                                         (callback-fn {:token (keyword (.-token e))
                                                       :type (.-type e)
                                                       :navigation? (.-isNavigation e)})))))
+
 (defn init-history
   []
   (let [history (if (history5/isSupported)
