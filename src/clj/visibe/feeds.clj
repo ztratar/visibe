@@ -40,7 +40,9 @@ loop."
   ;; REPL.
   []
   (future
-    (assoc-in-state! [:google :trends] (youngest-trends)) 
+    (let [g (youngest-trends)
+          f (when (empty? g) (map trend->photo-url (:united-states (goog/google-trends))))]
+      (assoc-in-state! [:google :trends] (if f f g))) 
     (loop [trends {}]
       (recur (let [new-trends (map trend->photo-url (:united-states (goog/google-trends)))]
                ;; persist the new hashmap of trends and their photos
