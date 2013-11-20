@@ -30,6 +30,14 @@
 (defn url->relative-path [s]
   (clojure.string/replace s "http://localhost:9000/" ""))
 
+(defn datums-for
+  "Returns (unsorted) datums associated with the specified trend"
+  ([trend] (filter (comp (partial = trend) :trend) (gis [:datums])))
+  ([trend n] (take n (datums-for trend))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; HTML5 History
+
 (defn navigate-callback
   ([callback-fn] (navigate-callback history callback-fn))
   ([hist callback-fn] (gevents/listen hist history-event/NAVIGATE
@@ -148,28 +156,27 @@
       (append! (sel1 :#feed-left) datum-card)
       (append! (sel1 :#feed-right) datum-card))))
 
-(defn datums-for
-  "Returns datums associated with the specified trend"
-  [trend]
-  (filter (comp (partial = trend) :trend) (gis [:datums])))
-
 (defn trend [trend]
-  ;; Swap views
+  (console/log "changing to:" trend)
   (let [trends (:trends @state)
-        trend-string (some (fn [e] (when (= (->slug e) trend) e)) (keys trends))]
+        trend (slug->trend trend)
+        elder-datum (first (sort-by :created-at (datums-for trend)))
+        _ (console/log "elder datum: " elder-datum)]
 
-    (wsc `(~'subscribe! ~trend-string))
-    (swap-view! (t/trend trend (trends trend-string)))
+    (swap-view! (t/trend trend (trends trend)))
 
+    ;; WS calls
+    (wsc `(~'subscribe! ~trend))
+    (wsc `(~'previous-15 ~elder-datum))
+    
     ;; Population and addition of logic
     (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home)))
-    (let [trend-datums (take 15 (reverse (sort-by :created-at (datums-for trend-string))))]
+    (let [trend-datums (take 15 (reverse (sort-by :created-at (datums-for trend))))]
       (if (empty? trend-datums)
         (append! (sel1 :.social-feed) (m/node [:h1 "Preloader."]))
         (do (doseq [d trend-datums]
               (add-new-datum! d))
-            (assoc-in-state! [:last-datum] (last trend-datums))
-            (wsc `(~'previous-15 ~(last trend-datums))))))))
+            (assoc-in-state! [:last-datum] (last elder-datum)))))))
 
 (defn new-datum-watch!
   "Updates the feed with new datums whenever we recive them"
@@ -182,11 +189,15 @@
         (doseq [datum to-append]
           (add-new-datum! datum))))))
 
-(defn bottom-of-page? []
+(defn bottom-of-page?
+  "We actually test for, are we close enough to the bottom that we should load more"
+  []
   (let [document-height (.getDocumentHeight dom-helper)
         document-scroll (aget (.getDocumentScroll dom-helper) "y")
         viewport-height (aget (.getViewportSize dom-helper) "height")]
-    (= (- document-height document-scroll) viewport-height)))
+    ;; TODO, Mon Nov 18 2013, Francis Wolke
+    ;; % instead of hard coding 400px
+    (>= (+ 400 (- document-height document-scroll)) viewport-height)))
 
 (defn append-old-datums-on-scroll
   "Algorithm that determines when to place historical datums"
@@ -196,11 +207,12 @@
              (not (sel1 :#no-more-data)))
 
     (let [last-datum (:last-datum @state)
-          sorted-datums (sort-by :created-at (filter #(< (:created-at %) (:created-at last-datum)) (:datums @state)))
-          to-append (take 15 (reverse sorted-datums))]
+          sorted-datums (sort-by :created-at (filter #(< (:created-at %) (:created-at last-datum)) (datums-for trend)))
+          to-append (take 15 (reverse sorted-datums))
+          _ (console/log "count" (count to-append))]
 
-      (if (empty? to-append)
-        (append! (sel1 :#social-feed) (m/node [:h1#no-more-data "No historical datums"]))
+      (if (= 0 (count to-append))
+        (append! (sel1 :.social-feed) (m/node [:h1#no-more-data "No historical datums"]))
         (do (doseq [datum to-append]
               (add-old-datum! datum))
             (assoc-in-state! [:last-datum] (last to-append))

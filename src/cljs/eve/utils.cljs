@@ -1,15 +1,14 @@
 (ns ^{:doc "..."}
-  eve.utils
-  (:require [eve.state :refer [state]]))
+  eve.utils)
 
 ;;; (.table js/console "some tabular info")
 
 (defn datum-count
-  ([] (count (:datums @state)))
-  ([trend] (count (filter #(= trend (:trend %)) (:datums @state)))))
+  ([] (count (:datums @eve.state/state)))
+  ([trend] (count (filter #(= trend (:trend %)) (:datums @eve.state/state)))))
 
 (defn ->slug [s]
   (.toLowerCase (clojure.string/replace s " " "-")))
 
 (defn slug->trend [slug]
-  (ffirst (filter (fn [[n _]] (= slug (->slug n))) (into [] (:trends @state)))))
+  (ffirst (filter (fn [[n _]] (= slug (->slug n))) (into [] (:trends @eve.state/state)))))

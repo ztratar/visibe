@@ -11,7 +11,8 @@
             [monger.query :as q]
             [monger.operators :refer :all]
             [monger.collection :as c])
-  (:import org.bson.types.ObjectId))
+  (:import org.bson.types.ObjectId
+           com.mongodb.WriteConcern))
 
 (defn instagram-photo->essentials [m]
   (let [a (partial get-in m)]
@@ -71,12 +72,10 @@
   [trend datums]
   (and (c/insert-batch trend datums)
        ;; Use `and' to ensure that the write has returned before indexing
-       (c/ensure-index trend (array-map :created-at -1)
-                       ;; {:unique true}
-                       )))
+       (c/ensure-index trend (array-map :created-at -1) {:unique true} {:dropDupes true})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Datum Queries
+;;; Queries
 
 (defn datums-since
   "Returns datums younger than TIME for given trend"

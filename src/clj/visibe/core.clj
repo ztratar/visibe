@@ -16,7 +16,8 @@
             [visibe.state :refer [state gis assoc-in-state! read-config!]]
             [monger.core :as mg]
             [org.httpkit.server :as hk]
-            [clojure.tools.nrepl.server :refer [start-server stop-server]]))
+            [clojure.tools.nrepl.server :refer [start-server stop-server]])
+  (:import com.mongodb.WriteConcern))
 
 (defn index []
   (html5 [:head
@@ -59,6 +60,10 @@
   [mode]
   (read-config!)
   (mg/connect-via-uri! (storage/conn-uri (:mongo @state)))
+  ;; XXX, Tue Nov 19 2013, Francis Wolke
+  ;; Currently we will _never_ get an exception if something goes wrong with the database. Move
+  ;; this into the queries where it's needed.
+  (mg/set-default-write-concern! (.continueOnErrorForInsert WriteConcern/ERRORS_IGNORED true))
   (new-bearer-token!)
   (start-server :port (Integer. (get-in @state [:app :nrepl-port])))
   (assoc-in-state! [:app :server] (hk/run-server #'app {:port (Integer. (get-in @state [:app :port]))}))
