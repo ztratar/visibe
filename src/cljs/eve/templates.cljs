@@ -51,7 +51,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Trend
 
-(deftemplate tweet [{text :text created-at :created-at name :name screen-name :screen-name
+(deftemplate tweet [{text :text created-at :created-at name :name screen-name :screen_name
                      profile-image-url :profile_image_url_https id-str :id_str}]
  
   [:li.social-activity.tweet
