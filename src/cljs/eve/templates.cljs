@@ -51,39 +51,35 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Trend
 
-(deftemplate tweet [{text :text created-at :created-at
-                     name :name screen-name :screen-name
-                     profile-image-url :profile_image_url_https}]
+(deftemplate tweet [{text :text created-at :created-at name :name screen-name :screen-name
+                     profile-image-url :profile_image_url_https id-str :id_str}]
  
   [:li.social-activity.tweet
-   [:a.user-img {:href "#"} [:img {:src profile-image-url}]]
+   [:a.user-img {:href (str "https://www.twitter.com/" screen-name)} [:img {:src profile-image-url}]]
    [:div.content
     [:a.user-name {:href "#"} name]
-    [:span.byline "On " [:a {:href "#"} "Twitter"] (x-time-ago created-at)]
+    [:span.byline "On " [:a {:href (str "https://www.twitter.com/" screen-name "/status" id-str)} "Twitter"] (x-time-ago created-at)]
     [:div.body-content text]]])
 
-(deftemplate instagram-photo [{tags :tags created-at :created-at type :type
-                               username :username profile-picture :profile-picture
-                               text :text full-name :full-name link :link
-                               {height :height url :url width :width} :photo}]
+(deftemplate instagram-photo [{tags :tags created-at :created-at type :type username :username
+                               profile-picture :profile-picture text :text full-name :full-name
+                               link :link {height :height url :url width :width} :photo}]
   [:li.social-activity.instagram
-   [:a.user-img {:href "#"} [:img {:src profile-picture}]]
+   [:a.user-img {:href (str "http://www.instagram.com/" username)} [:img {:src profile-picture}]]
    [:div.content
     [:a.user-name {:href "#"} full-name]
-    [:span.byline "On " [:a {:href "#"} "Instagram"] (x-time-ago created-at)]
+    [:span.byline "On " [:a {:href link} "Instagram"] (x-time-ago created-at)]
     [:div.body-content text]
     [:div.photo [:img {:src url}]]]])
 
-(deftemplate instagram-video [{tags :tags id :id created-at :created-at
-                               type :type username :username
-                               profile-picture :profile-picture
-                               full-name :full-name link :link
+(deftemplate instagram-video [{tags :tags id :id created-at :created-at type :type username :username
+                               profile-picture :profile-picture full-name :full-name link :link
                                text :text {height :height url :url width :width} :video}]
   [:li.social-activity.instagram
-   [:a.user-img {:href "#"} [:img {:src profile-picture}]]
+   [:a.user-img {:href (str "http://www.instagram.com/" username)} [:img {:src profile-picture}]]
    [:div.content
     [:a.user-name {:href "#"} full-name]
-    [:span.byline "On " [:a {:href "#"} "Instagram"] (x-time-ago created-at)]
+    [:span.byline "On " [:a {:href link} "Instagram"] (x-time-ago created-at)]
     [:div.body-content text]
     [:div.video
      `[~(keyword (str "video.instagram-video" id))

@@ -36,8 +36,8 @@
   ;; FIXME, NOTE Fri Oct 04 2013, Francis Wolke
   ;; `:text` path may not always have full urls.
   [tweet]
-  (-> (merge (select-keys tweet [:text :created-at :trend :datum-type])
-             (select-keys (:user tweet) [:name :screen_name :profile_image_url_https]))))
+  (merge (select-keys tweet [:text :created-at :trend :datum-type :id_str])
+         (select-keys (:user tweet) [:name :screen_name :profile_image_url_https])))
 
 (defn clean-datum [datum]
   (case (keyword (:datum-type datum))
