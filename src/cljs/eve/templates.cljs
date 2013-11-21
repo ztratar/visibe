@@ -1,6 +1,7 @@
 (ns ^{:doc "Raw dommy templates"}
   eve.templates
   (:require [dommy.core :as dommy]
+            [shodan.console :as console]
             [eve.utils :refer [->slug]]
             [cljs-time.coerce :as coerce]
             [cljs-time.core :as c]
@@ -8,17 +9,21 @@
   (:require-macros [dommy.macros :as m :refer [deftemplate]]))
 
 (defn x-time-ago [created-at]
-  (let [created-at   (coerce/from-long created-at)
-        now          (c/now)
-        now-hour     (c/hour now) 
-        now-minute   (c/minute now)
-        datum-hour   (c/hour created-at)
-        datum-minute (c/minute created-at)
-        hour-difference    (- now-hour datum-hour)
-        min-difference     (- now-hour datum-hour)]
-    (if (= 0 hour-difference)
-      (str " " min-difference " minutes ago")
-      (str " " hour-difference " hours ago"))))
+  (let [created-at      (coerce/from-long created-at)
+        now             (c/now)
+        now-hour        (c/hour now) 
+        now-min         (c/minute now)
+        now-days        (c/day now)
+        datum-hour      (c/hour created-at)
+        datum-min       (c/minute created-at)
+        datum-days      (c/day created-at)
+        day-difference  (- now-days datum-days)
+        hour-difference (- now-hour datum-hour)
+        min-difference  (- now-hour datum-min)]
+
+    (cond (not= 0 day-difference)  (str " " day-difference " days ago")
+          (not= 0 hour-difference) (str " " hour-difference " hours ago")
+          :else (str " " min-difference " minutes ago"))))
 
 (deftemplate ^{:doc "Generates a template for the supplied data structure"}
   automagic
@@ -104,5 +109,4 @@
     [:div.line]
     [:div#feed-left]
     [:div#feed-right]
-    [:div.loader [:img {:src "/img/ajax-loader.gif"}]]
-    ]])
+    [:div.loader [:img {:src "/img/ajax-loader.gif"}]]]])

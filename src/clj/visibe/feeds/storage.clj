@@ -72,7 +72,7 @@
   [trend datums]
   (and (c/insert-batch trend datums)
        ;; Use `and' to ensure that the write has returned before indexing
-       (c/ensure-index trend (array-map :created-at -1) {:unique true} {:dropDupes true})))
+       (c/ensure-index trend (array-map :created-at -1) {:unique true :dropDupes true :background true})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Queries
