@@ -7,6 +7,7 @@
         instagram.api.endpoint)
   (:require [visibe.state :refer [assoc-in-state! gis]]
             [org.httpkit.server :as hk]
+            [visibe.homeless :refer [sleep]]
             [visibe.feeds.storage :refer [append-datums]]
             [visibe.homeless :refer [rfc822-str->long]]
             [clj-time.coerce :refer [from-long]]
@@ -100,5 +101,5 @@ relevent media."
                     new-datums (clojure.set/difference (set new-media) media)]
                 (future (push-instagrams-to-subscribed-clients! trend new-datums))
                 (store-instagram-media trend new-datums)
-                (Thread/sleep (/ 180000 3)) ; 1 minute
+                (sleep 1)
                 (recur new-datums))))))

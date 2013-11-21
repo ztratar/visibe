@@ -4,6 +4,7 @@
   (:require [clojure.data.json :as json]
             [clojure.set :refer [rename-keys]]
             [org.httpkit.server :as hk]
+            [visibe.homeless :refer [sleep]]
             [clj-http.lite.client :as client]
             [clojure.string :as s]
             [clj-time.coerce :refer [to-long from-long]]
@@ -147,5 +148,5 @@ returns `nil` when trend is no longer 'active'. 'Active' is defined as being in
                     (subscribed-clients trend))
             (do (future (push-tweets-to-subscribed-clients! trend (:statuses tweet-data)))
                 (store-tweets trend tweet-data)
-                (Thread/sleep (/ 180000 3)) ; 1 min
+                (sleep 1)
                 (recur (twitter-q new-query)))))))))

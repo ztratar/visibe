@@ -1,6 +1,8 @@
 (ns ^{:doc "Coordination of different feeds"}
-  visibe.feeds
+  visibe.feeds  
   (:require [clojure.set :as set]
+            [visibe.homeless :refer [sleep]]
+            [org.httpkit.server :as hk]
             [clj-http.lite.client :as client]
             [visibe.feeds.instagram :as instagram]
             [visibe.feeds.twitter :as twitter]
@@ -22,7 +24,7 @@
             (recur (let [new-trends (:united-states (goog/google-trends))]
                      (when-not (= (set trends) (set new-trends))
                        (assoc-in-state! [:google :trends] new-trends))
-                     (Thread/sleep 300000) ; 5 min
+                     (sleep 5)
                      new-trends)))))
 
 (defn scrape-and-persist-trends!
@@ -47,11 +49,15 @@
                (persist-google-trends-and-photos new-trends)
                
                (when (not= trends new-trends)
+
+                 (future (doseq [client (seq (gis [:app :channels]))]
+                           (hk/send! client (:current-trends new-trends))))
+                 
                  (let [difference (set/difference (keys new-trends) (keys trends))]
                    (assoc-in-state! [:google :trends] (into {} (mapv (fn [x] [x (new-trends x)]) difference)))
                    (doseq [t difference] (twitter/track-trend t)
                           (instagram/track-trend t)))
                  
-                 (do (Thread/sleep 300000) ; 5 min
+                 (do (sleep 5)
                      new-trends)))))))
 
