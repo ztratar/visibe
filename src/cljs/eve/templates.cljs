@@ -58,7 +58,7 @@
    [:a.user-img {:href (str "https://www.twitter.com/" screen-name)} [:img {:src profile-image-url}]]
    [:div.content
     [:a.user-name {:href "#"} name]
-    [:span.byline "On " [:a {:href (str "https://www.twitter.com/" screen-name "/status" id-str)} "Twitter"] (x-time-ago created-at)]
+    [:span.byline "On " [:a {:href (str "https://www.twitter.com/" screen-name "/status/" id-str)} "Twitter"] (x-time-ago created-at)]
     [:div.body-content text]]])
 
 (deftemplate instagram-photo [{tags :tags created-at :created-at type :type username :username
