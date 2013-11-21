@@ -45,6 +45,9 @@ loop."
       (assoc-in-state! [:google :trends] (if f f g))) 
     (loop [trends {}]
       (recur (let [new-trends (map trend->photo-url (:united-states (goog/google-trends)))]
+               ;; TODO, Wed Nov 20 2013, Francis Wolke
+               ;; Send `new-trends' out to all channels stuff in a future.
+
                ;; persist the new hashmap of trends and their photos
                (persist-google-trends-and-photos new-trends)
                

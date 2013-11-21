@@ -119,4 +119,5 @@
                       (q/sort (array-map :created-at -1))
                       (q/limit 1)))
         data (dissoc data :_id)]
-    (rename-keys data (zipmap (keys data) (map name (keys data))))))
+    (dissoc (rename-keys data (zipmap (keys data) (map name (keys data))))
+            "created-at")))

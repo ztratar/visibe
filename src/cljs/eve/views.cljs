@@ -84,7 +84,7 @@
 
 (defn home [trend-m]
   (swap-view! (t/home))
-  (let [trends (remove #{"created-at"} (keys trend-m))
+  (let [trends (keys trend-m)
         trends (loop [acc #{}]
                  (if (= (* 3 (quot (count trends) 3)) (count acc))
                    acc
@@ -146,6 +146,7 @@
       (t/automagic datum))))
 
 (defn add-new-datum! [datum]
+  (when (sel1 :#preloader) (dommy/remove! (sel1 :#preloader)))
   (let [datum-card (determine-card datum)]
     (if (= :left (left-or-right?))
       (prepend! (sel1 :#feed-left) datum-card)
@@ -174,7 +175,7 @@
     (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home)))
     (let [trend-datums (take 15 (reverse (sort-by :created-at (datums-for trend))))]
       (if (empty? trend-datums)
-        (append! (sel1 :.social-feed) (m/node [:h1 "Preloader."]))
+        (append! (sel1 :.social-feed) (m/node [:h1#preloader "Preloader."]))
         (do (doseq [d trend-datums]
               (add-new-datum! d))
             (assoc-in-state! [:last-datum] (last elder-datum)))))))
@@ -228,7 +229,5 @@
   ;; TODO, Tue Oct 15 2013, Francis Wolke Buggy - if you don't pass in a trend,
   ;; it'll throw. Clojure has some sort of contracts facility...
   (case view
-    :trend (do (apply trend args)
-               (assoc-in-state! [:view] :trend))
-    :home (do (home (:trends @state))
-              (assoc-in-state! [:view] :home))))
+    :trend (do (apply trend args) (assoc-in-state! [:view] :trend))
+    :home (do (home (:trends @state)) (assoc-in-state! [:view] :home))))
