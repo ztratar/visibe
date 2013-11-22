@@ -11,15 +11,18 @@
 (defn x-time-ago [created-at]
   (let [created-at      (coerce/from-long created-at)
         now             (c/now)
-        now-hour        (c/hour now) 
+
         now-min         (c/minute now)
+        now-hour        (c/hour now) 
         now-days        (c/day now)
-        datum-hour      (c/hour created-at)
+
         datum-min       (c/minute created-at)
+        datum-hour      (c/hour created-at)
         datum-days      (c/day created-at)
-        day-difference  (- now-days datum-days)
+
+        min-difference  (- now-min datum-min)
         hour-difference (- now-hour datum-hour)
-        min-difference  (- now-hour datum-min)]
+        day-difference  (- now-days datum-days)]
 
     (cond (not= 0 day-difference)  (str " " day-difference " days ago")
           (not= 0 hour-difference) (str " " hour-difference " hours ago")
