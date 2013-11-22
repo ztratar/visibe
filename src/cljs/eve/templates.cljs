@@ -12,7 +12,7 @@
 
 (defn x-time-ago [created-at]
   ;; TODO, Thu Nov 21 2013, Francis Wolke
-  ;; The issue here is _obviously_ time zones
+  ;; The issue here is time zones - I hope
   (let [created-at      (coerce/from-long created-at)
         now             (c/now)
 
@@ -29,13 +29,26 @@
         days       (- now-days datum-days)]
 
     (console/log "time: " created-at " time zone: " (.getTimezoneOffset created-at))
-    (str " " days ", days "  hours ", hours " minutes ", minutes")
 
-    #_(match [days hours mins]
-             [0 0 _] (str " " days  " minutes ago")
-             [0 _ _] (str " " hours " hours ago")
-             [_ _ _] (str " " mins  " days ago")
-             :else (console/error "x-time-ago received bad input"))))
+    (match [days hours mins]
+           [0 0 _] (str " " days  " minutes ago")
+           [0 _ _] (str " " hours " hours ago")
+           [_ _ _] (str " " minutes  " days ago")
+           :else (console/error "x-time-ago received bad input"))))
+
+(defn format-tweet
+  "Accepts a tweet string and gives back the template to represent it, taking
+   into account any URLs that exist"
+  [s]
+  (let [url  (first (re-find #"(http|ftp|https)://[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:/~+#-]*[\w@?^=%&amp;/~+#-])?" s))
+        link (when url [:a {:href url :target "_blank"} url])
+        text (when url (clojure.string/split s url))]
+    (cond (empty? url) [:p text]
+          (= 1 (count text)) [:p (first text) link]
+          (= "" (first text)) [:p link (second text)]
+          (= 2 (count text)) [:p (first text) link (second text)]
+          :else (do (console/error "Currently don't handle multiple links within a tweet")
+                    [:p s]))))
 
 (deftemplate ^{:doc "Generates a template for the supplied data structure"}
   automagic
@@ -74,7 +87,7 @@
                    :target "_blank"} name]
     [:span.byline "On " [:a {:href (str "https://www.twitter.com/" screen-name "/status/" id-str)
                              :target "_blank"} "Twitter"] (x-time-ago created-at)]
-    [:div.body-content text]]])
+    [:div.body-content (format-tweet text)]]])
 
 (deftemplate instagram-photo [{tags :tags created-at :created-at type :type username :username
                                profile-picture :profile-picture text :text full-name :full-name
