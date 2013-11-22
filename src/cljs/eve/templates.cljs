@@ -3,12 +3,16 @@
   (:require [dommy.core :as dommy]
             [shodan.console :as console]
             [eve.utils :refer [->slug]]
+            [cljs.core.match]
             [cljs-time.coerce :as coerce]
             [cljs-time.core :as c]
             [dommy.utils :as utils])
-  (:require-macros [dommy.macros :as m :refer [deftemplate]]))
+  (:require-macros [cljs.core.match.macros :refer [match]]
+                   [dommy.macros :as m :refer [deftemplate]]))
 
 (defn x-time-ago [created-at]
+  ;; TODO, Thu Nov 21 2013, Francis Wolke
+  ;; The issue here is _obviously_ time zones
   (let [created-at      (coerce/from-long created-at)
         now             (c/now)
 
@@ -16,17 +20,22 @@
         now-hour        (c/hour now) 
         now-days        (c/day now)
 
-        datum-min       (c/minute created-at)
-        datum-hour      (c/hour created-at)
-        datum-days      (c/day created-at)
+        datum-min  (c/minute created-at)
+        datum-hour (c/hour created-at)
+        datum-days (c/day created-at)
 
-        min-difference  (- now-min datum-min)
-        hour-difference (- now-hour datum-hour)
-        day-difference  (- now-days datum-days)]
+        minutes    (- now-min datum-min)
+        hours      (- now-hour datum-hour)
+        days       (- now-days datum-days)]
 
-    (cond (not= 0 day-difference)  (str " " day-difference " days ago")
-          (not= 0 hour-difference) (str " " hour-difference " hours ago")
-          :else (str " " min-difference " minutes ago"))))
+    (console/log "time: " created-at " time zone: " (.getTimezoneOffset created-at))
+    (str " " days ", days "  hours ", hours " minutes ", minutes")
+
+    #_(match [days hours mins]
+             [0 0 _] (str " " days  " minutes ago")
+             [0 _ _] (str " " hours " hours ago")
+             [_ _ _] (str " " mins  " days ago")
+             :else (console/error "x-time-ago received bad input"))))
 
 (deftemplate ^{:doc "Generates a template for the supplied data structure"}
   automagic
@@ -58,20 +67,23 @@
                      profile-image-url :profile_image_url_https id-str :id_str}]
  
   [:li.social-activity.tweet
-   [:a.user-img {:href (str "https://www.twitter.com/" screen-name)} [:img {:src profile-image-url}]]
+   [:a.user-img {:href (str "https://www.twitter.com/" screen-name)
+                 :target "_blank"} [:img {:src profile-image-url}]]
    [:div.content
-    [:a.user-name {:href "#"} name]
-    [:span.byline "On " [:a {:href (str "https://www.twitter.com/" screen-name "/status/" id-str)} "Twitter"] (x-time-ago created-at)]
+    [:a.user-name {:href (str "https://www.twitter.com/" screen-name)
+                   :target "_blank"} name]
+    [:span.byline "On " [:a {:href (str "https://www.twitter.com/" screen-name "/status/" id-str)
+                             :target "_blank"} "Twitter"] (x-time-ago created-at)]
     [:div.body-content text]]])
 
 (deftemplate instagram-photo [{tags :tags created-at :created-at type :type username :username
                                profile-picture :profile-picture text :text full-name :full-name
                                link :link {height :height url :url width :width} :photo}]
   [:li.social-activity.instagram
-   [:a.user-img {:href (str "http://www.instagram.com/" username)} [:img {:src profile-picture}]]
+   [:a.user-img {:href (str "http://www.instagram.com/" username) :target "_blank"} [:img {:src profile-picture}]]
    [:div.content
-    [:a.user-name {:href "#"} full-name]
-    [:span.byline "On " [:a {:href link} "Instagram"] (x-time-ago created-at)]
+    [:a.user-name {:href (str "http://www.instagram.com/" username) :target "_blank"} full-name]
+    [:span.byline "On " [:a {:href link :target "_blank"} "Instagram"] (x-time-ago created-at)]
     [:div.body-content text]
     [:div.photo [:img {:src url}]]]])
 
@@ -79,10 +91,11 @@
                                profile-picture :profile-picture full-name :full-name link :link
                                text :text {height :height url :url width :width} :video}]
   [:li.social-activity.instagram
-   [:a.user-img {:href (str "http://www.instagram.com/" username)} [:img {:src profile-picture}]]
+   [:a.user-img {:href (str "http://www.instagram.com/" username)
+                 :target "_blank"} [:img {:src profile-picture}]]
    [:div.content
-    [:a.user-name {:href "#"} full-name]
-    [:span.byline "On " [:a {:href link} "Instagram"] (x-time-ago created-at)]
+    [:a.user-name {:href (str "http://www.instagram.com/" username) :target "_blank"} full-name]
+    [:span.byline "On " [:a {:href link :target "_blank"} "Instagram"] (x-time-ago created-at)]
     [:div.body-content text]
     [:div.video
      `[~(keyword (str "video.instagram-video" id))
