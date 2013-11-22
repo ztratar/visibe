@@ -8,7 +8,7 @@
             [visibe.feeds.twitter :as twitter]
             [visibe.feeds.flickr :refer [trend->photo-url]]
             [visibe.feeds.storage :refer [persist-google-trends-and-photos youngest-trends]]
-            [visibe.state :refer [assoc-in-state! state]]
+            [visibe.state :refer [assoc-in-state! state gis]]
             [visibe.feeds.google-trends :as goog])
   (:import java.net.URL
            java.io.ByteArrayOutputStream
