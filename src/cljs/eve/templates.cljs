@@ -43,12 +43,14 @@
   (let [url  (first (re-find #"(http|ftp|https)://[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:/~+#-]*[\w@?^=%&amp;/~+#-])?" s))
         link (when url [:a {:href url :target "_blank"} url])
         text (when url (clojure.string/split s url))]
-    (cond (empty? url) [:p text]
-          (= 1 (count text)) [:p (first text) link]
+    (cond (empty? url)        [:p s]
+          (= 1 (count text))  [:p (first text) link]
           (= "" (first text)) [:p link (second text)]
-          (= 2 (count text)) [:p (first text) link (second text)]
-          :else (do (console/error "Currently don't handle multiple links within a tweet")
-                    [:p s]))))
+          (= 2 (count text))  [:p (first text) link (second text)]
+          ;; TODO, Thu Nov 21 2013, Francis Wolke
+          ;; Multiple links within a tweet
+          :else               (do (console/error "We currently don't handle multiple links within a tweet")
+                                  [:p s]))))
 
 (deftemplate ^{:doc "Generates a template for the supplied data structure"}
   automagic
