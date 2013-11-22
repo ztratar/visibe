@@ -8,7 +8,11 @@ lein run help
 
 We will, on occasion, see a preloader AND some datums
 
-The storage layer appears to be handing back bad datums
+Using HTML5 history will not unsubscribe/subscribe you from trends as expected.
+
+# Interesting technologies
+
+http://marcopolo.io/2013/10/01/servant-cljs.html
 
 # TODO
 

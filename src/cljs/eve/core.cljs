@@ -5,7 +5,7 @@
             [eve.ws :refer [ws-connect!]]
             [shodan.console :as console]
             [eve.views :refer [navigate! new-datum-watch! bottom-of-page?
-                               append-old-datums-on-scroll]]
+                               append-old-datums-on-scroll set-token!]]
             [dommy.utils :as utils]
             [dommy.core :as dommy]
             [eve.state :refer [state assoc-in-state! update-in-state!]]
@@ -14,11 +14,10 @@
   (:require-macros [cljs.core.async.macros :refer [go alt!]]
                    [dommy.macros :as m]))
 
-;; http://marcopolo.io/2013/10/01/servant-cljs.html
-
 (repl/connect "http://localhost:8002/repl")
 
 (defn bootstrap! []
+  (set-token! "")
   (ws-connect!)
   (let [ch (chan)]
     (go (loop [v (:trends @state)]
