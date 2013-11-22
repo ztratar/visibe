@@ -15,8 +15,7 @@
            msg (r/read-string (str (.-data data)))]
        (case (:type msg)
          :datums         (update-in-state! [:datums] (comp set (partial into (:data msg))))
-         :current-trends (do (console/log "got current trends")
-                             (assoc-in-state! [:trends] (:data msg)))
+         :current-trends  (assoc-in-state! [:trends] (:data msg))
          :print          (console/log (str (:data msg)))
          (console/log "ws data" (str (:data msg))))))))
 

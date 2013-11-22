@@ -159,11 +159,9 @@
       (append! (sel1 :#feed-right) datum-card))))
 
 (defn trend [trend]
-  (console/log "changing to:" trend)
   (let [trends (:trends @state)
         trend (slug->trend trend)
-        elder-datum (first (sort-by :created-at (datums-for trend)))
-        _ (console/log "elder datum: " elder-datum)]
+        elder-datum (first (sort-by :created-at (datums-for trend)))]
 
     (swap-view! (t/trend trend (trends trend)))
 
@@ -173,7 +171,7 @@
     
     ;; Population and addition of logic
     (dommy/listen! (m/sel1 :#home-button) :click (fn [& _] (navigate! :home)))
-    (let [trend-datums (take 15 (reverse (sort-by :created-at (datums-for trend))))]
+    (let [trend-datums (take 15 (sort-by :created-at (datums-for trend)))]
       (if (empty? trend-datums)
         (append! (sel1 :.social-feed) (m/node [:h1#preloader "Preloader."]))
         (do (doseq [d trend-datums]
@@ -187,9 +185,8 @@
         old-datums (filter #(= current-trend (:trend %)) (:datums old))
         new-datums (filter #(= current-trend (:trend %)) (:datums new))]
     (when (and (= :trend (:view new)))
-      (let [to-append (reverse (sort-by :created-at (difference (set new-datums) (set old-datums))))]
-        (doseq [datum to-append]
-          (add-new-datum! datum))))))
+      (doseq [datum (reverse (sort-by :created-at (difference (set new-datums) (set old-datums))))]
+        (add-new-datum! datum)))))
 
 (defn bottom-of-page?
   "We actually test for, are we close enough to the bottom that we should load more"
@@ -210,8 +207,7 @@
 
     (let [last-datum (:last-datum @state)
           sorted-datums (sort-by :created-at (filter #(< (:created-at %) (:created-at last-datum)) (datums-for trend)))
-          to-append (take 15 (reverse sorted-datums))
-          _ (console/log "count" (count to-append))]
+          to-append (take 15 (reverse sorted-datums))]
 
       (if (= 0 (count to-append))
         (append! (sel1 :.social-feed) (m/node [:h1#no-more-data "No historical datums"]))
