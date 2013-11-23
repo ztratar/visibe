@@ -55,5 +55,5 @@
 
 (defn clean-datum [datum]
   (if (= :tweet (keyword (:datum-type datum)))
-    (instagram->essentials datum)
-    (tweet->essentials datum)))
+    (tweet->essentials datum)
+    (instagram->essentials datum)))
