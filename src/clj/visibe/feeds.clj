@@ -1,16 +1,17 @@
 (ns ^{:doc "Social feed loops"}
-  visibe.feeds  
-  (:require [clojure.set :as set]
-            [visibe.homeless :refer [sleep]]
-            [org.httpkit.server :as hk]
-            [visibe.api :refer [ds->ws-message]]
-            [clj-http.lite.client :as client]
-            [visibe.feeds.instagram :as instagram]
-            [visibe.feeds.twitter :as twitter]
-            [visibe.feeds.flickr :refer [trend->photo-url]]
-            [visibe.feeds.storage :refer [persist-google-trends-and-photos youngest-trends]]
-            [visibe.state :refer [assoc-in-state! state gis]]
-            [visibe.feeds.google-trends :as goog])
+  visibe.feeds
+  (:require [clj-http.lite.client       :as client]
+            [clojure.set                :as set]
+            [org.httpkit.server         :as hk]
+            [visibe.feeds.flickr        :refer [trend->photo-url]]
+            [visibe.feeds.sanitation    :refer :all]
+            [visibe.api                 :refer [ds->ws-message]]
+            [visibe.feeds.google-trends :refer [google-trends]]
+            [visibe.feeds.instagram     :as instagram]
+            [visibe.feeds.storage       :refer [persist-google-trends-and-photos append-datums]]
+            [visibe.feeds.twitter       :as twitter]
+            [visibe.homeless            :refer [sleep]]
+            [visibe.state               :refer [assoc-in-state! state gis]])
   (:import java.net.URL
            java.io.ByteArrayOutputStream
            java.io.ByteArrayInputStream
@@ -45,13 +46,17 @@
 (defn instagram-track-trend
   "Tracks a trend while it's an active trend, or susbscribed to by a client
    persisting data related to it and pushing data to subscribed clients."
+  ;; TODO, Sat Nov 23 2013, Francis Wolke
+  ;; Currently does not gather all the data that we could possibly gather
   [trend]
   (future (loop [media #{}]
             (when (active? trend)
-              (let [new-media  (instagram/instagram-media trend)
-                    new-datums (clojure.set/difference (set new-media) media)]
-                (future (push-datums-to-subscribed-clients! trend new-datums))
-                (instagram/store-instagram-media trend new-datums)
+              (let [new-datums (map (partial clean-instagram trend)
+                                    (set/difference (set (instagram/instagram-media trend)) media))
+                    ;; Only send clients relevent data
+                    essentials (map instagram->essentials )]
+                (future (push-datums-to-subscribed-clients! trend essentials))
+                (append-datums trend new-datums)
                 (sleep 1)
                 (recur new-datums))))))
 
@@ -63,13 +68,15 @@
   ;; Twitter's rate limit window is 15 minutes. We are allowed 450 requests over
   ;; this peiod of time. (/ (* 15 60) 450) => 2 sec
   [trend]
-  (future (loop [tweet-data (twitter/search-tweets trend)]
-            (when (active? trend)
-              (future (push-datums-to-subscribed-clients! trend (:statuses tweet-data)))
-              ;; Naked append datums call?
-              (twitter/store-tweets trend tweet-data)
-              (sleep 1)
-              (recur (twitter/next-page (-> tweet-data :search_metadata :refresh_url)))))))
+  (future (loop [twitter-data (twitter/search-tweets trend)]
+            (let [clean-tweets (map (partial clean-tweet trend) (:statuses twitter-data))
+                  essentials (map tweet->essentials clean-tweets)]
+              (when (active? trend)
+                ;; Only send clients relevent data
+                (future (push-datums-to-subscribed-clients! trend essentials))
+                (append-datums trend clean-tweets)
+                (sleep 1)
+                (recur (twitter/next-page (-> twitter-data :search_metadata :refresh_url))))))))
 
 (defn scrape-and-persist-trends!
   "Main loop that starts all trend related data gathering. For each API other
@@ -88,21 +95,17 @@
   (future
     (loop [trends {}]
       (recur (let [new-trends (into {} (vec (pmap (fn [url] [url (trend->photo-url url)])
-                                                  (:united-states (goog/google-trends)))))]
+                                                  (:united-states (google-trends)))))]
 
                (persist-google-trends-and-photos new-trends)
-               
                (when (not= trends new-trends)
-
                  (future (doseq [client (seq (gis [:app :channels]))]
                            (hk/send! client (:current-trends new-trends))))
-                 
                  (let [difference (set/difference (keys new-trends) (keys trends))]
                    (assoc-in-state! [:google :trends] (into {} (mapv (fn [x] [x (new-trends x)]) difference)))
                    (doseq [t difference]
                      (twitter-track-trend t)
                      (instagram-track-trend t)))
-                 
                  (do (sleep 5)
                      new-trends)))))))
 

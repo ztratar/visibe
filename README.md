@@ -25,6 +25,7 @@ http://marcopolo.io/2013/10/01/servant-cljs.html
 - A trend from last week is not = to a trend this week
 - not catching exceptions anywhere in this program
 - codox
+- slamhound
 - Apply the insights from SS's workflow http://thinkrelevance.com/blog/2013/06/04/clojure-workflow-reloaded
 - Sharing functionality
 - Deploy

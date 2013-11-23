@@ -109,15 +109,3 @@
                 (q/sort (array-map :created-at -1))
                 (q/limit 1))
               (map #(clean-datum (dissoc % :_id))))))
-
-(defn youngest-trends
-  ;; TODO, Thu Nov 14 2013, Francis Wolke
-  ;; The concept of trends, and the corresponding photos needs a name
-  "Returns the youngest trends and corresponding photos"
-  []
-  (let [data (first (q/with-collection "google-trends"
-                      (q/sort (array-map :created-at -1))
-                      (q/limit 1)))
-        data (dissoc data :_id)]
-    (dissoc (rename-keys data (zipmap (keys data) (map name (keys data))))
-            "created-at")))

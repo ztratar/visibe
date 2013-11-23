@@ -63,6 +63,8 @@
 
   :main visibe.core/main-
 
+  :jvm-opts ["-Djava.awt.headless=true"]
+
   :repositories [["JCenter" {:url "http://jcenter.bintray.com"
                              :snapshots false}]]
 
