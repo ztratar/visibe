@@ -22,7 +22,7 @@
   (let [a (partial get-in m)
         i (= :instagram-photo (:datum-type m))]
     (-> m
-        (select-keys [:tags :id :created-at :link :trend])
+        (select-keys [:tags :id :created-at :link :trend :datum-type])
         (merge {:full-name (a [:user :full_name])
                 :profile-picture (a [:user :profile_picture])
                 :username (a [:user :username])}
@@ -50,5 +50,10 @@
   ;; XXX, NOTE Fri Oct 04 2013, Francis Wolke
   ;; `:text` path does not always have full urls.
   [tweet]
-  (merge (select-keys tweet [:text :created-at :trend :datum-type])
+  (merge (select-keys tweet [:text :created-at :trend :datum-type :id_str])
          (select-keys (:user tweet) [:name :screen_name :profile_image_url_https])))
+
+(defn clean-datum [datum]
+  (if (= :tweet (keyword (:datum-type datum)))
+    (instagram->essentials datum)
+    (tweet->essentials datum)))

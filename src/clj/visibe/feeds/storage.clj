@@ -3,6 +3,7 @@
   (:use visibe.homeless user)
   (:require [monger.core :as mg]
             [monger.query :as q]
+            [visibe.feeds.sanitation :refer [clean-datum]]
             [clojure.set :refer [rename-keys]]
             [clj-time.local :refer [local-now format-local-time]]
             [clj-time.core :refer [date-time]]
@@ -13,38 +14,6 @@
             [monger.collection :as c])
   (:import org.bson.types.ObjectId
            com.mongodb.WriteConcern))
-
-(defn instagram-photo->essentials [m]
-  (let [a (partial get-in m)]
-    (-> m
-        (select-keys [:tags :id :created-at :link :trend :datum-type])
-        (merge {:full-name (a [:user :full_name])
-                :profile-picture (a [:user :profile_picture])
-                :username (a [:user :username])
-                :photo (a [:images :standard_resolution])}))))
-
-(defn instagram-video->essentials [m]
-  (let [a (partial get-in m)]
-    (-> m
-        (select-keys [:tags :id :created-at :link :trend :datum-type])
-        (merge {:full-name (a [:user :full_name])
-                :profile-picture (a [:user :profile_picture])
-                :username (a [:user :username])
-                :video (a [:videos :standard_resolution])}))))
-
-(defn tweet->essentials
-  ;; FIXME, NOTE Fri Oct 04 2013, Francis Wolke
-  ;; `:text` path may not always have full urls.
-  [tweet]
-  (merge (select-keys tweet [:text :created-at :trend :datum-type :id_str])
-         (select-keys (:user tweet) [:name :screen_name :profile_image_url_https])))
-
-(defn clean-datum [datum]
-  (case (keyword (:datum-type datum))
-    :instagram-photo (instagram-photo->essentials datum)
-    :instagram-video (instagram-video->essentials datum)
-    :tweet           (tweet->essentials datum)
-    datum))
 
 (defn conn-uri
   "'%' is an escape character."
@@ -64,15 +33,9 @@
 
 (defn append-datums
   "Adds datums to a trend, creates the trend if it didn't already exist"
-  ;; TODO, Wed Nov 13 2013, Francis Wolke
-  ;; Handle batch insert errors
-  ;; http://www.mongodb.org/display/DOCS/Inserting#Inserting-Bulkinserts
-  ;; We should be ensuring datum uniquness here. But this will cause an
-  ;; exception to be thrown if there are duplicates.
   [trend datums]
-  (and (c/insert-batch trend datums)
-       ;; Use `and' to ensure that the write has returned before indexing
-       (c/ensure-index trend (array-map :created-at -1) {:unique true :dropDupes true :background true})))
+  (c/insert-batch trend datums)
+  (c/ensure-index trend (array-map :created-at -1) {:unique true :dropDupes true :background true}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Queries
