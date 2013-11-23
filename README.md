@@ -14,6 +14,10 @@ Using HTML5 history will not unsubscribe/subscribe you from trends as expected.
 
 http://marcopolo.io/2013/10/01/servant-cljs.html
 
+# Prior to release:
+- we need to have a database that won't have it's limit exceeded within 24 hrs
+- strong password protection
+
 # TODO
 
 - Add a number of tweets per second dial in channel the context

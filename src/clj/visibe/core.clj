@@ -68,14 +68,10 @@
   (start-server :port (Integer. (get-in @state [:app :nrepl-port])))
   (assoc-in-state! [:app :server] (hk/run-server #'app {:port (Integer. (get-in @state [:app :port]))}))
   (instagram/generate-oauth-creds!)
-  (case mode
-    :dev (feeds/scrape-trends!)
-    :production (feeds/scrape-and-persist-trends!)))
+  (feeds/scrape-and-persist-trends!))
 
 (defn main-
-  ([] (println "Please specify one of #{help dev production}"))
-  ([mode] (case mode
-            "production" (rally-the-troops! :production)
-            "dev" (rally-the-troops! :dev)
-            "help" (println "`lein run dev` will start the server without storing data in the database. `lein run production` will. In either case, HTTP/WebSocket and nREPL servers will start with the ports specified in PROJECT_ROOT/config.cljd")
-            (println "Please specify one of #{help dev production}"))))
+  ([] (println "Please specify one of #{help production}"))
+  ([s] (case s
+         "production" (rally-the-troops! :production)
+         "help" (println "Please specify one of #{help production}"))))

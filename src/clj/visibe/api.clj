@@ -1,20 +1,20 @@
 (ns ^{:doc "Websocket and HTTP API."}
   visibe.api
-  (:require [org.httpkit.server :as hk]
-            [visibe.state :refer [state assoc-in-state! update-in-state! gis]]
+  (:require [compojure.core             :refer :all]
+            [compojure.handler          :as    handler]
+            [compojure.route            :as    route]
+            [org.httpkit.server         :as    hk]
             [visibe.feeds.google-trends :refer [google-mapping]]
-            [visibe.feeds.storage :as storage]
-            [compojure.route :as route]
-            [compojure.core :refer :all]
-            [compojure.handler :as handler]))
+            [visibe.feeds.storage       :as    storage]
+            [visibe.state               :refer [state assoc-in-state! update-in-state! gis]]))
 
 ;;; TODO, Wed Nov 13 2013, Francis Wolke
 
 ;;; Dynamic `help' and `doc'
 ;;; A community websocket implementation exists. Use that instead. http://cljwamp.us/
 
-; WebSockets API
-;*******************************************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; WebSockets API
 
 (defn ^{:api :websocket :doc "Returns current google trends for specified region along with their associated flickr urls"}
   current-trends
@@ -45,8 +45,8 @@
                     (fn [subscriptions] (set (remove #{trend} subscriptions))))
   {:subscriptions (gis [:app :channels channel :subscriptions])})
 
-; WebSockets Boilerplate
-;*******************************************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; WebSockets Boilerplate
 
 (defn ds->ws-message
   "[d]ata [s]tructure -> websocket message"

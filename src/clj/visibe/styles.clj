@@ -5,14 +5,14 @@
             [garden.arithmetic :refer [+ - * /]]))
 
 ;;; TODO, Thu Oct 17 2013, Francis Wolke
-;;; Almost every thing in here needs to be renamed.
-;;; Garden has the concept of units, which will clean up this code.
+;;; Almost everything in here needs to be renamed.  Garden has the concept of
+;;; units, which will clean up this code.
 
 ;;; NOTE, Wed Nov 06 2013, Francis Wolke
-;;; Hook up the color pallet to a lazy seq of pallets from color lovers.
-;;; Have emacs save this file after swapping out the colors on command,
-;;; Allowing a designer to explore the color schemes, then at their wish,
-;;; move onto another, already hand picked.
+;;; Hook up the color pallet to a lazy seq of pallets from color lovers.  Have
+;;; emacs save this file after swapping out the colors on command, Allowing a
+;;; designer to explore the color schemes, then at their wish, move onto
+;;; another, already hand picked.
 
 ;;; Pallet
 

@@ -1,8 +1,9 @@
-(ns ^{:doc "Coordination of different feeds"}
+(ns ^{:doc "Social feed loops"}
   visibe.feeds  
   (:require [clojure.set :as set]
             [visibe.homeless :refer [sleep]]
             [org.httpkit.server :as hk]
+            [visibe.api :refer [ds->ws-message]]
             [clj-http.lite.client :as client]
             [visibe.feeds.instagram :as instagram]
             [visibe.feeds.twitter :as twitter]
@@ -16,16 +17,59 @@
            java.io.File
            javax.imageio.ImageIO))
 
-(defn scrape-trends!
-  "Scrapes trends, updates `state' but does not persist the data. Any datum feed
-   must be stubbed out."
-  []
-  (future (loop [trends (:united-states (goog/google-trends))]
-            (recur (let [new-trends (:united-states (goog/google-trends))]
-                     (when-not (= (set trends) (set new-trends))
-                       (assoc-in-state! [:google :trends] new-trends))
-                     (sleep 5)
-                     new-trends)))))
+(defn subscribed-clients
+  "Seq of websocket channels for clients subscribed to TREND"
+  [trend]
+  (let [channels (seq (gis [:app :channels]))
+        subscribed-and-on? (fn [[channel context]]
+                             (and (some #{trend} (:subscriptions context)) (:on context)))]
+    (map first (filter subscribed-and-on? channels))))
+
+(defn push-datums-to-subscribed-clients!
+  "Sends DATUMS on websocket channels subscribed to TREND"
+  [trend datums]
+  (let [subscribed-clients (subscribed-clients trend)]
+    (when-not (empty? subscribed-clients) 
+      (doseq [client subscribed-clients]
+        (hk/send! client (ds->ws-message :datums datums))))))
+
+(defn active?
+  "Is a this trend a 'current trend', or subscribed to by a client?"
+  [trend]
+  (or (some #{trend} (keys (gis [:google :trends])))
+      (not (empty? (subscribed-clients trend)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Trend tracking
+
+(defn instagram-track-trend
+  "Tracks a trend while it's an active trend, or susbscribed to by a client
+   persisting data related to it and pushing data to subscribed clients."
+  [trend]
+  (future (loop [media #{}]
+            (when (active? trend)
+              (let [new-media  (instagram/instagram-media trend)
+                    new-datums (clojure.set/difference (set new-media) media)]
+                (future (push-datums-to-subscribed-clients! trend new-datums))
+                (instagram/store-instagram-media trend new-datums)
+                (sleep 1)
+                (recur new-datums))))))
+
+(defn twitter-track-trend
+  "Tracks a trend while it's still an 'active' trend. Runs in future, persisting
+   data and pushing it to clients when appropriate"
+  ;; NOTE, Fri Oct 04 2013, Francis Wolke
+  ;; For the time being, I don't want to deal with the full stream.
+  ;; Twitter's rate limit window is 15 minutes. We are allowed 450 requests over
+  ;; this peiod of time. (/ (* 15 60) 450) => 2 sec
+  [trend]
+  (future (loop [tweet-data (twitter/search-tweets trend)]
+            (when (active? trend)
+              (future (push-datums-to-subscribed-clients! trend (:statuses tweet-data)))
+              ;; Naked append datums call?
+              (twitter/store-tweets trend tweet-data)
+              (sleep 1)
+              (recur (twitter/next-page (-> tweet-data :search_metadata :refresh_url)))))))
 
 (defn scrape-and-persist-trends!
   "Main loop that starts all trend related data gathering. For each API other
@@ -55,8 +99,9 @@
                  
                  (let [difference (set/difference (keys new-trends) (keys trends))]
                    (assoc-in-state! [:google :trends] (into {} (mapv (fn [x] [x (new-trends x)]) difference)))
-                   (doseq [t difference] (twitter/track-trend t)
-                          (instagram/track-trend t)))
+                   (doseq [t difference]
+                     (twitter-track-trend t)
+                     (instagram-track-trend t)))
                  
                  (do (sleep 5)
                      new-trends)))))))
