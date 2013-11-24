@@ -15,6 +15,11 @@
   (:import org.bson.types.ObjectId
            com.mongodb.WriteConcern))
 
+(defn remove-trend-collections []
+  (doseq [i (remove #{"fs.chunks" "fs.files" "google-trends" "system.indexes" "system.users"}
+                    (.getCollectionNames mg/*mongodb-database*))]
+    (c/drop i)))
+
 (defn conn-uri
   "'%' is an escape character."
   [{username :username password :password host :host port :port database :database}]
