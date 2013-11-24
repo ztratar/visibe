@@ -6,34 +6,33 @@
             [cljs.core.match]
             [cljs-time.coerce :as coerce]
             [cljs-time.core :as c]
-            [dommy.utils :as utils])
+            [cljs-time.local]
+            [dommy.utils :as utils]
+            [goog.i18n.TimeZone :as tz]
+            [goog.date.DateTime :as dt])
   (:require-macros [cljs.core.match.macros :refer [match]]
                    [dommy.macros :as m :refer [deftemplate]]))
 
 (defn x-time-ago [created-at]
-  ;; TODO, Thu Nov 21 2013, Francis Wolke
-  ;; The issue here is time zones - I hope
-  (let [created-at      (coerce/from-long created-at)
-        now             (c/now)
-
-        now-min         (c/minute now)
-        now-hour        (c/hour now) 
-        now-days        (c/day now)
-
-        datum-min  (c/minute created-at)
-        datum-hour (c/hour created-at)
-        datum-days (c/day created-at)
-
-        minutes    (- now-min datum-min)
-        hours      (- now-hour datum-hour)
-        days       (- now-days datum-days)]
-
-    (console/log "time: " created-at " time zone: " (.getTimezoneOffset created-at))
-
-    (match [days hours mins]
-           [0 0 _] (str " " days  " minutes ago")
+  ;; http://docs.closure-library.googlecode.com/git/class_goog_i18n_TimeZone.html
+  ;; http://google-web-toolkit.googlecode.com/svn/trunk/user/src/com/google/gwt/i18n/client/constants/TimeZoneConstants.properties
+  (let [created-at (coerce/from-long created-at)
+        jf (juxt c/day c/hour c/minute)
+        [now-days now-hour now-min] (jf (c/now))
+        [datum-days datum-hour datum-min] (jf created-at)
+        days (- now-days datum-days)
+        hours (- now-hour datum-hour)
+        minutes (- now-min datum-min)
+        ;; Hack to deal with the fact that I don't want to create a 'correct' time implementation yet
+        timezone-offset (/ (.getTimezoneOffset (js/Date.)) 60)
+        [days hours] (if (< hours timezone-offset)
+                       [(dec days) (- 24 (- timezone-offset hours))]
+                       [days (- hours timezone-offset)])]
+    
+    (match [days hours minutes]
+           [0 0 _] (str " " minutes " minutes ago")
            [0 _ _] (str " " hours " hours ago")
-           [_ _ _] (str " " minutes  " days ago")
+           [_ _ _] (str " " days  " days ago")
            :else (console/error "x-time-ago received bad input"))))
 
 (defn format-tweet
