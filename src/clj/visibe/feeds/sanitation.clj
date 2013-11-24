@@ -4,7 +4,7 @@
             we wish to store does not map directly to what we want to send to
             the client. `clean-X' should be used only when dealing with raw data
             from a social media source, and `X->essentials' should be used when
-            sending data to a client."}
+            sending data to a client"}
   visibe.feeds.sanitation
   (:require [visibe.homeless :refer [rfc822-str->long]]
             [clojure.set :refer [rename-keys]]))
@@ -38,20 +38,37 @@
     (rfc822-str->long (clojure.string/join " " [(str weekday ",") day month year time ?]))))
 
 (defn clean-tweet
-  "Takes a raw tweet, turns it into the format we'd prefer to handle"
+  "XXX, Sun Nov 24 2013, Francis Wolke
+
+   Tweets don't obey a sane schema. If ':retweeted_status' is a member of a
+   tweet, then, for whatever reason, you'll find that the CORRECT ':created-at'
+   is actually in ':retweeted_status :created_at'. There is no documentation
+   that explains this, and googling pulls up nothing.
+
+   Aside from that, this puts tweets into the format that we'd prefer to handle"
   [trend tweet]
-  (-> tweet
-      (assoc :trend trend)
-      (assoc :datum-type :tweet)
-      (rename-keys {:created_at :created-at})
-      (update-in [:created-at] twitter-time->long)))
+  (let [tweet (-> tweet
+                  (assoc :trend trend)
+                  (assoc :datum-type :tweet)
+                  (rename-keys {:created_at :created-at})
+                  (update-in [:created-at] twitter-time->long))]
+    (if (:retweeted_status tweet)
+      (update-in tweet [:retweeted_status] (fn [m] (-> (rename-keys  {:created_at :created-at})
+                                                       (update-in  [:created-at] twitter-time->long))))
+      tweet)))
 
 (defn tweet->essentials
-  ;; XXX, NOTE Fri Oct 04 2013, Francis Wolke
-  ;; `:text` path does not always have full urls.
+  "XXX, NOTE Fri Oct 04 2013, Francis Wolke
+   See `clean-tweet' for an explanation as to why this code is so strange"
   [tweet]
-  (merge (select-keys tweet [:text :created-at :trend :datum-type :id_str])
-         (select-keys (:user tweet) [:name :screen_name :profile_image_url_https])))
+  (if (:retweeted_status tweet)
+
+    (merge (select-keys tweet [:text :trend :datum-type :id_str])
+           (select-keys (:user tweet) [:name :screen_name :profile_image_url_https])
+           (:created_at (:retweeted_status tweet)))
+
+    (merge (select-keys tweet [:text :created-at :trend :datum-type :id_str])
+           (select-keys (:user tweet) [:name :screen_name :profile_image_url_https]))))
 
 (defn clean-datum [datum]
   (if (= :tweet (keyword (:datum-type datum)))

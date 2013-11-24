@@ -73,6 +73,9 @@
   ;; play nicely with objects as keys (?)
   ;; this could, given some work, be useful for things like data migrations. Just specify the data structure that you want, from what exists
   ;; and use logic programming to figure out how to get there. Possibly.
+
+
+  ;; I really want to dispach on type, If I get a keyword, search for it - if I get a seq, search for them, ectera
   "[s]mart [s]elect. 
 Given a start map and `seq' of goal-keys, generates a function to convert one to the other (start to goal). EG:
 ... call ...

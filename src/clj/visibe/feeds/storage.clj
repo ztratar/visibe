@@ -35,7 +35,8 @@
   "Adds datums to a trend, creates the trend if it didn't already exist"
   [trend datums]
   (c/insert-batch trend datums)
-  (c/ensure-index trend (array-map :created-at -1) {:unique true :dropDupes true :background true}))
+  (c/ensure-index trend (array-map :created-at -1)
+                  {:unique true :dropDupes true :background true}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Queries
