@@ -54,7 +54,7 @@
               (let [new-datums (map (partial clean-instagram trend)
                                     (set/difference (set (instagram/instagram-media trend)) media))
                     ;; Only send clients relevent data
-                    essentials (map instagram->essentials )]
+                    essentials (map instagram->essentials new-datums)]
                 (future (push-datums-to-subscribed-clients! trend essentials))
                 (append-datums trend new-datums)
                 (sleep 1)
@@ -79,7 +79,7 @@
                 (recur (twitter/next-page (-> twitter-data :search_metadata :refresh_url))))))))
 
 (defn scrape-and-persist-trends!
-  "Main loop that starts all trend related data gathering. For each API other
+  "Main loop that initiates all trend related data gathering. For each API other
    that google-trends we have a `track-trend' function that runs in it's own thread
    (a future) and persists it's own data. Google trend data is persisted in this
    loop."
@@ -92,20 +92,22 @@
   ;; store a pointer to all launched futures so that I can kill them at the
   ;; REPL.
   []
-  (future
-    (loop [trends {}]
-      (recur (let [new-trends (into {} (vec (pmap (fn [url] [url (trend->photo-url url)])
-                                                  (:united-states (google-trends)))))]
+  (letfn [(trends-blob [trends] (into {} (vec (pmap (fn [url] [url (trend->photo-url url)]) trends))))]
+    (future
+      (loop [trends {}]
+        (recur (let [new-trends (trends-blob (:united-states (google-trends)))]
 
-               (persist-google-trends-and-photos new-trends)
-               (when (not= trends new-trends)
-                 (future (doseq [client (seq (gis [:app :channels]))]
-                           (hk/send! client (:current-trends new-trends))))
-                 (let [difference (set/difference (keys new-trends) (keys trends))]
-                   (assoc-in-state! [:google :trends] (into {} (mapv (fn [x] [x (new-trends x)]) difference)))
-                   (doseq [t difference]
-                     (twitter-track-trend t)
-                     (instagram-track-trend t)))
-                 (do (sleep 5)
-                     new-trends)))))))
+                 (persist-google-trends-and-photos new-trends)
+                 (when (not= trends new-trends)
+                   (future (doseq [client (seq (gis [:app :channels]))]
+                             (hk/send! client (:current-trends new-trends))))
+
+                   (let [difference (set/difference (keys new-trends) (keys trends))]
+                     (assoc-in-state! [:google :trends] (trends-blob difference))
+                     (doseq [t difference]
+                       (twitter-track-trend t)
+                       (instagram-track-trend t))))
+
+                 (sleep 5)
+                 new-trends))))))
 

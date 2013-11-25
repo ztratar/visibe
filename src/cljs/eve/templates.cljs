@@ -18,17 +18,23 @@
   ;; http://google-web-toolkit.googlecode.com/svn/trunk/user/src/com/google/gwt/i18n/client/constants/TimeZoneConstants.properties
   (let [created-at (coerce/from-long created-at)
         jf (juxt c/day c/hour c/minute)
-        [now-days now-hour now-min] (jf (c/now))
-        [datum-days datum-hour datum-min] (jf created-at)
-        days (- now-days datum-days)
-        hours (- now-hour datum-hour)
-        minutes (- now-min datum-min)
+        ;; n (c/now)
+        [now-days now-hours now-mins] (jf (c/now))
+        [datum-days datum-hours datum-mins] (jf created-at)
         ;; Hack to deal with the fact that I don't want to create a 'correct' time implementation yet
         timezone-offset (/ (.getTimezoneOffset (js/Date.)) 60)
-        [days hours] (if (< hours timezone-offset)
-                       [(dec days) (- 24 (- timezone-offset hours))]
-                       [days (- hours timezone-offset)])]
-    
+        
+        [now-days now-hours] (if (< now-hours timezone-offset)
+                               [(dec now-days) (- 24 (- timezone-offset now-hours))]
+                               [now-days (- now-hours timezone-offset)])
+
+        [datum-days datum-hours] (if (< datum-hours timezone-offset)
+                                   [(dec datum-days) (- 24 (- timezone-offset datum-hours))]
+                                   [datum-days (- datum-hours timezone-offset)])
+        days (- now-days datum-days)
+        hours (- now-hours datum-hours)
+        minutes (- now-mins datum-mins)]
+    [days hours minutes]
     (match [days hours minutes]
            [0 0 _] (str " " minutes " minutes ago")
            [0 _ _] (str " " hours " hours ago")
