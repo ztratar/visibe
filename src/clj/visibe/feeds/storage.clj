@@ -52,7 +52,7 @@
   (->> (q/with-collection trend
          (q/find {:created-at (array-map $gt time)})
          (q/sort (array-map :created-at -1)))
-       (map #(datum->essentials (dissoc % :_id)))))
+       (map datum->essentials)))
 
 (defn previous-15
   "Returns 15 datums older than the supplied datum for a given trend"
@@ -63,7 +63,7 @@
          (q/find {:created-at (array-map $lt created-at)})
          (q/sort (array-map :created-at -1))
          (q/limit 15))
-       (map #(datum->essentials (dissoc % :_id)))))
+       (map datum->essentials)))
 
 (defn seed-datums
   "20 most recent datums on a trend"
@@ -71,10 +71,10 @@
   (->> (q/with-collection trend
          (q/sort (array-map :created-at -1))
          (q/limit 20))
-       (map #(datum->essentials (dissoc % :_id)))))
+       (map datum->essentials)))
 
 (defn most-recent-datum [trend]
   (first (->> (q/with-collection trend
                 (q/sort (array-map :created-at -1))
                 (q/limit 1))
-              (map #(datum->essentials (dissoc % :_id))))))
+              (map datum->essentials))))

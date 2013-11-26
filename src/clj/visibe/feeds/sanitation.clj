@@ -71,6 +71,7 @@
            (select-keys (:user tweet) [:name :screen_name :profile_image_url_https]))))
 
 (defn datum->essentials [datum]
-  (if (= "tweet" (:datum-type datum))
-    (tweet->essentials datum)
-    (instagram->essentials datum)))
+  (-> (if (= "tweet" (:datum-type datum))
+        (tweet->essentials datum)
+        (instagram->essentials datum))
+      (update-in [:_id] str)))
