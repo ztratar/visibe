@@ -84,6 +84,7 @@
 
 (defn home [trend-m]
   (swap-view! (t/home))
+  (dommy/remove-class! (sel1 :body) "topic-page")
   (let [trends (keys trend-m)
         trends (loop [acc #{}]
                  (if (= (* 3 (quot (count trends) 3)) (count acc))
@@ -163,6 +164,7 @@
         trend (slug->trend trend)
         elder-datum (first (sort-by :created-at (datums-for trend)))]
 
+    (dommy/add-class! (sel1 :body) "topic-page")
     (swap-view! (t/trend trend (trends trend)))
 
     ;; WS calls
