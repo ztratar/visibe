@@ -105,7 +105,7 @@
     [:a.user-name {:href (str "http://www.instagram.com/" username) :target "_blank"} full-name]
     [:span.byline "On " [:a {:href link :target "_blank"} "Instagram"] (x-time-ago created-at)]
     [:div.body-content text]
-    [:div.photo [:img {:src url}]]]])
+    [:div.photo [:img {:src url :onerror "this.parentNode.removeChild(this)"}]]]])
 
 (deftemplate instagram-video [{tags :tags id :id created-at :created-at type :type username :username
                                profile-picture :profile-picture full-name :full-name link :link
