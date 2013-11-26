@@ -20,7 +20,7 @@
 
 (defn instagram->essentials [m]
   (let [a (partial get-in m)
-        i (= :instagram-photo (:datum-type m))]
+        i (= "instagram-photo" (:datum-type m))]
     (-> m
         (select-keys [:tags :id :created-at :link :trend :datum-type])
         (merge {:full-name (a [:user :full_name])
@@ -29,8 +29,8 @@
                (if i
                  ;; TODO, Sat Nov 23 2013, Francis Wolke
                  ;; These could be combined into ':instagram' or ':media'
-                 {:photo (a [:images :standard_resolution])}
-                 {:video (a [:videos :standard_resolution])})))))
+                 {:photo (a [:images :low_resolution :url])}
+                 {:video (a [:videos :standard_resolution :url])})))))
 
 (defn- twitter-time->long
   [s]

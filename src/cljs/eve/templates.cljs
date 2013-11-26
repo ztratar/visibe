@@ -98,18 +98,18 @@
 
 (deftemplate instagram-photo [{tags :tags created-at :created-at type :type username :username
                                profile-picture :profile-picture text :text full-name :full-name
-                               link :link {height :height url :url width :width} :photo}]
+                               link :link url :photo}]
   [:li.social-activity.instagram
    [:a.user-img {:href (str "http://www.instagram.com/" username) :target "_blank"} [:img {:src profile-picture}]]
    [:div.content
     [:a.user-name {:href (str "http://www.instagram.com/" username) :target "_blank"} full-name]
     [:span.byline "On " [:a {:href link :target "_blank"} "Instagram"] (x-time-ago created-at)]
     [:div.body-content text]
-    [:div.photo [:img {:src url}]]]])
+    [:div.photo [:img {:src url :onerror "this.parentNode.removeChild(this)"}]]]])
 
 (deftemplate instagram-video [{tags :tags id :id created-at :created-at type :type username :username
                                profile-picture :profile-picture full-name :full-name link :link
-                               text :text {height :height url :url width :width} :video}]
+                               text :text url :video}]
   [:li.social-activity.instagram
    [:a.user-img {:href (str "http://www.instagram.com/" username)
                  :target "_blank"} [:img {:src profile-picture}]]
