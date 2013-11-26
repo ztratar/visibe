@@ -22,7 +22,7 @@
   (let [a (partial get-in m)
         i (= "instagram-photo" (:datum-type m))]
     (-> m
-        (select-keys [:tags :id :created-at :link :trend :datum-type])
+        (select-keys [:tags :id :created-at :link :trend :datum-type :_id])
         (merge {:full-name (a [:user :full_name])
                 :profile-picture (a [:user :profile_picture])
                 :username (a [:user :username])}
@@ -63,14 +63,14 @@
   [tweet]
   (if (:retweeted_status tweet)
 
-    (merge (select-keys tweet [:text :trend :datum-type :id_str])
+    (merge (select-keys tweet [:text :trend :datum-type :id_str :_id])
            (select-keys (:user tweet) [:name :screen_name :profile_image_url_https])
            (:created_at (:retweeted_status tweet)))
 
-    (merge (select-keys tweet [:text :created-at :trend :datum-type :id_str])
+    (merge (select-keys tweet [:text :created-at :trend :datum-type :id_str :_id])
            (select-keys (:user tweet) [:name :screen_name :profile_image_url_https]))))
 
-(defn clean-datum [datum]
-  (if (= :tweet (keyword (:datum-type datum)))
+(defn datum->essentials [datum]
+  (if (= "tweet" (:datum-type datum))
     (tweet->essentials datum)
     (instagram->essentials datum)))

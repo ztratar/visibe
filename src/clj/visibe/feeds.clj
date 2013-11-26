@@ -32,7 +32,7 @@
   (let [subscribed-clients (subscribed-clients trend)]
     (when-not (empty? subscribed-clients) 
       (doseq [client subscribed-clients]
-        (hk/send! client (ds->ws-message :datums datums))))))
+        (hk/send! client (ds->ws-message :datums (map datum->essentials datums)))))))
 
 (defn active?
   "Is a this trend a 'current trend', or subscribed to by a client?"
@@ -52,10 +52,8 @@
   (future (loop [media #{}]
             (when (active? trend)
               (let [new-datums (map (partial clean-instagram trend)
-                                    (set/difference (set (instagram/instagram-media trend)) media))
-                    ;; Only send clients relevent data
-                    essentials (map instagram->essentials new-datums)]
-                (future (push-datums-to-subscribed-clients! trend essentials))
+                                    (set/difference (set (instagram/instagram-media trend)) media))]
+                (future (push-datums-to-subscribed-clients! trend new-datums))
                 (append-datums trend new-datums)
                 (sleep 1)
                 (recur new-datums))))))
@@ -69,11 +67,10 @@
   ;; this peiod of time. (/ (* 15 60) 450) => 2 sec
   [trend]
   (future (loop [twitter-data (twitter/search-tweets trend)]
-            (let [clean-tweets (map (partial clean-tweet trend) (:statuses twitter-data))
-                  essentials (map tweet->essentials clean-tweets)]
+            (let [clean-tweets (map (partial clean-tweet trend) (:statuses twitter-data))]
               (when (active? trend)
                 ;; Only send clients relevent data
-                (future (push-datums-to-subscribed-clients! trend essentials))
+                (future (push-datums-to-subscribed-clients! trend clean-tweets))
                 (append-datums trend clean-tweets)
                 (sleep 1)
                 (recur (twitter/next-page (-> twitter-data :search_metadata :refresh_url))))))))
