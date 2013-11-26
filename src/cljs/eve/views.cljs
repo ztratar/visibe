@@ -176,7 +176,7 @@
         (append! (sel1 :.social-feed) (m/node [:h1#preloader "Preloader."]))
         (do (doseq [d trend-datums]
               (add-new-datum! d))
-            (assoc-in-state! [:last-datum] (last elder-datum)))))))
+            (assoc-in-state! [:last-datum] elder-datum))))))
 
 (defn new-datum-watch!
   "Updates the feed with new datums whenever we recive them"
