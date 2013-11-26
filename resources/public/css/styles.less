@@ -1,6 +1,5 @@
 @screen-md: 900px;
-@screen-sm: 768px;
-@screen-tiny: 480px;
+@screen-tiny: 768px;
 
 @import "bootstrap.css";
 @import "fonts.css";
@@ -282,10 +281,18 @@ body {
 		@media (max-width: @screen-tiny) {
 			width: 100%;
 		}
+
+		@media (max-width: @screen-md) {
+			width: 700px;
+		}
 		
 		#feed-left {
 			width: 450px;
 			float: left;
+
+			@media (max-width: @screen-md) {
+				width: 350px;
+			}
 
 			@media (max-width: @screen-tiny) {
 				width: 100%;
@@ -295,6 +302,10 @@ body {
 		#feed-right {
 			width: 450px;
 			float: left;
+
+			@media (max-width: @screen-md) {
+				width: 350px;
+			}
 
 			@media (max-width: @screen-tiny) {
 				width: 100%;
@@ -360,6 +371,10 @@ body {
 			padding: 0 0 0 140px;
 			margin: 0 0 60px 0;
 			list-style: none;
+
+			@media (max-width: @screen-md) {
+				width: 350px;
+			}
 
 			@media (max-width: @screen-tiny) {
 				width: 100%;
@@ -460,6 +475,10 @@ body {
 					img {
 						width: 260px;
 						border-radius: 10px;
+
+						@media (max-width: @screen-md) {
+							width: 210px;
+						}
 					}
 				}
 
@@ -471,6 +490,10 @@ body {
 
 						@media (max-width: @screen-tiny) {
 							width: 100%;
+						}
+
+						@media (max-width: @screen-md) {
+							width: 210px;
 						}
 					}
 				}
