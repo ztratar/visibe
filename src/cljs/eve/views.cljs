@@ -140,11 +140,7 @@
     :instagram-photo (t/instagram-photo datum)
     :vine (t/vine datum)
     :tweet (t/tweet datum)
-    (case type
-      "instagram-photo" (t/instagram-video datum)
-      "instagram-video" (t/instagram-photo datum)
-      "tweet" (t/tweet datum)
-      (t/automagic datum))))
+    (t/automagic datum)))
 
 (defn add-new-datum! [datum]
   (when (sel1 :#preloader) (dommy/remove! (sel1 :#preloader)))
@@ -153,7 +149,7 @@
       (prepend! (sel1 :#feed-left) datum-card)
       (prepend! (sel1 :#feed-right) datum-card))))
 
-(defn add-old-datum! [{type :type datum-type :datum-type id :id :as datum}]
+(defn add-old-datum! [{type :type id :id :as datum}]
   (let [datum-card (determine-card datum)]
     (if (= :left (left-or-right?))
       (append! (sel1 :#feed-left) datum-card)
@@ -183,10 +179,11 @@
 (defn new-datum-watch!
   "Updates the feed with new datums whenever we recive them"
   [key identity old new]
-  (let [current-trend (slug->trend (get-token))
-        old-datums (filter #(= current-trend (:trend %)) (:datums old))
-        new-datums (filter #(= current-trend (:trend %)) (:datums new))]
-    (when (and (= :trend (:view new)))
+  (when (= :trend (:view new))
+    (let [current-trend (slug->trend (get-token))
+          f (partial filter #(= current-trend (:trend %)))
+          old-datums (f (:datums old))
+          new-datums (f (:datums new))]
       (doseq [datum (reverse (sort-by :created-at (difference (set new-datums) (set old-datums))))]
         (add-new-datum! datum)))))
 
@@ -212,7 +209,7 @@
           to-append (take 15 (reverse sorted-datums))]
 
       (if (= 0 (count to-append))
-        (append! (sel1 :.social-feed) (m/node [:h1#no-more-data "No historical datums"]))
+        (append! (sel1 :.social-feed) (m/node [:div.end-of-data [:h1#no-more-data "No historical datums"]]))
         (do (doseq [datum to-append]
               (add-old-datum! datum))
             (assoc-in-state! [:last-datum] (last to-append))

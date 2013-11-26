@@ -56,11 +56,9 @@
 
 (defn previous-15
   "Returns 15 datums older than the supplied datum for a given trend"
-  ;; FIXME, Wed Nov 13 2013, Francis Wolke
-  ;; We will discard valid data here, if two datums happen to have the same timestamp
-  [{trend :trend created-at :created-at}]
+  [{trend :trend created-at :created-at id :_id}]
   (->> (q/with-collection trend
-         (q/find {:created-at (array-map $lt created-at)})
+         (q/find {:created-at (array-map $lt created-at) :_id (array-map $ne (ObjectId. id))})
          (q/sort (array-map :created-at -1))
          (q/limit 15))
        (map datum->essentials)))

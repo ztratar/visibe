@@ -12,7 +12,7 @@
 (defn clean-instagram [trend instagram]
   (-> instagram
       (assoc :datum-type (if (= "image" (:type instagram))
-                           :instagram-photo :instagram-video)
+                           "instagram-photo" "instagram-video")
              :trend trend)
       (rename-keys {:created_time :created-at})
       ;; Java time is in millis, UNIX time is in seconds
@@ -49,7 +49,7 @@
   [trend tweet]
   (let [tweet (-> tweet
                   (assoc :trend trend)
-                  (assoc :datum-type :tweet)
+                  (assoc :datum-type "tweet")
                   (rename-keys {:created_at :created-at})
                   (update-in [:created-at] twitter-time->long))]
     (if (:retweeted_status tweet)

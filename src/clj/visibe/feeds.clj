@@ -51,8 +51,8 @@
   [trend]
   (future (loop [media #{}]
             (when (active? trend)
-              (let [new-datums (map (partial clean-instagram trend)
-                                    (set/difference (set (instagram/instagram-media trend)) media))]
+              (let [new-datums (set (map (partial clean-instagram trend) (instagram/instagram-media trend)))
+                    new-datums (set/difference new-datums media)]
                 (future (push-datums-to-subscribed-clients! trend new-datums))
                 (append-datums trend new-datums)
                 (sleep 1)
