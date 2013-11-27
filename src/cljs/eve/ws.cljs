@@ -1,4 +1,4 @@
-(ns eve.ws ^{:doc "Websockets"}
+(ns eve.ws ^{:doc "Websocket router and connection logic"}
     (:require [cljs.core.async :as async :refer [<! >! chan put! timeout close!]]
               [cljs.reader :as r]
               [eve.state :refer [update-in-state! assoc-in-state! state]]
@@ -14,14 +14,14 @@
      (let [data (<! receive)
            msg (r/read-string (str (.-data data)))]
        (case (:type msg)
-         :datums         (update-in-state! [:datums] (comp set (partial into (:data msg))))
-         :current-trends  (assoc-in-state! [:trends] (:data msg))
-         :print          (console/log (str (:data msg)))
+         :datums          (update-in-state! [:datums] (comp set (partial into (:data msg))))
+         :current-trends  (do (assoc-in-state! [:homescreen-layout] [])
+                              (assoc-in-state! [:trends] (:data msg)))
+         :print           (console/log (str (:data msg)))
          (console/log "ws data" (str (:data msg))))))))
 
 (defn ws-connect! []
-  (let [ws (js/WebSocket. (str "ws://" js/window.location.host "/ws"
-                               js/window.location.host))
+  (let [ws (js/WebSocket. "ws://localhost:9000/ws")
         _ (set! (.-onerror ws) #(console/error "WebSocket: " %))
         _ (set! (.-onmessage ws) (fn [msg] (put! receive msg)))
         _ (set! (.-onopen ws) (fn [& _] (.send ws "(current-trends)")))]

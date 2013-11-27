@@ -82,34 +82,39 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Home
 
+(defn calculate-homescreen-layout! []
+  (let [trends (keys (gis [:trends]))
+        new-layout (loop [acc #{}]
+                     (if (= (* 3 (quot (count trends) 3)) (count acc))
+                       (vec acc)
+                       (recur (conj acc (rand-nth trends)))))]
+    (assoc-in-state! [:homescreen-layout] new-layout)))
+
 (defn home [trend-m]
   (swap-view! (t/home))
   (dommy/remove-class! (sel1 :body) :topic-page)
-  (let [trends (keys trend-m)
-        trends (loop [acc #{}]
-                 (if (= (* 3 (quot (count trends) 3)) (count acc))
-                   acc
-                   (recur (conj acc (rand-nth trends)))))
-        token (get-token)]
 
-    ;; Unsubscribe from whatever trend we just left. This does not work when you are attempting to
-    ;; do this from the history API.
-    (let [trend (slug->trend token)]
-      (wsc `(~'unsubscribe! ~trend)))
-    
-    ;; Population
-    (let [trends-list (m/sel1 :#trends)]
-      (doseq [trend trends]
-        (let [trend-card (t/trend-card trend)
-              trend-card-background (str "url(" (trend-m trend) ")")]
-          (dommy/append! trends-list trend-card)
-          (dommy/set-style! (sel1 trend-card :span) :background trend-card-background)
-          (dommy/listen! (sel1 trend-card :a)
-                         :click (fn [e]
-                                  (.preventDefault e)
-                                  (let [new-path (url->relative-path (.-href (sel1 trend-card :a)))]
-                                    (set-token! new-path)
-                                    (navigate! :trend new-path)))))))))
+  (when (empty? (gis [:homescreen-layout]))
+    (calculate-homescreen-layout!))
+
+  ;; Unsubscribe from whatever trend we just left. This does not work when you are attempting to
+  ;; do this from the history API.
+  (let [trend (slug->trend (get-token))]
+    (wsc `(~'unsubscribe! ~trend)))
+  
+  ;; Population
+  (let [trends-list (m/sel1 :#trends)]
+    (doseq [trend (gis [:homescreen-layout])]
+      (let [trend-card (t/trend-card trend)
+            trend-card-background (str "url(" (trend-m trend) ")")]
+        (dommy/append! trends-list trend-card)
+        (dommy/set-style! (sel1 trend-card :span) :background trend-card-background)
+        (dommy/listen! (sel1 trend-card :a)
+                       :click (fn [e]
+                                (.preventDefault e)
+                                (let [new-path (url->relative-path (.-href (sel1 trend-card :a)))]
+                                  (set-token! new-path)
+                                  (navigate! :trend new-path))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Trend

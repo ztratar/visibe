@@ -47,6 +47,7 @@
                  [org.toomuchcode/clara-rules "0.1.0"]
                  [cljs-http "0.1.0"]
                  [prismatic/dommy "0.1.1"]
+                 [clojure-opennlp "0.3.1"] ;; uses Opennlp 1.5.3
                  [secretary "0.4.0"]
                  [prismatic/hiphip "0.1.0"]
                  [prismatic/plumbing "0.1.0"]

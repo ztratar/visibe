@@ -6,6 +6,7 @@
   (:require-macros [dommy.macros :as m]))
 
 (def state (atom {:view :home
+                  :homepage-layout []
                   :trends {} 
                   :websocket-connection nil
                   :last-datum nil
