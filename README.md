@@ -29,10 +29,21 @@ http://www.quora.com/Natural-Language-Processing/What-are-the-most-important-res
 
 # TODO
 
+- Google img search
+- Historical datums don't work perfectly
+- loop and update datum times
+- When profile pictures fail to load, load the egg photo instead
+- preloaders
+- get the number of pixes per colum to determine which column to place the next datum instead of the current hack
+- datums per second toggle
+- multiple links within a tweet - get URLs out of the corresponding key in tweets
+- Graphs
+- New datums are being appended, even if they are the same as the old datum. This rarely happens, but when it does....
 - Twitter media
+- filter twitter and instagram by language
 - Add a synopis at the top of the feed
 - Eric want's to have the datums take up less space. 
-- Single feed on mobile
+- Single feed on mobile - export a js fn for Zach 
 - Add a number of tweets per second dial in channel the context
 - A trend from last week is not = to a trend this week
 - not catching exceptions anywhere in this program

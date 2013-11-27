@@ -7,11 +7,11 @@
 
 (def state (atom {:view :home
                   :homepage-layout []
-                  :trends {} 
+                  :trends {}
+                  :mobile false
                   :websocket-connection nil
                   :last-datum nil
                   :datums #{}}))
-
 (defn gis
   "[g]et [i]n [s]tate"
   [path]
@@ -23,3 +23,6 @@
 
 (defn assoc-in-state! [path v]
   (swap! state assoc-in path v))
+
+(defn ^:export toggle-mobile! []
+  (assoc-in-state! [:mobile] (not (gis [:mobile]))))

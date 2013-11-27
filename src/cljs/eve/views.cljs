@@ -133,7 +133,8 @@
 (defn left-or-right? []
   (let [l (feed-height :#feed-left)
         r (feed-height :#feed-right)]
-    (cond (= l r) :left
+    (cond (gis [:mobile]) :right
+          (= l r) :left
           (< l r) :left
           :else :right)))
 
