@@ -76,6 +76,10 @@
 
 
   ;; I really want to dispach on type, If I get a keyword, search for it - if I get a seq, search for them, ectera
+
+  ;; Sometimes I want to find a key that ends up being nested inside of a vector, such as {:foo [{:the-key-I-want .....}]} and I
+  ;; don't currently detect this. However, this is ANNOYING.
+
   "[s]mart [s]elect. 
 Given a start map and `seq' of goal-keys, generates a function to convert one to the other (start to goal). EG:
 ... call ...

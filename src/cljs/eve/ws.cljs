@@ -20,7 +20,8 @@
          (console/log "ws data" (str (:data msg))))))))
 
 (defn ws-connect! []
-  (let [ws (js/WebSocket. "ws://localhost:9000/ws")
+  (let [ws (js/WebSocket. (str "ws://" js/window.location.host "/ws"
+                               js/window.location.host))
         _ (set! (.-onerror ws) #(console/error "WebSocket: " %))
         _ (set! (.-onmessage ws) (fn [msg] (put! receive msg)))
         _ (set! (.-onopen ws) (fn [& _] (.send ws "(current-trends)")))]

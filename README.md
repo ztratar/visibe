@@ -1,6 +1,7 @@
 # visibe
 
 ```
+ssh -i ~/.ssh/visibe.pem ubuntu@ec2-54-211-37-187.compute-1.amazonaws.com
 lein run help
 ```
 

@@ -25,8 +25,10 @@
 (declare navigate!)
 (declare swap-view!)
 
+(def root-url (str js/window.location.protocol "//" js/window.location.host "/"))
+
 (defn url->relative-path [s]
-  (clojure.string/replace s "http://localhost:9000/" ""))
+  (clojure.string/replace s root-url ""))
 
 (defn datums-for
   "Returns (unsorted) datums associated with the specified trend"
