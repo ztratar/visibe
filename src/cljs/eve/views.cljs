@@ -25,8 +25,6 @@
 (declare navigate!)
 (declare swap-view!)
 
-(def dom-helper (goog.dom.DomHelper.))
-
 (defn url->relative-path [s]
   (clojure.string/replace s "http://localhost:9000/" ""))
 
@@ -188,32 +186,35 @@
         (add-new-datum! datum)))))
 
 (defn bottom-of-page?
-  "We actually test for, are we close enough to the bottom that we should load more"
+  "Are we close enough to the bottom to load more?"
   []
-  (let [document-height (.getDocumentHeight dom-helper)
+  ;; TODO, Tue Nov 26 2013, Francis Wolke
+  ;; Do I have to instantiate `dom-helper' every time?
+  (let [dom-helper (goog.dom.DomHelper.)
+        document-height (.getDocumentHeight dom-helper)
         document-scroll (aget (.getDocumentScroll dom-helper) "y")
         viewport-height (aget (.getViewportSize dom-helper) "height")]
-    ;; TODO, Mon Nov 18 2013, Francis Wolke
-    ;; % instead of hard coding 400px
-    (>= (+ 400 (- document-height document-scroll)) viewport-height)))
+    ;; 600 is the offset
+    (>= (+ 600 viewport-height document-scroll) document-height)))
 
 (defn append-old-datums-on-scroll
   "Algorithm that determines when to place historical datums"
   []
-  (when (and (= :trend (:view @state))
-             (bottom-of-page?)
-             (not (sel1 :#no-more-data)))
+  (when (and (= :trend (:view @state)) (bottom-of-page?))
 
-    (let [last-datum (:last-datum @state)
-          sorted-datums (sort-by :created-at (filter #(< (:created-at %) (:created-at last-datum)) (datums-for trend)))
-          to-append (take 15 (reverse sorted-datums))]
+    (let [current-trend (slug->trend (get-token))
+          last-datum (:last-datum @state)
+          older-datums (take-while (partial not= last-datum)
+                                   ;; Datums send without being stored do not have ':created-at' keys
+                                   (remove #(not (:created-at %)) (sort-by :created-at (datums-for trend))))
+          to-append (take 15 (reverse older-datums))]
 
-      (if (= 0 (count to-append))
-        (append! (sel1 :.social-feed) (m/node [:div.end-of-data [:h1#no-more-data "No historical datums"]]))
-        (do (doseq [datum to-append]
-              (add-old-datum! datum))
-            (assoc-in-state! [:last-datum] (last to-append))
-            (wsc `(~'previous-15 ~(first sorted-datums))))))))
+      (cond (and (empty? to-append) (not (sel1 :#no-more-data))) (append! (sel1 :.social-feed) (m/node [:div.end-of-data [:h1#no-more-data "No historical datums"]]))
+            (empty? to-append) (console/log "There are no more datums")
+            :else (do (doseq [datum to-append]
+                        (add-old-datum! datum))
+                      (assoc-in-state! [:last-datum] (last to-append))
+                      (wsc `(~'previous-15 ~(first older-datums))))))))
 
 (defn swap-view! [node]
   ;; TODO, Mon Oct 14 2013, Francis Wolke

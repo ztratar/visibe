@@ -53,7 +53,7 @@
                   (rename-keys {:created_at :created-at})
                   (update-in [:created-at] twitter-time->long))]
     (if (:retweeted_status tweet)
-      (update-in tweet [:retweeted_status] (fn [m] (-> (rename-keys  {:created_at :created-at})
+      (update-in tweet [:retweeted_status] (fn [m] (-> m (rename-keys  {:created_at :created-at})
                                                        (update-in  [:created-at] twitter-time->long))))
       tweet)))
 
@@ -63,7 +63,7 @@
   [tweet]
   (if (:retweeted_status tweet)
 
-    (merge (select-keys tweet [:text :trend :datum-type :id_str :_id])
+    (merge (select-keys tweet [:text :trend :datum-type :id_str :_id :created-at])
            (select-keys (:user tweet) [:name :screen_name :profile_image_url_https])
            (:created_at (:retweeted_status tweet)))
 
