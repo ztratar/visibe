@@ -160,6 +160,7 @@
 
     (dommy/add-class! (sel1 :body) :topic-page)
     (swap-view! (t/trend trend (trends trend)))
+    (assoc-in-state! [:last-datum] elder-datum)
 
     ;; WS calls
     (wsc `(~'subscribe! ~trend))
@@ -170,9 +171,8 @@
     (let [trend-datums (take 15 (sort-by :created-at (datums-for trend)))]
       (if (empty? trend-datums)
         (append! (sel1 :.social-feed) (m/node [:h1#preloader "Preloader."]))
-        (do (doseq [d trend-datums]
-              (add-new-datum! d))
-            (assoc-in-state! [:last-datum] elder-datum))))))
+        (doseq [d trend-datums]
+          (add-new-datum! d))))))
 
 (defn new-datum-watch!
   "Updates the feed with new datums whenever we recive them"
@@ -198,23 +198,22 @@
     (>= (+ 600 viewport-height document-scroll) document-height)))
 
 (defn append-old-datums-on-scroll
-  "Algorithm that determines when to place historical datums"
+  "Determines when to place historical datums"
   []
   (when (and (= :trend (:view @state)) (bottom-of-page?))
-
-    (let [current-trend (slug->trend (get-token))
-          last-datum (:last-datum @state)
-          older-datums (take-while (partial not= last-datum)
-                                   ;; Datums send without being stored do not have ':created-at' keys
-                                   (remove #(not (:created-at %)) (sort-by :created-at (datums-for trend))))
+    
+    (let [last-datum (:last-datum @state)
+          trend-datums (remove (comp not :created-at) (sort-by :created-at (datums-for (slug->trend (get-token)))))
+          older-datums (take-while (partial not= last-datum) trend-datums)
           to-append (take 15 (reverse older-datums))]
 
-      (cond (and (empty? to-append) (not (sel1 :#no-more-data))) (append! (sel1 :.social-feed) (m/node [:div.end-of-data [:h1#no-more-data "No historical datums"]]))
+      (cond (and (empty? to-append) (not (sel1 :#no-more-data))) (append! (sel1 :.social-feed)
+                                                                          (m/node [:div.end-of-data [:h1#no-more-data "No historical datums"]]))
             (empty? to-append) (console/log "There are no more datums")
-            :else (do (doseq [datum to-append]
-                        (add-old-datum! datum))
-                      (assoc-in-state! [:last-datum] (last to-append))
-                      (wsc `(~'previous-15 ~(first older-datums))))))))
+            :else (do (assoc-in-state! [:last-datum] (last to-append))
+                      (wsc `(~'previous-15 ~(last to-append)))
+                      (doseq [datum to-append]
+                        (add-old-datum! datum)))))))
 
 (defn swap-view! [node]
   ;; TODO, Mon Oct 14 2013, Francis Wolke
