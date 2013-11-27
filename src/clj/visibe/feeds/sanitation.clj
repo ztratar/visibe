@@ -52,10 +52,17 @@
                   (assoc :datum-type "tweet")
                   (rename-keys {:created_at :created-at})
                   (update-in [:created-at] twitter-time->long))]
+    ;; Tweets with media - currently this assumes pictures, though we need to support video in the future.
+    ;; (cond (-> tweet :retweeted_status :entities :media) 
+    ;;       (:retweeted_status tweet) (update-in tweet [:retweeted_status]
+    ;;                                            (fn [m] (-> m (rename-keys  {:created_at :created-at})
+    ;;                                                        (update-in  [:created-at] twitter-time->long))))
+    ;;       :else tweet)
     (if (:retweeted_status tweet)
       (update-in tweet [:retweeted_status] (fn [m] (-> m (rename-keys  {:created_at :created-at})
                                                        (update-in  [:created-at] twitter-time->long))))
       tweet)))
+
 
 (defn tweet->essentials
   "XXX, NOTE Fri Oct 04 2013, Francis Wolke

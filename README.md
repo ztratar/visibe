@@ -29,6 +29,7 @@ http://www.quora.com/Natural-Language-Processing/What-are-the-most-important-res
 
 # TODO
 
+- Twitter media
 - Add a synopis at the top of the feed
 - Eric want's to have the datums take up less space. 
 - Single feed on mobile
