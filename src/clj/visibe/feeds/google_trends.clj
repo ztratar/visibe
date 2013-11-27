@@ -1,8 +1,24 @@
-(ns ^{:doc "For collection of google trends data."}
+(ns ^{:doc "For collection of google trends data and google images"}
   visibe.feeds.google-trends  
   (:require [clj-http.lite.client :as client]
+            [cemerick.url :refer [url-encode]]
             [clojure.data.json :refer [read-json]]
             [cheshire.core :refer [decode]]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Images
+
+(defn trend->goog-photo-url
+  "Uninteligent search of google images"
+  ;; TODO, Wed Nov 27 2013, Francis Wolke
+  ;; http://stackoverflow.com/questions/533857/whats-the-best-web-image-search-api
+  ;; Apparently BING has a pretty good image search API that is cheaper that googles
+  [trend]
+  (-> (client/get (str "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=" (url-encode trend)))
+      :body read-json :responseData :results first :unescapedUrl))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Trends
 
 (defn raw-google-trends []
   ;; NOTE, Mon Sep 30 2013, Francis Wolke

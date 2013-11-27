@@ -6,7 +6,7 @@
             [visibe.feeds.flickr        :refer [trend->photo-url]]
             [visibe.feeds.sanitation    :refer :all]
             [visibe.api                 :refer [ds->ws-message]]
-            [visibe.feeds.google-trends :refer [google-trends]]
+            [visibe.feeds.google-trends :refer [google-trends trend->goog-photo-url]]
             [visibe.feeds.instagram     :as instagram]
             [visibe.feeds.storage       :refer [persist-google-trends-and-photos append-datums]]
             [visibe.feeds.twitter       :as twitter]
@@ -75,6 +75,10 @@
                 (sleep 1)
                 (recur (twitter/next-page (-> twitter-data :search_metadata :refresh_url))))))))
 
+(defn- trends-blob
+  [trends]
+  (into {} (vec (pmap (fn [url] [url (trend->goog-photo-url url)]) trends))))
+
 (defn scrape-and-persist-trends!
   "Main loop that initiates all trend related data gathering. For each API other
    that google-trends we have a `track-trend' function that runs in it's own thread
@@ -89,22 +93,20 @@
   ;; store a pointer to all launched futures so that I can kill them at the
   ;; REPL.
   []
-  (letfn [(trends-blob [trends] (into {} (vec (pmap (fn [url] [url (trend->photo-url url)]) trends))))]
-    (future
-      (loop [trends {}]
-        (recur (let [new-trends (trends-blob (:united-states (google-trends)))]
+  (future (loop [trends {}]
+            (recur (let [new-trends (trends-blob (:united-states (google-trends)))]
 
-                 (persist-google-trends-and-photos new-trends)
-                 (when (not= trends new-trends)
-                   (future (doseq [client (seq (gis [:app :channels]))]
-                             (hk/send! client (:current-trends new-trends))))
+                     (persist-google-trends-and-photos new-trends)
+                     (when (not= trends new-trends)
+                       (future (doseq [client (seq (gis [:app :channels]))]
+                                 (hk/send! client (:current-trends new-trends))))
 
-                   (let [difference (set/difference (keys new-trends) (keys trends))]
-                     (assoc-in-state! [:google :trends] (trends-blob difference))
-                     (doseq [t difference]
-                       (twitter-track-trend t)
-                       (instagram-track-trend t))))
+                       (let [difference (set/difference (keys new-trends) (keys trends))]
+                         (assoc-in-state! [:google :trends] (trends-blob difference))
+                         (doseq [t difference]
+                           (twitter-track-trend t)
+                           (instagram-track-trend t))))
 
-                 (sleep 5)
-                 new-trends))))))
+                     (sleep 5)
+                     new-trends)))))
 

@@ -25,7 +25,6 @@ lein run help
 
 ## Major
 
-- Google img search
 - Add a synopis at the top of the feed
 - Sharing functionality
 
