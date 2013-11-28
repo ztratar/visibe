@@ -60,7 +60,7 @@
 (defn search-tweets
   "Searches the twitter api for tweets matching the specified trend"
   [trend]
-  (-> (client/get (str "https://api.twitter.com/1.1/search/tweets.json?q="
+  (-> (client/get (str "https://api.twitter.com/1.1/search/tweets.json?lang=en&q="
                        (url-encode trend) "&count=100") ; current max is 100 tweets.
                   {:headers {"Authorization" (str "Bearer " (bearer-token))}})
       :body
