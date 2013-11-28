@@ -123,8 +123,9 @@
   [feed]
   (let [e (.-childNodes (sel1 feed))
         r (range (.-length e))
-        f (fn [g] (cond (.contains (.-classList g) "instagram") 2
-                        (.contains (.-classList  g) "tweet") 1
+        f (fn [g] (cond (.contains (.-classList g) "instagram")   2
+                        (.contains (.-classList g) "tweet-photo") 2
+                        (.contains (.-classList g) "tweet")       1
                         :else (console/error "This social activity did not have one #{tweet, instagram-photo, instagram-video} as a class:" g)))]
     (if (empty? r)
       0
@@ -141,11 +142,12 @@
 (defn determine-card
   "Given a datum, hands back it's card"
   [{type :type datum-type :datum-type id :id :as datum}]
-  (case (keyword datum-type)
-    :instagram-video (t/instagram-video datum)
-    :instagram-photo (t/instagram-photo datum)
-    :vine (t/vine datum)
-    :tweet (t/tweet datum)
+  (case datum-type
+    "instagram-video" (t/instagram-video datum)
+    "instagram-photo" (t/instagram-photo datum)
+    "tweet-photo"     (t/tweet-photo datum)
+    "tweet"           (t/tweet datum)
+    "vine"            (t/vine datum)
     (t/automagic datum)))
 
 (defn add-new-datum! [datum]

@@ -15,6 +15,7 @@ lein run help
 - http://nlpwp.org/book/
 - http://www.amazon.com/Foundations-Statistical-Natural-Language-Processing/dp/0262133601
 - http://www.goodreads.com/shelf/show/natural-language-processing
+- http://dinosrc.it/
 - http://www.quora.com/Natural-Language-Processing/What-are-the-most-important-research-papers-which-all-NLP-students-should-definitely-read
 
 # Prior to release:
@@ -30,16 +31,18 @@ lein run help
 
 ## Minor
 
-- filter twitter and instagram by language
-- Twitter media
-- Vines
+- Twitter Videos
+- multiple links within a tweet - get URLs out of the corresponding key in tweets
+
 - Graphs
+- Vines
+
 - loop and update datum times
 - When profile pictures fail to load, load the egg photo instead
 - preloaders
 - get the number of pixes per colum to determine which column to place the next datum instead of the current hack
 - datums per second toggle
-- multiple links within a tweet - get URLs out of the corresponding key in tweets
+
 - codox
 - slamhound
 - Apply the insights from SS's workflow http://thinkrelevance.com/blog/2013/06/04/clojure-workflow-reloaded

@@ -83,6 +83,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Trend
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Tweets
+
 (deftemplate tweet [{text :text created-at :created-at name :name screen-name :screen_name
                      profile-image-url :profile_image_url_https id-str :id_str}]
  
@@ -95,6 +98,28 @@
     [:span.byline "On " [:a {:href (str "https://www.twitter.com/" screen-name "/status/" id-str)
                              :target "_blank"} "Twitter"] (x-time-ago created-at)]
     [:div.body-content (format-tweet text)]]])
+
+(deftemplate tweet-photo [{text :text created-at :created-at name :name screen-name :screen_name
+                           profile-image-url :profile_image_url_https id-str :id_str photo-url :photo-url
+                           link-urls :link-urls}]
+ 
+  [:li.social-activity.tweet
+   [:a.user-img {:href (str "https://www.twitter.com/" screen-name)
+                 :target "_blank"} [:img {:src profile-image-url}]]
+   [:div.content
+    [:a.user-name {:href (str "https://www.twitter.com/" screen-name)
+                   :target "_blank"} name]
+    [:span.byline "On " [:a {:href (str "https://www.twitter.com/" screen-name "/status/" id-str)
+                             :target "_blank"} "Twitter"] (x-time-ago created-at)]
+    [:div.body-content (if link-urls
+                         (format-tweet text))]
+    [:img {:src photo-url}]]])
+
+(deftemplate video-tweet [{text :text created-at :created-at name :name screen-name :screen_name
+                           profile-image-url :profile_image_url_https id-str :id_str}])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Instagrams
 
 (deftemplate instagram-photo [{tags :tags created-at :created-at type :type username :username
                                profile-picture :profile-picture text :text full-name :full-name
