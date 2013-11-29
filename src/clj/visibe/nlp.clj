@@ -66,9 +66,9 @@
 (defn chunk-tweet [tweet] (noun-phrases (chunker (pos-tag (tokenize tweet)))))
 (defn tweet->noun-phrases [tweet] (noun-phrases (chunker (pos-tag (tokenize tweet)))))
 
-(tweet->noun-phrases)
+;; (tweet->noun-phrases)
 
-(filter (fn [[_ n]] (> n 10)) (into [] (frequencies (reduce into toy-data))))
+;; (filter (fn [[_ n]] (> n 10)) (into [] (frequencies (reduce into toy-data))))
 
 ;; (def test-stuff (map (keys (visibe.state/gis [:google :trends]))))
 
