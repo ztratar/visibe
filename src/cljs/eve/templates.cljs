@@ -13,6 +13,9 @@
   (:require-macros [cljs.core.match.macros :refer [match]]
                    [dommy.macros :as m :refer [deftemplate]]))
 
+(def ^:export twitter-default-profile-photo "https://abs.twimg.com/sticky/default_profile_images/default_profile_4_normal.png")
+(def ^:export instagram-default-profile-photo "http://d22r54gnmuhwmk.cloudfront.net/photos/8/ih/ln/GuiHlNPfszVeNBo-556x313-noPad.jpg")
+
 (defn x-time-ago [created-at]
   ;; http://docs.closure-library.googlecode.com/git/class_goog_i18n_TimeZone.html
   ;; http://google-web-toolkit.googlecode.com/svn/trunk/user/src/com/google/gwt/i18n/client/constants/TimeZoneConstants.properties
@@ -91,7 +94,8 @@
  
   [:li.social-activity.tweet
    [:a.user-img {:href (str "https://www.twitter.com/" screen-name)
-                 :target "_blank"} [:img {:src profile-image-url}]]
+                 :target "_blank"} [:img {:src profile-image-url
+                                          :onerror "this.setAttribute(\"src\", eve.templates.twitter_default_profile_photo)"}]]
    [:div.content
     [:a.user-name {:href (str "https://www.twitter.com/" screen-name)
                    :target "_blank"} name]
@@ -105,7 +109,8 @@
  
   [:li.social-activity.tweet
    [:a.user-img {:href (str "https://www.twitter.com/" screen-name)
-                 :target "_blank"} [:img {:src profile-image-url}]]
+                 :target "_blank"} [:img {:src profile-image-url
+                                          :onerror "this.setAttribute(\"src\", eve.templates.twitter_default_url)"}]]  ; todo - set profile picture as an egg
    [:div.content
     [:a.user-name {:href (str "https://www.twitter.com/" screen-name)
                    :target "_blank"} name]
@@ -125,7 +130,9 @@
                                profile-picture :profile-picture text :text full-name :full-name
                                link :link url :photo}]
   [:li.social-activity.instagram
-   [:a.user-img {:href (str "http://www.instagram.com/" username) :target "_blank"} [:img {:src profile-picture}]]
+   [:a.user-img {:href (str "http://www.instagram.com/" username) :target "_blank"}
+    [:img {:src profile-picture
+           :onerror "this.setAttribute(\"src\", eve.templates.instagram_default_profile_photo)"}]]
    [:div.content
     [:a.user-name {:href (str "http://www.instagram.com/" username) :target "_blank"} full-name]
     [:span.byline "On " [:a {:href link :target "_blank"} "Instagram"] (x-time-ago created-at)]
@@ -137,7 +144,9 @@
                                text :text url :video}]
   [:li.social-activity.instagram
    [:a.user-img {:href (str "http://www.instagram.com/" username)
-                 :target "_blank"} [:img {:src profile-picture}]]
+                 :target "_blank"}
+    [:img {:src profile-picture
+           :onerror "this.setAttribute(\"src\", eve.templates.instagram_default_profile_photo)"}]]
    [:div.content
     [:a.user-name {:href (str "http://www.instagram.com/" username) :target "_blank"} full-name]
     [:span.byline "On " [:a {:href link :target "_blank"} "Instagram"] (x-time-ago created-at)]
