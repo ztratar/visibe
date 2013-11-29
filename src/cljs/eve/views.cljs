@@ -147,7 +147,7 @@
   (case datum-type
     "instagram-video" (t/instagram-video datum)
     "instagram-photo" (t/instagram-photo datum)
-    "tweet-photo"     (t/tweet-photo datum)
+    "tweet-photo"     nil ;; (t/tweet-photo datum) 
     "tweet"           (t/tweet datum)
     "vine"            (t/vine datum)
     (t/automagic datum)))
@@ -155,9 +155,10 @@
 (defn add-new-datum! [datum]
   (when (sel1 :#preloader) (dommy/remove! (sel1 :#preloader)))
   (let [datum-card (determine-card datum)]
-    (if (= :left (left-or-right?))
-      (prepend! (sel1 :#feed-left) datum-card)
-      (prepend! (sel1 :#feed-right) datum-card))))
+    (when datum-card
+      (if (= :left (left-or-right?))
+        (prepend! (sel1 :#feed-left) datum-card)
+        (prepend! (sel1 :#feed-right) datum-card)))))
 
 (defn add-old-datum! [{type :type id :id :as datum}]
   (let [datum-card (determine-card datum)]

@@ -11,6 +11,9 @@
 (defn c= [n body]
   (= n (count body)))
 
+(defn reduce-into-set [c]
+  (into #{} (reduce into c)))
+
 (defn log [& s]
   (spit (java.io.File. "./log") (apply str s) :append true))
 

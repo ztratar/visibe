@@ -13,8 +13,10 @@
   (:require-macros [cljs.core.match.macros :refer [match]]
                    [dommy.macros :as m :refer [deftemplate]]))
 
-(def ^:export twitter-default-profile-photo "https://abs.twimg.com/sticky/default_profile_images/default_profile_4_normal.png")
-(def ^:export instagram-default-profile-photo "http://d22r54gnmuhwmk.cloudfront.net/photos/8/ih/ln/GuiHlNPfszVeNBo-556x313-noPad.jpg")
+(def ^:export twitter-default-profile-photo
+  "https://abs.twimg.com/sticky/default_profile_images/default_profile_4_normal.png")
+(def ^:export instagram-default-profile-photo
+  "http://d22r54gnmuhwmk.cloudfront.net/photos/8/ih/ln/GuiHlNPfszVeNBo-556x313-noPad.jpg")
 
 (defn x-time-ago [created-at]
   ;; http://docs.closure-library.googlecode.com/git/class_goog_i18n_TimeZone.html
@@ -90,35 +92,44 @@
 ;;; Tweets
 
 (deftemplate tweet [{text :text created-at :created-at name :name screen-name :screen_name
-                     profile-image-url :profile_image_url_https id-str :id_str}]
- 
-  [:li.social-activity.tweet
-   [:a.user-img {:href (str "https://www.twitter.com/" screen-name)
-                 :target "_blank"} [:img {:src profile-image-url
-                                          :onerror "this.setAttribute(\"src\", eve.templates.twitter_default_profile_photo)"}]]
-   [:div.content
-    [:a.user-name {:href (str "https://www.twitter.com/" screen-name)
-                   :target "_blank"} name]
-    [:span.byline "On " [:a {:href (str "https://www.twitter.com/" screen-name "/status/" id-str)
-                             :target "_blank"} "Twitter"] (x-time-ago created-at)]
-    [:div.body-content (format-tweet text)]]])
+                     profile-image-url :profile_image_url_https id-str :id_str :as datum}]
+  (let [twitter-profile-url (str "https://www.twitter.com/" screen-name)
+        tweet-url           (str "https://www.twitter.com/" screen-name "/status/" id-str)]
+
+    [:li.social-activity.tweet
+     [:a.user-img {:href twitter-profile-url
+                   :target "_blank"}
+      [:img {:src profile-image-url
+             :onerror "this.setAttribute(\"src\", eve.templates.twitter_default_profile_photo)"}]]
+
+     [:div.content
+      [:a.user-name {:href twitter-profile-url
+                     :target "_blank"} name]
+      [:span.byline "On " [:a {:href tweet-url
+                               :target "_blank"} "Twitter"] (x-time-ago created-at)]
+      [:div.body-content (format-tweet text)]]]))
 
 (deftemplate tweet-photo [{text :text created-at :created-at name :name screen-name :screen_name
                            profile-image-url :profile_image_url_https id-str :id_str photo-url :photo-url
-                           link-urls :link-urls}]
- 
-  [:li.social-activity.tweet
-   [:a.user-img {:href (str "https://www.twitter.com/" screen-name)
-                 :target "_blank"} [:img {:src profile-image-url
-                                          :onerror "this.setAttribute(\"src\", eve.templates.twitter_default_url)"}]]  ; todo - set profile picture as an egg
-   [:div.content
-    [:a.user-name {:href (str "https://www.twitter.com/" screen-name)
-                   :target "_blank"} name]
-    [:span.byline "On " [:a {:href (str "https://www.twitter.com/" screen-name "/status/" id-str)
-                             :target "_blank"} "Twitter"] (x-time-ago created-at)]
-    [:div.body-content (if link-urls
-                         (format-tweet text))]
-    [:img {:src photo-url}]]])
+                           link-urls :link-urls :as datum}]
+
+  (let [twitter-profile-url (str "https://www.twitter.com/" screen-name)
+        tweet-url           (str "https://www.twitter.com/" screen-name "/status/" id-str)]
+
+    (console/log "tweet-photo: " tweet-url " profile: " twitter-profile-url)
+
+    [:li.social-activity.tweet
+     [:a.user-img {:href (str "https://www.twitter.com/" screen-name)
+                   :target "_blank"} [:img {:src profile-image-url
+                                            :onerror "this.setAttribute(\"src\", eve.templates.twitter_default_url)"}]] ; todo - set profile picture as an egg
+     [:div.content
+      [:a.user-name {:href (str "https://www.twitter.com/" screen-name)
+                     :target "_blank"} name]
+      [:span.byline "On " [:a {:href (str "https://www.twitter.com/" screen-name "/status/" id-str)
+                               :target "_blank"} "Twitter"] (x-time-ago created-at)]
+      [:div.body-content (if link-urls
+                           (format-tweet text))]
+      [:img {:src photo-url}]]]))
 
 (deftemplate video-tweet [{text :text created-at :created-at name :name screen-name :screen_name
                            profile-image-url :profile_image_url_https id-str :id_str}])

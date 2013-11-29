@@ -26,7 +26,7 @@ lein run help
 
 ## Major
 
-- Add a synopis at the top of the feed
+- Graphs
 - Sharing functionality
 
 ## Minor
@@ -34,11 +34,10 @@ lein run help
 - Twitter Videos
 - multiple links within a tweet - get URLs out of the corresponding key in tweets
 
-- Graphs
+- Add a synopis at the top of the feed
 - Vines
 
 - loop and update datum times
-- When profile pictures fail to load, load the egg photo instead
 - preloaders
 - get the number of pixes per colum to determine which column to place the next datum instead of the current hack
 - datums per second toggle
