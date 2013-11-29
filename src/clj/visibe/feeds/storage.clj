@@ -76,3 +76,6 @@
                 (q/sort (array-map :created-at -1))
                 (q/limit 1))
               (map datum->essentials))))
+
+(defn datums-for [trend]
+  (c/find-maps trend))

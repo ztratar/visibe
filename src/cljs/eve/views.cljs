@@ -35,6 +35,8 @@
   ([trend] (filter (comp (partial = trend) :trend) (gis [:datums])))
   ([trend n] (take n (datums-for trend))))
 
+(defn datum-count [] (count (:datums @state)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; HTML5 History
 

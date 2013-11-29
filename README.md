@@ -49,6 +49,7 @@ lein run help
 
 ## Bugs
 
+- Some tweets are not showing up - I would bet that they are the twitter photos
 - Using HTML5 history will not unsubscribe/subscribe you from trends as expected.
 - We will, on occasion, see a preloader AND some datums
 - Historical datums don't work perfectly
