@@ -7,7 +7,7 @@
             [eve.views :refer [navigate! new-datum-watch! bottom-of-page?
                                append-old-datums-on-scroll set-token!]]
             [dommy.utils :as utils]
-            [dommy.core :as dommy]
+            [dommy.core  :as dommy]
             [eve.state :refer [state assoc-in-state! update-in-state!]]
             [eve.templates :as templates]
             [cljs.core.async :as async :refer [<! >! chan put! timeout close!]])

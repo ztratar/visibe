@@ -42,9 +42,10 @@
            };"]
           (include-js "js/out/goog/base.js"
                       "js/libs/less.js"
-                      "js/libs/moment-with-langs.js"
                       "js/libs/video-js/video.js"
-                      "js/out/goog/eve.js")
+                      "js/out/goog/eve.js"
+                      ;; "/js/out/production/goog/eve-production.js"
+                      )
           [:script {:type "text/javascript"} "goog.require(\"eve.core\");"]
           [:div#content]]))
 

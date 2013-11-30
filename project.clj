@@ -81,8 +81,14 @@
 
   :cljsbuild  {:repl-listen-port 8002
                :builds [{:id "dev"
-                         :source-paths ["src/cljs"]
+                         :source-paths ["src/cljs/"]
                          :compiler {:output-to "resources/public/js/out/goog/eve.js"
                                     :output-dir "resources/public/js/out"
                                     :optimizations :none
-                                    :source-map true}}]})
+                                    :source-map true}}
+
+                        {:id "prod"
+                         :source-paths ["src/cljs/"]
+                         :compiler {:output-to "resources/public/js/out/production/goog/eve-production.js"
+                                    :output-dir "resources/public/js/out/production"
+                                    :optimizations :whitespace}}]})

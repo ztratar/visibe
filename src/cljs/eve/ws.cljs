@@ -21,7 +21,9 @@
          (console/log "ws data" (str (:data msg))))))))
 
 (defn ws-connect! []
-  (let [ws (js/WebSocket. "ws://localhost:9000/ws")
+  (let [ws (js/WebSocket. "ws://localhost:9000/ws"
+                          ;; "ws://192.81.214.133:80/ws"
+                          )
         _ (set! (.-onerror ws) #(console/error "WebSocket: " %))
         _ (set! (.-onmessage ws) (fn [msg] (put! receive msg)))
         _ (set! (.-onopen ws) (fn [& _] (.send ws "(current-trends)")))]
@@ -31,4 +33,4 @@
 (defn wsc [f]
   (if-let [conn (:websocket-connection @state)]
     (.send conn (str f))
-    (console/error "You must establish a WebSocket connection"))) 
+    (console/error "You must establish a WebSocket connection")))

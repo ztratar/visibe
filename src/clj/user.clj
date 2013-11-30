@@ -83,6 +83,9 @@
   ;; Sometimes I want to find a key that ends up being nested inside of a vector, such as {:foo [{:the-key-I-want .....}]} and I
   ;; don't currently detect this. However, this is ANNOYING.
 
+
+  ;; So - I've thought about this - and if we detect a sequence, it makes sense to walk it to - looking for hashmaps. If a hashamp
+  ;; containing the key we want exists, then say that it's in a sequence located at [:x :y :z]
   "[s]mart [s]elect. 
 Given a start map and `seq' of goal-keys, generates a function to convert one to the other (start to goal). EG:
 ... call ...
