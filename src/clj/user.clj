@@ -113,3 +113,15 @@ paths to the duplicate key.
                        (recur (rest goal-keys)
                               (assoc duplicate-keys fst paths)
                               out)))))))
+
+;; (defn sexp->->
+;;   "Accepts a sexp and turns it into -> or ->> form if possible"
+;;   []
+;; (take 20 (map first (sort-by second (map name->tpl (trend-collections)))))
+;; 
+;; => (->> (trend-collections)
+;;          (map name->tpl)
+;;          (sort-by second)
+;;          (map first)
+;;          (take 20))
+;;)

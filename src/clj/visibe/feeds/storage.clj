@@ -15,10 +15,25 @@
   (:import org.bson.types.ObjectId
            com.mongodb.WriteConcern))
 
+(defn trend-collections []
+  (remove #{"fs.chunks" "fs.files" "google-trends" "system.indexes" "system.users"}
+          (.getCollectionNames mg/*mongodb-database*)))
+
 (defn remove-trend-collections []
-  (doseq [i (remove #{"fs.chunks" "fs.files" "google-trends" "system.indexes" "system.users"}
-                    (.getCollectionNames mg/*mongodb-database*))]
+  (doseq [i (trend-collections)]
     (c/drop i)))
+
+(defn popular-trends
+  "20 Most popular trends by datum count"
+  []
+  (letfn [(name->tpl [n] (let [c (.getCollection mg/*mongodb-database* n)]
+                           [n (.count c)]))]
+    (->> (trend-collections)
+         (map name->tpl)
+         (sort-by second)
+         (map first)
+         reverse
+         (take 20))))
 
 (defn conn-uri
   "'%' is an escape character."

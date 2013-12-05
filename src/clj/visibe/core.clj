@@ -44,7 +44,7 @@
                       "js/libs/less.js"
                       "js/libs/video-js/video.js"
                       "js/out/goog/eve.js"
-                      ;; "/js/out/production/goog/eve-production.js"
+                      ;; "js/out/production/goog/eve-production.js"
                       )
           [:script {:type "text/javascript"} "goog.require(\"eve.core\");"]
           [:div#content]]))
@@ -69,10 +69,13 @@
   (start-server :port (Integer. (get-in @state [:app :nrepl-port])))
   (assoc-in-state! [:app :server] (hk/run-server #'app {:port (Integer. (get-in @state [:app :port]))}))
   (instagram/generate-oauth-creds!)
-  (feeds/scrape-and-persist-trends!))
+  (if (= :dev mode)
+    (feeds/popular-trends!)
+    (feeds/scrape-and-persist-trends!)))
 
 (defn main-
   ([] (println "Please specify one of #{help production}"))
   ([s] (case s
+         "dev"        (rally-the-troops! :dev)
          "production" (rally-the-troops! :production)
-         "help" (println "Please specify one of #{help production}"))))
+         (println "Please specify one of #{help dev production}"))))

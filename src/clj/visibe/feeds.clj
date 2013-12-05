@@ -8,7 +8,7 @@
             [visibe.api                 :refer [ds->ws-message]]
             [visibe.feeds.google-trends :refer [google-trends trend->goog-photo-url]]
             [visibe.feeds.instagram     :as instagram]
-            [visibe.feeds.storage       :refer [persist-google-trends-and-photos append-datums]]
+            [visibe.feeds.storage       :refer [persist-google-trends-and-photos append-datums popular-trends]]
             [visibe.feeds.twitter       :as twitter]
             [visibe.homeless            :refer [sleep]]
             [visibe.state               :refer [assoc-in-state! state gis]])
@@ -110,3 +110,8 @@
                      (sleep 5)
                      new-trends)))))
 
+(defn popular-trends!
+  "Populates `state' with some of the most popular trends. For use when you do
+   not wish to spin up the number of threads consumed by the running application."
+  []
+  (assoc-in-state! [:google :trends] (trends-blob (popular-trends))))
