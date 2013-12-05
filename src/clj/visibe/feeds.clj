@@ -94,7 +94,7 @@
   ;; REPL.
   []
   (future (loop [trends {}]
-            (recur (let [new-trends (trends-blob (:united-states (google-trends)))]
+            (recur (let [new-trends (trends-blob (google-trends))]
 
                      (persist-google-trends-and-photos new-trends)
                      (when (not= trends new-trends)

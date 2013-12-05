@@ -1,5 +1,5 @@
-(ns ^{:doc "Data Storage and retrieval."}
-  visibe.feeds.storage
+(ns visibe.feeds.storage
+  "Data Storage and retrieval."
   (:use visibe.homeless user)
   (:require [monger.core :as mg]
             [monger.query :as q]

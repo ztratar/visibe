@@ -58,4 +58,5 @@ human readable format."
                  (assoc acc (google-mapping k) (m k))))))))
 
 (defn google-trends []
-  (keys->countries (raw-google-trends)))
+  (:united-states
+   (keys->countries (raw-google-trends))))

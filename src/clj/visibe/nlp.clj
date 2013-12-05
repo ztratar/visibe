@@ -84,5 +84,5 @@
 ;; (ppn (map #(noun-phrases (chunk-tweet %))
 ;;           (filter string? (first tweet-text))))
 
-(def play-tweets (filter string? (map :text (filter (#{"tweet" "tweet-photo"} (:datum-type %))
-                                                    (visibe.feeds.storage/datums-for "Frozen")))))
+;; (def play-tweets (filter string? (map :text (filter (#{"tweet" "tweet-photo"} (:datum-type %))
+;;                                                     (visibe.feeds.storage/datums-for "Frozen")))))
