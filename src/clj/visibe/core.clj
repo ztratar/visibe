@@ -1,5 +1,5 @@
-(ns ^{:doc "Starting point."}
-  visibe.core
+(ns visibe.core
+  "Starting point."
   (:use user
         hiccup.core
         hiccup.page

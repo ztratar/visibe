@@ -1,9 +1,9 @@
-(ns ^{:doc "For collection of twitter data. Relevent API docs:
+(ns visibe.feeds.twitter
+  "For collection of twitter data. Relevent API docs:
 
-            https://dev.twitter.com/docs/using-search
-            https://dev.twitter.com/docs/working-with-timelines
-            https://dev.twitter.com/docs/api/1.1/get/search/tweets"}
-  visibe.feeds.twitter
+   https://dev.twitter.com/docs/using-search
+   https://dev.twitter.com/docs/working-with-timelines
+   https://dev.twitter.com/docs/api/1.1/get/search/tweets"
   (:use user)
   (:require [clojure.data.json :as json]
             [org.httpkit.server :as hk]

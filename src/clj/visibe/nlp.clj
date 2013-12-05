@@ -1,8 +1,7 @@
-(ns ^{:doc "NLP stuff for visibe"}
-  visibe.npl
+(ns visibe.npl
+  "NLP stuff for visibe"
   (:use opennlp.nlp
-        opennlp.treebank
-        opennlp.tools.filters))
+        opennlp.treebank))
 
 (def penn-treebank-parts-of-speech
   ;; "Number" "Tag" "Description"

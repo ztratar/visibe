@@ -1,5 +1,5 @@
-(ns ^{:doc "View logic. Ties together templates, population logic and listeners."}
-  eve.views
+(ns eve.views
+  "View logic. Ties together templates, population logic and listeners."
   (:require [cljs.core.async :as async :refer [<! >! chan put! timeout close!]]
             [cljs.core.match :as match]
             [clojure.set :refer [difference]]

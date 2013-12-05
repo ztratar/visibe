@@ -1,5 +1,5 @@
-(ns ^{:doc "Websocket and HTTP API."}
-  visibe.api
+(ns visibe.api
+  "Websocket and HTTP API."
   (:require [compojure.core             :refer :all]
             [compojure.handler          :as    handler]
             [compojure.route            :as    route]

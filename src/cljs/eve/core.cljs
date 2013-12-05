@@ -1,5 +1,5 @@
-(ns ^{:doc "Conceptual start of the program."}
-  eve.core
+(ns eve.core
+  "Conceptual start of the program."
   (:require [clojure.browser.repl :as repl]
             [cljs-http.client :as http]
             [eve.ws :refer [ws-connect!]]

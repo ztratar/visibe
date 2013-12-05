@@ -1,5 +1,5 @@
-(ns ^{:doc "Place where lost vars end up"}
-  visibe.homeless
+(ns visibe.homeless
+  "Place where lost vars end up"
   (:require [clj-time.coerce :refer [to-long from-long]]
             [clj-time.format :as f]
             [clj-time.core :refer [date-time]]))

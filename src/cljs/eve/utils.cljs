@@ -1,5 +1,4 @@
-(ns ^{:doc "..."}
-  eve.utils)
+(ns eve.utils)
 
 ;;; (.table js/console "some tabular info")
 

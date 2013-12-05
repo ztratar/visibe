@@ -1,5 +1,5 @@
-(ns ^{:doc "Raw dommy templates"}
-  eve.templates
+(ns eve.templates
+  "Raw dommy templates"
   (:require [dommy.core :as dommy]
             [shodan.console :as console]
             [eve.utils :refer [->slug]]

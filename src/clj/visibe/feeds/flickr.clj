@@ -1,6 +1,6 @@
-(ns ^{:doc "Used to generate urls for popular trending photos. 
-Relevent page: http://www.flickr.com/services/api/misc.urls.html"}
-  visibe.feeds.flickr
+(ns visibe.feeds.flickr
+  "Used to generate urls for popular trending photos. 
+   Relevent page: http://www.flickr.com/services/api/misc.urls.html"
   (:use ring.util.codec)
   (:require [clj-http.lite.client :as client]
             [clojure.xml :as xml]

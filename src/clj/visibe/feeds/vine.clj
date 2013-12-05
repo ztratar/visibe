@@ -1,5 +1,4 @@
-(ns ^{:doc "..."}
-  visibe.feeds.vine
+(ns visibe.feeds.vine
   (:require [clj-http.lite.client :as client]))
 
 ;; https://github.com/starlock/vino/wiki/API-Reference

@@ -1,5 +1,5 @@
-(ns ^{:doc "Social feed loops"}
-  visibe.feeds
+(ns visibe.feeds
+  "Social feed loops"
   (:require [clj-http.lite.client       :as client]
             [clojure.set                :as set]
             [org.httpkit.server         :as hk]

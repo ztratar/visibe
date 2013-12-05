@@ -1,6 +1,6 @@
-(ns ^{:doc "Application state. In it's own `ns' to prevent circular
-  dependencies."}
-  visibe.state)
+(ns visibe.state
+  "Application state. In it's own `ns' to prevent circular
+  dependencies.")
 
 ;;; TODO, Thu Oct 24 2013, Francis Wolke
 ;;; Check `state' on every update against a schema. Allow all transactions to

@@ -1,5 +1,5 @@
-(ns ^{:doc "For collection of google trends data and google images"}
-  visibe.feeds.google-trends  
+(ns visibe.feeds.google-trends
+  "For collection of google trends data and google images"
   (:require [clj-http.lite.client :as client]
             [cemerick.url :refer [url-encode]]
             [clojure.data.json :refer [read-json]]
@@ -58,5 +58,4 @@ human readable format."
                  (assoc acc (google-mapping k) (m k))))))))
 
 (defn google-trends []
-  (:united-states
-   (keys->countries (raw-google-trends))))
+  (:united-states (keys->countries (raw-google-trends))))

@@ -1,5 +1,5 @@
-(ns ^{:doc "CSS style information. Compiles to ./resources/public/css/main.css "}
-  visibe.styles
+(ns visibe.styles
+  "CSS style information. Compiles to ./resources/public/css/main.css "
   (:refer-clojure :exclude [+ - * /])
   (:require [garden.core :refer [css]]
             [garden.arithmetic :refer [+ - * /]]))

@@ -1,11 +1,11 @@
-(ns ^{:doc "Clean data from social media sites
+(ns visibe.feeds.sanitation
+  "Clean data from social media sites
 
-            There exists both `clean-X' and `X->essentials' because the data
-            we wish to store does not map directly to what we want to send to
-            the client. `clean-X' should be used only when dealing with raw data
-            from a social media source, and `X->essentials' should be used when
-            sending data to a client"}
-  visibe.feeds.sanitation
+   There exists both `clean-X' and `X->essentials' because the data
+   we wish to store does not map directly to what we want to send to
+   the client. `clean-X' should be used only when dealing with raw data
+   from a social media source, and `X->essentials' should be used when
+   sending data to a client"
   (:use user)
   (:require [visibe.homeless :refer [rfc822-str->long]]
             [clojure.set :refer [rename-keys]]))

@@ -1,5 +1,5 @@
-(ns ^{:doc "Boilerplate for gathering trend data from instagram"}
-  visibe.feeds.instagram
+(ns visibe.feeds.instagram
+  "Boilerplate for gathering trend data from instagram"
   (:use instagram.oauth
         ring.util.codec
         instagram.callbacks

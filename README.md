@@ -19,6 +19,7 @@ lein run help
 - http://www.quora.com/Natural-Language-Processing/What-are-the-most-important-research-papers-which-all-NLP-students-should-definitely-read
 
 # Prior to release:
+
 - we need to have a database that won't have it's limit exceeded within 24 hrs
 - strong password protection
 
@@ -28,6 +29,7 @@ lein run help
 
 - Graphs
 - Sharing functionality
+- synopis http://www.yelp.com/biz/metro-balderas-1-san-jose#query:tacos
 
 ## Minor
 
@@ -60,10 +62,7 @@ lein run help
 
 - Eric want's to have the datums take up less space. 
 
-most commmon keywords + an example tweet
-http://www.yelp.com/biz/metro-balderas-1-san-jose#query:tacos
-synopsis
-have datums been 
+- most commmon keywords + an example tweet
 
 ## License
 

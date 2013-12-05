@@ -1,9 +1,10 @@
-(ns eve.ws ^{:doc "Websocket router and connection logic"}
-    (:require [cljs.core.async :as async :refer [<! >! chan put! timeout close!]]
-              [cljs.reader :as r]
-              [eve.state :refer [update-in-state! assoc-in-state! state]]
-              [shodan.console :as console])
-    (:require-macros [cljs.core.async.macros :refer [go alt!]]))
+(ns eve.ws
+  "Websocket router and connection logic"
+  (:require [cljs.core.async :as async :refer [<! >! chan put! timeout close!]]
+            [cljs.reader :as r]
+            [eve.state :refer [update-in-state! assoc-in-state! state]]
+            [shodan.console :as console])
+  (:require-macros [cljs.core.async.macros :refer [go alt!]]))
 
 (def send (chan))
 (def receive (chan))
