@@ -8,7 +8,7 @@
                                append-old-datums-on-scroll set-token!
                                reactive-layout-logic!]]
             [dommy.utils :as utils]
-            [dommy.core  :as dommy]
+            [dommy.core :as dommy]
             [eve.state :refer [state assoc-in-state! update-in-state!]]
             [eve.templates :as templates]
             [cljs.core.async :as async :refer [<! >! chan put! timeout close!]])
@@ -32,7 +32,8 @@
               (do (navigate! :home)
                   (close! ch)))))))
   (add-watch state :feed new-datum-watch!)
-  (set! (-> js/videojs (.-options) (.-flash) (.-swf)) "js/video-js/video-js.swf"))
+  (set! (-> js/videojs (.-options) (.-flash) (.-swf))
+        "js/video-js/video-js.swf"))
 
 (def on-load   (set! js/window.onload bootstrap!))
 (def on-resize (set! js/window.onresize reactive-layout-logic!))

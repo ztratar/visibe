@@ -250,7 +250,7 @@
       (add-old-datum! datum))))
 
 (defn mobile-size? []
-  (<= (aget (.getViewportSize dom-helper) "width") 600))
+  (<= (aget (.getViewportSize dom-helper) "width") 768))
 
 (defn reactive-layout-logic! []
   (match [(mobile-size?) (gis [:mobile])]
