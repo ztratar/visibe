@@ -5,7 +5,8 @@
             [eve.ws :refer [ws-connect!]]
             [shodan.console :as console]
             [eve.views :refer [navigate! new-datum-watch! bottom-of-page?
-                               append-old-datums-on-scroll set-token!]]
+                               append-old-datums-on-scroll set-token!
+                               reactive-layout-logic!]]
             [dommy.utils :as utils]
             [dommy.core  :as dommy]
             [eve.state :refer [state assoc-in-state! update-in-state!]]
@@ -33,5 +34,6 @@
   (add-watch state :feed new-datum-watch!)
   (set! (-> js/videojs (.-options) (.-flash) (.-swf)) "js/video-js/video-js.swf"))
 
-(def on-load (set! (.-onload js/window) bootstrap!))
+(def on-load   (set! js/window.onload bootstrap!))
+(def on-resize (set! js/window.onresize reactive-layout-logic!))
 (def on-scroll (set! js/window.onscroll append-old-datums-on-scroll))

@@ -4,7 +4,7 @@
             [cljs.core.match :as match]
             [clojure.set :refer [difference]]
             [dommy.utils :as utils]
-            [eve.state :refer [state assoc-in-state! gis]]
+            [eve.state :refer [state assoc-in-state! gis toggle-mobile!]]
             [eve.templates :as t]
             [eve.utils :refer [->slug slug->trend]]
             [eve.ws :refer [wsc]]
@@ -24,6 +24,8 @@
 (declare history)
 (declare navigate!)
 (declare swap-view!)
+
+(def dom-helper (goog.dom.DomHelper.))
 
 (def root-url (str js/window.location.protocol "//" js/window.location.host "/"))
 
@@ -76,6 +78,8 @@
   ([hist tok] (.setToken hist tok)))
 
 (defn replace-token! [hist tok] (.replaceToken hist tok))
+
+(defn current-trend [] (slug->trend (get-token)))
 
 ;;; XXX, Sun Nov 17 2013, Francis Wolke
 ;;; this needs to be part of the `bootstrap!` process
@@ -170,7 +174,9 @@
   (let [trends (:trends @state)
         trend (slug->trend trend)
         elder-datum (first (sort-by :created-at (datums-for trend)))]
-
+    (if (mobile-size?) 
+      (assoc-in-state! [:mobile] true)
+      (assoc-in-state! [:mobile] false))
     (dommy/add-class! (sel1 :body) :topic-page)
     (swap-view! (t/trend trend (trends trend)))
     (assoc-in-state! [:last-datum] elder-datum)
@@ -203,8 +209,7 @@
   []
   ;; TODO, Tue Nov 26 2013, Francis Wolke
   ;; Do I have to instantiate `dom-helper' every time?
-  (let [dom-helper (goog.dom.DomHelper.)
-        document-height (.getDocumentHeight dom-helper)
+  (let [document-height (.getDocumentHeight dom-helper)
         document-scroll (aget (.getDocumentScroll dom-helper) "y")
         viewport-height (aget (.getViewportSize dom-helper) "height")]
     ;; 600 is the offset
@@ -228,6 +233,35 @@
                       (doseq [datum to-append]
                         (add-old-datum! datum)))))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Reactive layout
+
+(defn redisplay-feed!
+  ;; TODO, Mon Dec 09 2013, Francis Wolke
+  ;; Scroll user back to the point where they were before
+  "Grabs the current datums - and redisplays them according to the layout 
+   specified by `(gis :mobile)'"
+  []
+  (console/log "redisplay-feed")
+  (doseq [d (sel :.social-activity)] (dommy/remove! d))
+  (let [to-add (take-while (partial not= (gis :last-datum))
+                           (sort-by :created-at (datums-for (current-trend))))]
+    (doseq [datum to-add]
+      (add-old-datum! datum))))
+
+(defn mobile-size? []
+  (<= (aget (.getViewportSize dom-helper) "width") 600))
+
+(defn reactive-layout-logic! []
+  (match [(mobile-size?) (gis [:mobile])]
+         [false false]   nil
+         [true true]     nil
+         [true false]    (do (toggle-mobile!) (redisplay-feed!))
+         [false true]    (do (toggle-mobile!) (redisplay-feed!))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Boilerplate
+
 (defn swap-view! [node]
   ;; TODO, Mon Oct 14 2013, Francis Wolke
   ;; Hide these instead of replacing contents? 
@@ -239,3 +273,4 @@
   (case view
     :trend (do (apply trend args) (assoc-in-state! [:view] :trend))
     :home (do (home (:trends @state)) (assoc-in-state! [:view] :home))))
+

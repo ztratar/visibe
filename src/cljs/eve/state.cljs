@@ -15,7 +15,9 @@
 (defn gis
   "[g]et [i]n [s]tate"
   [path]
-  (get-in @state path))
+  (if (coll? path)
+    (get-in @state path)
+    (path @state)))
 
 (defn update-in-state!
   ([path f] (swap! state update-in path f))
