@@ -50,8 +50,7 @@
                                                       :type (.-type e)
                                                       :navigation? (.-isNavigation e)})))))
 
-(defn init-history
-  []
+(defn init-history []
   (let [history (if (history5/isSupported)
                   (goog.history.Html5History.)
                   (goog.History.))]
@@ -124,6 +123,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Trend
+
+(defn mobile-size? []
+  (<= (aget (.getViewportSize dom-helper) "width") 768))
 
 (defn feed-height
   [feed]
@@ -212,7 +214,8 @@
   (let [document-height (.getDocumentHeight dom-helper)
         document-scroll (aget (.getDocumentScroll dom-helper) "y")
         viewport-height (aget (.getViewportSize dom-helper) "height")]
-    ;; 600 is the offset
+    ;; 600 is the offset from the bottom of the page at which point
+    ;; we say 'eh, close enough'
     (>= (+ 600 viewport-height document-scroll) document-height)))
 
 (defn append-old-datums-on-scroll
@@ -248,9 +251,6 @@
                            (sort-by :created-at (datums-for (current-trend))))]
     (doseq [datum to-add]
       (add-old-datum! datum))))
-
-(defn mobile-size? []
-  (<= (aget (.getViewportSize dom-helper) "width") 768))
 
 (defn reactive-layout-logic! []
   (match [(mobile-size?) (gis [:mobile])]
