@@ -5,7 +5,18 @@
    we wish to store does not map directly to what we want to send to
    the client. `clean-X' should be used only when dealing with raw data
    from a social media source, and `X->essentials' should be used when
-   sending data to a client"
+   sending data to a client
+
+   NOTE, Mon Dec 09 2013, Francis Wolke
+
+   This sort of code (sanitation / cleaning) is very nice and all, but 
+   should be generated after both server and client side have locked
+   down what data will be passed around.
+
+   I plan to come back and re-write all this at some point if given the
+   chance - but for that effort to be meaningful, it would require that 
+   I do profiling, auto-generate type annotations and have schemas for
+   all the data."
   (:use user)
   (:require [visibe.homeless :refer [rfc822-str->long]]
             [clojure.set :refer [rename-keys]]))

@@ -1,15 +1,15 @@
 (ns visibe.feeds
   "Social feed loops"
-  (:require [clj-http.lite.client       :as client]
-            [clojure.set                :as set]
-            [org.httpkit.server         :as hk]
-            [visibe.feeds.flickr        :refer [trend->photo-url]]
-            [visibe.feeds.sanitation    :refer :all]
+  (:require [clj-http.lite.client       :as    client]
+            [clojure.set                :as    set]
+            [org.httpkit.server         :as    hk]
             [visibe.api                 :refer [ds->ws-message]]
+            [visibe.feeds.flickr        :refer [trend->photo-url]]
             [visibe.feeds.google-trends :refer [google-trends trend->goog-photo-url]]
-            [visibe.feeds.instagram     :as instagram]
+            [visibe.feeds.instagram     :as    instagram]
+            [visibe.feeds.sanitation    :refer :all]
             [visibe.feeds.storage       :refer [persist-google-trends-and-photos append-datums popular-trends]]
-            [visibe.feeds.twitter       :as twitter]
+            [visibe.feeds.twitter       :as    twitter]
             [visibe.homeless            :refer [sleep]]
             [visibe.state               :refer [assoc-in-state! state gis]])
   (:import java.net.URL
@@ -18,7 +18,7 @@
            java.io.File
            javax.imageio.ImageIO))
 
-(defn subscribed-clients
+(defn- subscribed-clients
   "Seq of websocket channels for clients subscribed to TREND"
   [trend]
   (let [channels (seq (gis [:app :channels]))
@@ -26,7 +26,7 @@
                              (and (some #{trend} (:subscriptions context)) (:on context)))]
     (map first (filter subscribed-and-on? channels))))
 
-(defn push-datums-to-subscribed-clients!
+(defn- push-datums-to-subscribed-clients!
   "Sends DATUMS on websocket channels subscribed to TREND"
   [trend datums]
   (let [subscribed-clients (subscribed-clients trend)]
@@ -34,7 +34,7 @@
       (doseq [client subscribed-clients]
         (hk/send! client (ds->ws-message :datums (map datum->essentials datums)))))))
 
-(defn active?
+(defn- active?
   "Is a this trend a 'current trend', or subscribed to by a client?"
   [trend]
   (or (some #{trend} (keys (gis [:google :trends])))
@@ -42,6 +42,10 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Trend tracking
+
+;;; FIXME, Tue Dec 10 2013, Francis Wolke
+;;; It's confusing to have a seprate `clean-X' process that occurs before
+;;; storing the datums. It needs its own function independant of the 'tracking'
 
 (defn instagram-track-trend
   "Tracks a trend while it's an active trend, or susbscribed to by a client
@@ -51,7 +55,8 @@
   [trend]
   (future (loop [media #{}]
             (when (active? trend)
-              (let [new-datums (set (map (partial clean-instagram trend) (instagram/instagram-media trend)))
+              (let [new-datums (set (map (partial clean-instagram trend)
+                                         (instagram/instagram-media trend)))
                     new-datums (set/difference new-datums media)]
                 (future (push-datums-to-subscribed-clients! trend new-datums))
                 (append-datums trend new-datums)

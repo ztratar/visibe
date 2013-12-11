@@ -18,6 +18,31 @@
 (def ^:export instagram-default-profile-photo
   "http://d22r54gnmuhwmk.cloudfront.net/photos/8/ih/ln/GuiHlNPfszVeNBo-556x313-noPad.jpg")
 
+;;; FIXME, Tue Dec 10 2013, Francis Wolke
+;;; This code is supposed to be used for turning tweets into links 
+
+;; (defn- str-section
+;;   "From N to M in S, indexed from 0"
+;;   [s n m] (apply str (take m (drop n (seq s)))))
+
+;; (defn- url->link [url]
+;;   [:a {:href url :target "_blank"} url])
+
+;; (defn format-with-links
+;;   "Accepts a tweet string and gives back the template to represent it, turning 
+;;    any URL's in into links"
+;;   [s idxs]
+;;   (loop [is idxs
+;;          acc [:p]]
+;;     (if is
+;;       (let [[n m :as i] (first is)
+;;             last-i (.indexOf idxs i)
+;;             last-m (if (zero? last-i) 0 (second (idxs (dec last-i))))
+;;             tweet-text (str-section s last-m n)
+;;             link (url->link (str-section s n m))]
+;;         (recur (next is) (vec (concat acc [tweet-text] [link]))))
+;;       acc)))
+
 (defn x-time-ago [created-at]
   ;; http://docs.closure-library.googlecode.com/git/class_goog_i18n_TimeZone.html
   ;; http://google-web-toolkit.googlecode.com/svn/trunk/user/src/com/google/gwt/i18n/client/constants/TimeZoneConstants.properties
@@ -88,11 +113,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Trend
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Tweets
 
-(deftemplate tweet [{text :text created-at :created-at name :name screen-name :screen_name
-                     profile-image-url :profile_image_url_https id-str :id_str :as datum}]
+(deftemplate tweet
+  [{text :text created-at :created-at name :name screen-name :screen_name
+    profile-image-url :profile_image_url_https id-str :id_str :as datum}]
   (let [twitter-profile-url (str "https://www.twitter.com/" screen-name)
         tweet-url           (str "https://www.twitter.com/" screen-name "/status/" id-str)]
 

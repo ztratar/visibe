@@ -245,7 +245,6 @@
   "Grabs the current datums - and redisplays them according to the layout 
    specified by `(gis :mobile)'"
   []
-  (console/log "redisplay-feed")
   (doseq [d (sel :.social-activity)] (dommy/remove! d))
   (let [to-add (take-while (partial not= (gis :last-datum))
                            (sort-by :created-at (datums-for (current-trend))))]
