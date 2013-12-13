@@ -36,7 +36,6 @@ lein run help
 - Twitter Videos
 - multiple links within a tweet - get URLs out of the corresponding key in tweets
 
-- Add a synopis at the top of the feed
 - Vines
 
 - loop and update datum times

@@ -40,13 +40,12 @@
                                        // entry less file
                    rootpath: \"css/\"// a path to add on to the start of every url resource
            };"]
-          (include-js "js/out/goog/base.js"
+          (include-js ;; "js/out/goog/base.js"
                       "js/libs/less.js"
-                      "js/libs/video-js/video.js"
-                      "js/out/goog/eve.js"
-                      ;; "js/out/production/goog/eve-production.js"
+                      ;; "js/libs/video-js/video.js"
+                      ;; "js/out/goog/eve.js"
+                      "js/eve-production.js"
                       )
-          [:script {:type "text/javascript"} "goog.require(\"eve.core\");"]
           [:div#content]]))
 
 (defroutes app-routes

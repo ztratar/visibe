@@ -89,6 +89,6 @@
 
                         {:id "prod"
                          :source-paths ["src/cljs/"]
-                         :compiler {:output-to "resources/public/js/out/production/goog/eve-production.js"
-                                    :output-dir "resources/public/js/out/production"
-                                    :optimizations :whitespace}}]})
+                         :compiler {:output-to "resources/public/js/eve-production.js"
+                                    :pretty-print false
+                                    :optimizations :advanced}}]})

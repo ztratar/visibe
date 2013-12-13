@@ -8,7 +8,6 @@
             [cljs-time.core :as c]
             [cljs-time.local]
             [dommy.utils :as utils]
-            [cljs-uuid.core :as uuid]
             [goog.i18n.TimeZone :as tz]
             [goog.date.DateTime :as dt])
   (:require-macros [cljs.core.match.macros :refer [match]]
