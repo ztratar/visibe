@@ -8,18 +8,21 @@
             [cljs-time.core :as c]
             [cljs-time.local]
             [dommy.utils :as utils]
+            [cljs-uuid.core :as uuid]
             [goog.i18n.TimeZone :as tz]
             [goog.date.DateTime :as dt])
   (:require-macros [cljs.core.match.macros :refer [match]]
-                   [dommy.macros :as m :refer [deftemplate]]))
+                   [dommy.macros :as m :refer [sel1 sel deftemplate]]))
 
-(def ^:export twitter-default-profile-photo
-  "https://abs.twimg.com/sticky/default_profile_images/default_profile_4_normal.png")
-(def ^:export instagram-default-profile-photo
-  "http://d22r54gnmuhwmk.cloudfront.net/photos/8/ih/ln/GuiHlNPfszVeNBo-556x313-noPad.jpg")
+(def instagram-default-profile-photo "this.setAttribute(\"src\", \"http://d22r54gnmuhwmk.cloudfront.net/photos/8/ih/ln/GuiHlNPfszVeNBo-556x313-noPad.jpg\")")
+(def twitter-default-profile-photo "this.setAttribute(\"src\", \"https://abs.twimg.com/sticky/default_profile_images/default_profile_4_normal.png\")")
+(def remove-node "this.parentNode.removeChild(this)")
 
 ;;; FIXME, Tue Dec 10 2013, Francis Wolke
-;;; This code is supposed to be used for turning tweets into links 
+;;; This code is supposed to be used for turning tweets into links - but because
+;;; twitter hands back incorrect indicies, it's difficult to know what I should
+;;; do with them.  Another thought - just take the URL's and split on
+;;; them. There is enough data around to ensure that it works.
 
 ;; (defn- str-section
 ;;   "From N to M in S, indexed from 0"
@@ -126,8 +129,7 @@
      [:a.user-img {:href twitter-profile-url
                    :target "_blank"}
       [:img {:src profile-image-url
-             :onerror "this.setAttribute(\"src\", eve.templates.twitter_default_profile_photo)"}]]
-
+             :onerror twitter-default-profile-photo}]]
      [:div.content
       [:a.user-name {:href twitter-profile-url
                      :target "_blank"} name]
@@ -147,7 +149,7 @@
     [:li.social-activity.tweet
      [:a.user-img {:href (str "https://www.twitter.com/" screen-name)
                    :target "_blank"} [:img {:src profile-image-url
-                                            :onerror "this.setAttribute(\"src\", eve.templates.twitter_default_url)"}]] ; todo - set profile picture as an egg
+                                            :onerror twitter-default-profile-photo}]]
      [:div.content
       [:a.user-name {:href (str "https://www.twitter.com/" screen-name)
                      :target "_blank"} name]
@@ -155,7 +157,7 @@
                                :target "_blank"} "Twitter"] (x-time-ago created-at)]
       [:div.body-content (if link-urls
                            (format-tweet text))]
-      [:img {:src photo-url}]]]))
+      [:img {:src photo-url :onerror remove-node}]]]))
 
 (deftemplate video-tweet [{text :text created-at :created-at name :name screen-name :screen_name
                            profile-image-url :profile_image_url_https id-str :id_str}])
@@ -169,12 +171,12 @@
   [:li.social-activity.instagram
    [:a.user-img {:href (str "http://www.instagram.com/" username) :target "_blank"}
     [:img {:src profile-picture
-           :onerror "this.setAttribute(\"src\", eve.templates.instagram_default_profile_photo)"}]]
+           :onerror instagram-default-profile-photo}]]
    [:div.content
     [:a.user-name {:href (str "http://www.instagram.com/" username) :target "_blank"} full-name]
     [:span.byline "On " [:a {:href link :target "_blank"} "Instagram"] (x-time-ago created-at)]
     [:div.body-content text]
-    [:div.photo [:img {:src url :onerror "this.parentNode.removeChild(this)"}]]]])
+    [:div.photo [:img {:src url :onerror remove-node}]]]])
 
 (deftemplate instagram-video [{tags :tags id :id created-at :created-at type :type username :username
                                profile-picture :profile-picture full-name :full-name link :link
@@ -183,7 +185,7 @@
    [:a.user-img {:href (str "http://www.instagram.com/" username)
                  :target "_blank"}
     [:img {:src profile-picture
-           :onerror "this.setAttribute(\"src\", eve.templates.instagram_default_profile_photo)"}]]
+           :onerror instagram-default-profile-photo}]]
    [:div.content
     [:a.user-name {:href (str "http://www.instagram.com/" username) :target "_blank"} full-name]
     [:span.byline "On " [:a {:href link :target "_blank"} "Instagram"] (x-time-ago created-at)]
@@ -192,6 +194,7 @@
      `[~(keyword (str "video.instagram-video" id))
        {:width "550px" :height "550px"
         :class "video-js vjs-default-skin vjs-big-play-centered"
+        :onerror remove-node
         :controls "true"
         :preload "auto"}
        [:source {:src ~url :type "video/mp4"}]]]]])
